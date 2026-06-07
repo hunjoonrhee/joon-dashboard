@@ -1,30 +1,44 @@
 'use client'
 
 import { supabase } from '@/lib/supabase'
-import type { Goal, Session, Setting, Topic } from '@/types'
+import type {
+  Goal,
+  Project,
+  ProjectTask,
+  Session,
+  Setting,
+  TodayItem,
+  Topic,
+} from '@/types'
 import { Settings } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import FocusGoal from './FocusGoal'
-import GoalList from './GoalList'
-import SessionLog from './SessionLog'
-import TopCards from './TopCards'
+import GoalsTab from './tabs/GoalsTab'
+import HomeTab from './tabs/HomeTab'
+import ProjectsTab from './tabs/ProjectsTab'
+import StudyTab from './tabs/StudyTab'
+
+type Tab = 'home' | 'study' | 'goals' | 'projects'
 
 export default function Dashboard() {
+  const router = useRouter()
+  const [tab, setTab] = useState<Tab>('home')
   const [sessions, setSessions] = useState<Session[]>([])
   const [topics, setTopics] = useState<Topic[]>([])
   const [goals, setGoals] = useState<Goal[]>([])
   const [settings, setSettings] = useState<Record<string, string>>({})
+  const [todayItems, setTodayItems] = useState<TodayItem[]>([])
+  const [projects, setProjects] = useState<Project[]>([])
+  const [projectTasks, setProjectTasks] = useState<ProjectTask[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshKey, setRefreshKey] = useState(0)
-
-  const router = useRouter()
 
   const refresh = () => setRefreshKey((k) => k + 1)
 
   useEffect(() => {
     const fetchData = async () => {
-      const [s, t, g, st] = await Promise.all([
+      const today = new Date().toISOString().split('T')[0]
+      const [s, t, g, st, ti, p, pt] = await Promise.all([
         supabase
           .from('sessions')
           .select('*')
@@ -32,6 +46,13 @@ export default function Dashboard() {
         supabase.from('topics').select('*'),
         supabase.from('goals').select('*'),
         supabase.from('settings').select('*'),
+        supabase
+          .from('today_items')
+          .select('*')
+          .eq('date', today)
+          .order('created_at'),
+        supabase.from('projects').select('*').order('order_index'),
+        supabase.from('project_tasks').select('*').order('order_index'),
       ])
       if (s.data) setSessions(s.data)
       if (t.data) setTopics(t.data)
@@ -43,6 +64,9 @@ export default function Dashboard() {
         })
         setSettings(map)
       }
+      if (ti.data) setTodayItems(ti.data)
+      if (p.data) setProjects(p.data)
+      if (pt.data) setProjectTasks(pt.data)
       setLoading(false)
     }
     fetchData()
@@ -62,11 +86,16 @@ export default function Dashboard() {
     )
 
   return (
-    <main className="min-h-screen p-4 max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-gray-800">
-          {settings.name ?? 'Joon'}의 성장 대시보드
-        </h1>
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-white border-b border-gray-100 h-13 flex items-center justify-between px-5 sticky top-0 z-10">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 bg-indigo-500 rounded-lg flex items-center justify-center text-white text-sm">
+            🎯
+          </div>
+          <span className="text-sm font-semibold text-gray-800">
+            {settings.name ?? 'Joon'}
+          </span>
+        </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-gray-400">
             {new Date().toLocaleDateString('de-DE', {
@@ -77,16 +106,58 @@ export default function Dashboard() {
             onClick={() => router.push('/settings')}
             className="text-gray-400 hover:text-indigo-500 transition-colors"
           >
-            <Settings size={18} />
+            <Settings size={17} />
           </button>
         </div>
+      </nav>
+
+      <div className="bg-white border-b border-gray-100 flex px-5 sticky top-13 z-10">
+        {(['home', 'study', 'goals', 'projects'] as Tab[]).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`py-2.5 px-4 text-xs font-medium border-b-2 transition-colors ${
+              tab === t
+                ? 'text-indigo-500 border-indigo-500'
+                : 'text-gray-400 border-transparent'
+            }`}
+          >
+            {t === 'home'
+              ? '홈'
+              : t === 'study'
+                ? '공부 기록'
+                : t === 'goals'
+                  ? '목표'
+                  : '프로젝트'}
+          </button>
+        ))}
       </div>
-      <div className="flex flex-col gap-4">
-        <TopCards sessions={sessions} topics={topics} settings={settings} />
-        <FocusGoal topics={topics} goals={goals} onRefresh={refresh} />
-        <GoalList goals={goals} onRefresh={refresh} />
-        <SessionLog sessions={sessions} onRefresh={refresh} />
+
+      <div className="max-w-xl mx-auto px-4 py-4">
+        {tab === 'home' && (
+          <HomeTab
+            sessions={sessions}
+            topics={topics}
+            goals={goals}
+            settings={settings}
+            todayItems={todayItems}
+            onRefresh={refresh}
+          />
+        )}
+        {tab === 'study' && (
+          <StudyTab sessions={sessions} onRefresh={refresh} />
+        )}
+        {tab === 'goals' && (
+          <GoalsTab topics={topics} goals={goals} onRefresh={refresh} />
+        )}
+        {tab === 'projects' && (
+          <ProjectsTab
+            projects={projects}
+            projectTasks={projectTasks}
+            onRefresh={refresh}
+          />
+        )}
       </div>
-    </main>
+    </div>
   )
 }

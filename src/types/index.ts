@@ -42,3 +42,30 @@ export interface Setting {
   value: string
   created_at: string
 }
+
+export interface TodayItem {
+  id: string
+  name: string
+  tag: string | null
+  completed: boolean
+  date: string
+  created_at: string
+}
+
+export interface Project {
+  id: string
+  name: string
+  description: string | null
+  status: 'in_progress' | 'completed' | 'planned'
+  order_index: number
+  created_at: string
+}
+
+export interface ProjectTask {
+  id: string
+  project_id: string
+  name: string
+  status: 'planned' | 'in_progress' | 'completed'
+  order_index: number
+  created_at: string
+}
