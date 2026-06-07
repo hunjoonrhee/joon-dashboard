@@ -1,0 +1,32 @@
+{
+  "files.autoSave": "onFocusChange",
+
+  // Prettier로 기본 포맷터 지정
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // 저장 시 ESLint + 자동 import 정리
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+
+  // 파일타입별 포맷터 지정
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // ESLint가 검사해야 하는 파일 타입
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+
+  "eslint.alwaysShowStatus": true,
+
+  // Prettier 충돌 방지 (추천)
+  "prettier.useEditorConfig": true,
+  "editor.fontFamily": "'VictorMono NF', 'VictorMono', 'JetBrains Mono', 'Fira Code', 'D2Coding', Consolas, 'Courier New', monospace",
+  "editor.fontLigatures": true,
+  "editor.autoClosingBrackets": "always"
+}
