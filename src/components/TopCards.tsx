@@ -3,9 +3,10 @@ import type { Session, Topic } from '@/types'
 interface Props {
   sessions: Session[]
   topics: Topic[]
+  settings: Record<string, string>
 }
 
-export default function TopCards({ sessions, topics }: Props) {
+export default function TopCards({ sessions, topics, settings }: Props) {
   const thisMonth = new Date().getMonth()
   const sessionCount = sessions.filter(
     (s) => new Date(s.date).getMonth() === thisMonth
@@ -19,15 +20,21 @@ export default function TopCards({ sessions, topics }: Props) {
       )
     : null
 
+  const monthlyTarget = parseInt(settings.monthly_session_target ?? '12')
+
   return (
     <div className="grid grid-cols-3 gap-3">
-      <div className="bg-white rounded-xl border border-gray-100 p-4">
-        <p className="text-xs text-gray-400 mb-1">큰 목표</p>
-        <p className="text-base font-semibold text-gray-800">리드 아키텍트</p>
-        <p className="text-xs text-gray-400 mt-1">시니어 → 리드 → 아키텍트</p>
+      <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <p className="text-xs text-gray-500 mb-1">큰 목표</p>
+        <p className="text-base font-semibold text-gray-800">
+          {settings.big_goal ?? '리드 아키텍트'}
+        </p>
+        <p className="text-xs text-gray-400 mt-1">
+          {settings.big_goal_sub ?? '시니어 → 리드 → 아키텍트'}
+        </p>
       </div>
-      <div className="bg-white rounded-xl border border-gray-100 p-4">
-        <p className="text-xs text-gray-400 mb-1">마지막 세션</p>
+      <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <p className="text-xs text-gray-500 mb-1">마지막 세션</p>
         <p
           className={`text-2xl font-semibold ${daysSince && daysSince > 3 ? 'text-orange-400' : 'text-gray-800'}`}
         >
@@ -39,10 +46,10 @@ export default function TopCards({ sessions, topics }: Props) {
             : '기록 없음'}
         </p>
       </div>
-      <div className="bg-white rounded-xl border border-gray-100 p-4">
-        <p className="text-xs text-gray-400 mb-1">이번달 세션</p>
+      <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <p className="text-xs text-gray-500 mb-1">이번달 세션</p>
         <p className="text-2xl font-semibold text-gray-800">{sessionCount}회</p>
-        <p className="text-xs text-gray-400 mt-1">목표: 주 3회</p>
+        <p className="text-xs text-gray-400 mt-1">목표: 월 {monthlyTarget}회</p>
       </div>
     </div>
   )

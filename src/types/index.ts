@@ -35,3 +35,10 @@ export interface StudyItem {
   keyword: string
   created_at: string
 }
+
+export interface Setting {
+  id: string
+  key: string
+  value: string
+  created_at: string
+}
