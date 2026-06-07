@@ -13,11 +13,12 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: 'Joon Dashboard',
+  manifest: '/manifest.json',
   icons: {
     icon: '/icon.svg',
+    apple: '/icon-512.png',
   },
 }
-
 export default function RootLayout({
   children,
 }: Readonly<{
