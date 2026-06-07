@@ -18,7 +18,9 @@
     "roadmap": "Roadmap",
     "progressLabel": "Fokusziel-Fortschritt",
     "lastStudy": "Letztes Lernen",
-    "monthlySession": "Sessions diesen Monat"
+    "monthlySession": "Sessions diesen Monat",
+    "dayUnit": "T",
+    "countUnit": "x"
   },
   "status": {
     "in_progress": "In Bearbeitung",

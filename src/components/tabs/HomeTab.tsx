@@ -4,7 +4,7 @@ import { inputCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
 import type { Goal, Session, TodayItem, Topic } from '@/types'
 import { Check, Plus, X } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 interface Props {
@@ -30,6 +30,8 @@ export default function HomeTab({
   const [newItem, setNewItem] = useState('')
   const [newTag, setNewTag] = useState('')
 
+  const locale = useLocale()
+
   const focusGoals = goals.filter((g) => g.is_focus)
   const totalTopics = topics.filter((t) =>
     focusGoals.some((g) => g.id === t.goal_id)
@@ -49,17 +51,23 @@ export default function HomeTab({
     : null
 
   const thisWeek = () => {
-    const days = ['월', '화', '수', '목', '금', '토', '일']
     const today = new Date()
     const dayOfWeek = today.getDay()
     const monday = new Date(today)
     monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
-    return days.map((label, i) => {
+
+    return Array.from({ length: 7 }, (_, i) => {
       const d = new Date(monday)
       d.setDate(monday.getDate() + i)
       const dateStr = d.toISOString().split('T')[0]
       const hasSession = sessions.some((s) => s.date === dateStr)
       const isToday = d.toDateString() === today.toDateString()
+      const label = d
+        .toLocaleDateString(
+          locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
+          { weekday: 'short' }
+        )
+        .slice(0, 2)
       return { label, hasSession, isToday }
     })
   }
@@ -128,12 +136,15 @@ export default function HomeTab({
           </div>
           <div>
             <div className="text-base font-bold">
-              {daysSince !== null ? `${daysSince}일` : '-'}
+              {daysSince !== null ? `${daysSince}${t('dayUnit')}` : '-'}
             </div>
             <div className="text-xs opacity-65">{t('lastStudy')}</div>
           </div>
           <div>
-            <div className="text-base font-bold">{monthCount}회</div>
+            <div className="text-base font-bold">
+              {monthCount}
+              {t('countUnit')}
+            </div>
             <div className="text-xs opacity-65">{t('monthlySession')}</div>
           </div>
         </div>
@@ -248,13 +259,15 @@ export default function HomeTab({
         <div className="grid grid-cols-3 gap-2">
           <div className="bg-gray-50 rounded-lg p-3 text-center">
             <div className="text-lg font-bold text-indigo-500">
-              {week.filter((d) => d.hasSession).length}일
+              {week.filter((d) => d.hasSession).length}
+              {t('dayUnit')}
             </div>
             <div className="text-xs text-gray-400 mt-0.5">{t('thisWeek')}</div>
           </div>
           <div className="bg-gray-50 rounded-lg p-3 text-center">
             <div className="text-lg font-bold text-gray-800">
-              {monthCount}회
+              {monthCount}
+              {t('countUnit')}
             </div>
             <div className="text-xs text-gray-400 mt-0.5">{t('thisMonth')}</div>
           </div>
@@ -262,7 +275,7 @@ export default function HomeTab({
             <div
               className={`text-lg font-bold ${daysSince && daysSince > 3 ? 'text-orange-400' : 'text-gray-800'}`}
             >
-              {daysSince !== null ? `${daysSince}일` : '-'}
+              {daysSince !== null ? `${daysSince}${t('dayUnit')}` : '-'}
             </div>
             <div className="text-xs text-gray-400 mt-0.5">{t('gap')}</div>
           </div>
