@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { getTagColor } from '@/lib/tagColor'
 import type { Session } from '@/types'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import Modal from '../Modal'
@@ -23,10 +24,14 @@ const emptyForm = {
 
 export default function StudyTab({ sessions, onRefresh }: Props) {
   const router = useRouter()
+  const t = useTranslations('study')
+  const tCommon = useTranslations('common')
   const [modal, setModal] = useState<'add' | 'edit' | null>(null)
   const [selected, setSelected] = useState<Session | null>(null)
   const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
+
+  const locale = useLocale()
 
   const open = (type: 'add' | 'edit', session?: Session) => {
     if (type === 'edit' && session) {
@@ -82,10 +87,10 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
 
   const grouped = sessions.reduce(
     (acc, s) => {
-      const month = new Date(s.date).toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-      })
+      const month = new Date(s.date).toLocaleDateString(
+        locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
+        { year: 'numeric', month: 'long' }
+      )
       if (!acc[month]) acc[month] = []
       acc[month].push(s)
       return acc
@@ -99,7 +104,7 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-              공부 기록
+              {t('title')}
             </p>
             <button
               onClick={() => open('add')}
@@ -110,7 +115,7 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
           </div>
 
           {sessions.length === 0 ? (
-            <p className="text-sm text-gray-400">아직 기록이 없어.</p>
+            <p className="text-sm text-gray-400">{t('empty')}</p>
           ) : (
             Object.entries(grouped).map(([month, items]) => (
               <div key={month}>
@@ -125,7 +130,7 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
                     >
                       <div
                         className="flex items-start gap-2.5 flex-1 min-w-0 cursor-pointer"
-                        onClick={() => router.push(`/sessions/${s.id}`)}
+                        onClick={() => router.push(`sessions/${s.id}`)}
                       >
                         <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 flex-shrink-0" />
                         <div className="min-w-0">
@@ -133,7 +138,13 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
                             {s.title}
                           </p>
                           <p className="text-xs text-gray-400 mt-0.5">
-                            {new Date(s.date).toLocaleDateString('ko-KR')}
+                            {new Date(s.date).toLocaleDateString(
+                              locale === 'ko'
+                                ? 'ko-KR'
+                                : locale === 'de'
+                                  ? 'de-DE'
+                                  : 'en-US'
+                            )}
                             {s.duration_minutes && ` · ${s.duration_minutes}분`}
                           </p>
                           {s.tags.length > 0 && (
@@ -167,12 +178,12 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
 
       {modal && (
         <Modal
-          title={modal === 'add' ? '기록 추가' : '기록 수정'}
+          title={modal === 'add' ? t('addModal') : t('editModal')}
           onClose={close}
         >
           <div className="flex flex-col gap-3">
             <div>
-              <label className={labelCls}>날짜</label>
+              <label className={labelCls}>{t('date')}</label>
               <input
                 type="date"
                 className={inputCls}
@@ -181,17 +192,17 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
               />
             </div>
             <div>
-              <label className={labelCls}>제목</label>
+              <label className={labelCls}>{t('name')}</label>
               <input
                 type="text"
                 className={inputCls}
-                placeholder="오늘 뭐 했어?"
+                placeholder={t('placeholder')}
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
               />
             </div>
             <div>
-              <label className={labelCls}>시간 (분)</label>
+              <label className={labelCls}>{t('duration')}</label>
               <input
                 type="number"
                 className={inputCls}
@@ -203,7 +214,7 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
               />
             </div>
             <div>
-              <label className={labelCls}>태그 (쉼표로 구분)</label>
+              <label className={labelCls}>{t('tags')}</label>
               <input
                 type="text"
                 className={inputCls}
@@ -226,10 +237,10 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
             )}
             <div className="flex gap-2">
               <button onClick={close} className={cancelBtnCls}>
-                취소
+                {tCommon('cancel')}
               </button>
               <button onClick={save} disabled={saving} className={saveBtnCls}>
-                {saving ? '저장 중...' : '저장'}
+                {saving ? tCommon('saving') : tCommon('save')}
               </button>
             </div>
           </div>

@@ -1,15 +1,11 @@
 'use client'
 
-import {
-  projectStatusLabel,
-  projectStatusStyle,
-  taskStatusLabel,
-  taskStatusStyle,
-} from '@/lib/statusConfig'
+import { projectStatusStyle, taskStatusStyle } from '@/lib/statusConfig'
 import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
 import type { Project, ProjectTask } from '@/types'
 import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import Modal from '../Modal'
 
@@ -35,6 +31,9 @@ export default function ProjectsTab({
   projectTasks,
   onRefresh,
 }: Props) {
+  const t = useTranslations('projects')
+  const tCommon = useTranslations('common')
+  const tStatus = useTranslations('status')
   const [openProjects, setOpenProjects] = useState<Record<string, boolean>>({
     [projects[0]?.id ?? '']: true,
   })
@@ -172,7 +171,7 @@ export default function ProjectsTab({
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-            프로젝트
+            {t('title')}
           </p>
           <button
             onClick={() => openProjectModal('add')}
@@ -219,7 +218,7 @@ export default function ProjectsTab({
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${projectStatusStyle[p.status]}`}
                     >
-                      {projectStatusLabel[p.status]}
+                      {tStatus(p.status)}
                     </span>
                     <button
                       onClick={() => openProjectModal('edit', p)}
@@ -247,7 +246,9 @@ export default function ProjectsTab({
               {isOpen && (
                 <div className="border-t border-gray-100">
                   <div className="flex items-center justify-between px-4 py-2">
-                    <p className="text-xs text-gray-400 font-medium">태스크</p>
+                    <p className="text-xs text-gray-400 font-medium">
+                      {t('tasks')}
+                    </p>
                     <button
                       onClick={() => openTaskModal('add', p.id)}
                       className="text-indigo-500 hover:text-indigo-700 transition-colors"
@@ -256,46 +257,46 @@ export default function ProjectsTab({
                     </button>
                   </div>
                   <div className="flex flex-col">
-                    {tasks.map((t) => (
+                    {tasks.map((task) => (
                       <div
-                        key={t.id}
+                        key={task.id}
                         className="flex items-center gap-3 px-4 py-2.5 border-t border-gray-50"
                       >
                         <div
                           className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
-                            t.status === 'completed'
+                            task.status === 'completed'
                               ? 'bg-green-400 border-green-400'
-                              : t.status === 'in_progress'
+                              : task.status === 'in_progress'
                                 ? 'bg-indigo-500 border-indigo-500'
                                 : 'border-gray-200'
                           }`}
                         >
-                          {t.status === 'completed' && (
+                          {task.status === 'completed' && (
                             <span className="text-white text-xs">✓</span>
                           )}
-                          {t.status === 'in_progress' && (
+                          {task.status === 'in_progress' && (
                             <span className="text-white text-xs">▶</span>
                           )}
                         </div>
                         <p
                           className={`text-sm flex-1 ${
-                            t.status === 'completed'
+                            task.status === 'completed'
                               ? 'line-through text-gray-300'
-                              : t.status === 'in_progress'
+                              : task.status === 'in_progress'
                                 ? 'text-gray-800 font-medium'
                                 : 'text-gray-500'
                           }`}
                         >
-                          {t.name}
+                          {task.name}
                         </p>
                         <div className="flex items-center gap-1.5 flex-shrink-0">
                           <span
-                            className={`text-xs px-1.5 py-0.5 rounded ${taskStatusStyle[t.status]}`}
+                            className={`text-xs px-1.5 py-0.5 rounded ${taskStatusStyle[task.status]}`}
                           >
-                            {taskStatusLabel[t.status]}
+                            {tStatus(task.status)}
                           </span>
                           <button
-                            onClick={() => openTaskModal('edit', p.id, t)}
+                            onClick={() => openTaskModal('edit', p.id, task)}
                             className="text-gray-300 hover:text-indigo-500 transition-colors"
                           >
                             <Pencil size={12} />
@@ -313,16 +314,16 @@ export default function ProjectsTab({
 
       {projectModal && (
         <Modal
-          title={projectModal === 'add' ? '프로젝트 추가' : '프로젝트 수정'}
+          title={projectModal === 'add' ? t('addProject') : t('editProject')}
           onClose={closeProjectModal}
         >
           <div className="flex flex-col gap-3">
             <div>
-              <label className={labelCls}>프로젝트 이름</label>
+              <label className={labelCls}>{t('name')}</label>
               <input
                 type="text"
                 className={inputCls}
-                placeholder="예: Smart Travel Planner"
+                placeholder="Smart Travel Planner"
                 value={projectForm.name}
                 onChange={(e) =>
                   setProjectForm({ ...projectForm, name: e.target.value })
@@ -330,11 +331,11 @@ export default function ProjectsTab({
               />
             </div>
             <div>
-              <label className={labelCls}>설명</label>
+              <label className={labelCls}>{t('description')}</label>
               <input
                 type="text"
                 className={inputCls}
-                placeholder="예: Angular 21 · FTL Demo"
+                placeholder="Angular 21 · FTL Demo"
                 value={projectForm.description}
                 onChange={(e) =>
                   setProjectForm({
@@ -345,7 +346,7 @@ export default function ProjectsTab({
               />
             </div>
             <div>
-              <label className={labelCls}>상태</label>
+              <label className={labelCls}>{t('status')}</label>
               <select
                 className={inputCls}
                 value={projectForm.status}
@@ -356,9 +357,9 @@ export default function ProjectsTab({
                   })
                 }
               >
-                <option value="in_progress">진행 중</option>
-                <option value="completed">완료</option>
-                <option value="planned">예정</option>
+                <option value="in_progress">{tStatus('in_progress')}</option>
+                <option value="completed">{tStatus('completed')}</option>
+                <option value="planned">{tStatus('planned')}</option>
               </select>
             </div>
           </div>
@@ -375,14 +376,14 @@ export default function ProjectsTab({
             )}
             <div className="flex gap-2">
               <button onClick={closeProjectModal} className={cancelBtnCls}>
-                취소
+                {tCommon('cancel')}
               </button>
               <button
                 onClick={saveProject}
                 disabled={saving}
                 className={saveBtnCls}
               >
-                {saving ? '저장 중...' : '저장'}
+                {saving ? tCommon('saving') : tCommon('save')}
               </button>
             </div>
           </div>
@@ -391,16 +392,16 @@ export default function ProjectsTab({
 
       {taskModal && (
         <Modal
-          title={taskModal === 'add' ? '태스크 추가' : '태스크 수정'}
+          title={taskModal === 'add' ? t('addTask') : t('editTask')}
           onClose={closeTaskModal}
         >
           <div className="flex flex-col gap-3">
             <div>
-              <label className={labelCls}>태스크 이름</label>
+              <label className={labelCls}>{t('taskName')}</label>
               <input
                 type="text"
                 className={inputCls}
-                placeholder="예: US5 — 활동 중첩 FormArray"
+                placeholder="US5 — 활동 중첩 FormArray"
                 value={taskForm.name}
                 onChange={(e) =>
                   setTaskForm({ ...taskForm, name: e.target.value })
@@ -408,7 +409,7 @@ export default function ProjectsTab({
               />
             </div>
             <div>
-              <label className={labelCls}>상태</label>
+              <label className={labelCls}>{t('status')}</label>
               <select
                 className={inputCls}
                 value={taskForm.status}
@@ -419,9 +420,9 @@ export default function ProjectsTab({
                   })
                 }
               >
-                <option value="planned">예정</option>
-                <option value="in_progress">진행 중</option>
-                <option value="completed">완료</option>
+                <option value="planned">{tStatus('planned')}</option>
+                <option value="in_progress">{tStatus('in_progress')}</option>
+                <option value="completed">{tStatus('completed')}</option>
               </select>
             </div>
           </div>
@@ -438,14 +439,14 @@ export default function ProjectsTab({
             )}
             <div className="flex gap-2">
               <button onClick={closeTaskModal} className={cancelBtnCls}>
-                취소
+                {tCommon('cancel')}
               </button>
               <button
                 onClick={saveTask}
                 disabled={saving}
                 className={saveBtnCls}
               >
-                {saving ? '저장 중...' : '저장'}
+                {saving ? tCommon('saving') : tCommon('save')}
               </button>
             </div>
           </div>

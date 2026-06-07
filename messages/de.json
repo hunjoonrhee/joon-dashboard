@@ -1,0 +1,76 @@
+{
+  "nav": {
+    "home": "Start",
+    "study": "Lernprotokoll",
+    "goals": "Ziele",
+    "projects": "Projekte"
+  },
+  "home": {
+    "location": "Hier bin ich gerade",
+    "today": "Heute erledigen",
+    "todayPlaceholder": "+ Button drücken, um Aufgaben hinzuzufügen.",
+    "todayInput": "Was steht heute an...",
+    "tagInput": "Tag (z.B. Angular L3)",
+    "activity": "Diese Woche",
+    "thisWeek": "Diese Woche",
+    "thisMonth": "Dieser Monat",
+    "gap": "Pause",
+    "roadmap": "Roadmap",
+    "progressLabel": "Fokusziel-Fortschritt",
+    "lastStudy": "Letztes Lernen",
+    "monthlySession": "Sessions diesen Monat"
+  },
+  "status": {
+    "in_progress": "In Bearbeitung",
+    "completed": "Abgeschlossen",
+    "planned": "Geplant"
+  },
+  "priority": {
+    "urgent": "Dringend",
+    "high": "Hoch",
+    "medium": "Mittel",
+    "low": "Niedrig"
+  },
+  "common": {
+    "save": "Speichern",
+    "saving": "Wird gespeichert...",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "add": "Hinzufügen",
+    "edit": "Bearbeiten"
+  },
+  "study": {
+    "title": "Lernprotokoll",
+    "empty": "Noch keine Einträge.",
+    "addModal": "Eintrag hinzufügen",
+    "editModal": "Eintrag bearbeiten",
+    "date": "Datum",
+    "name": "Titel",
+    "duration": "Dauer (Minuten)",
+    "tags": "Tags (kommagetrennt)",
+    "placeholder": "Was hast du heute gemacht?"
+  },
+  "goals": {
+    "title": "Ziele",
+    "empty": "Keine Ziele vorhanden.",
+    "addModal": "Ziel hinzufügen",
+    "editModal": "Ziel bearbeiten",
+    "name": "Zielname",
+    "description": "Beschreibung",
+    "priority": "Priorität",
+    "status": "Status",
+    "focus": "Als aktuelles Fokusziel festlegen"
+  },
+  "projects": {
+    "title": "Projekte",
+    "tasks": "Aufgaben",
+    "addProject": "Projekt hinzufügen",
+    "editProject": "Projekt bearbeiten",
+    "addTask": "Aufgabe hinzufügen",
+    "editTask": "Aufgabe bearbeiten",
+    "name": "Projektname",
+    "description": "Beschreibung",
+    "status": "Status",
+    "taskName": "Aufgabenname"
+  }
+}

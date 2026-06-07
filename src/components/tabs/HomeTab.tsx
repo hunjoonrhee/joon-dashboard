@@ -4,6 +4,7 @@ import { inputCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
 import type { Goal, Session, TodayItem, Topic } from '@/types'
 import { Check, Plus, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 interface Props {
@@ -23,6 +24,8 @@ export default function HomeTab({
   todayItems,
   onRefresh,
 }: Props) {
+  const t = useTranslations('home')
+  const tStatus = useTranslations('status')
   const [addingItem, setAddingItem] = useState(false)
   const [newItem, setNewItem] = useState('')
   const [newTag, setNewTag] = useState('')
@@ -104,7 +107,7 @@ export default function HomeTab({
       <div className="bg-gradient-to-br from-indigo-500 to-violet-500 rounded-2xl p-5 text-white relative overflow-hidden">
         <div className="absolute right-[-20px] top-[-20px] w-32 h-32 rounded-full bg-white/10" />
         <p className="text-xs font-bold tracking-widest opacity-70 uppercase mb-1">
-          나 지금 여기 있어
+          {t('location')}
         </p>
         <p className="text-2xl font-bold tracking-tight mb-0.5">
           {settings.big_goal ?? '리드 아키텍트'}
@@ -121,17 +124,17 @@ export default function HomeTab({
         <div className="flex gap-6 mt-3">
           <div>
             <div className="text-base font-bold">{overallPct}%</div>
-            <div className="text-xs opacity-65">집중 목표 진행도</div>
+            <div className="text-xs opacity-65">{t('progressLabel')}</div>
           </div>
           <div>
             <div className="text-base font-bold">
               {daysSince !== null ? `${daysSince}일` : '-'}
             </div>
-            <div className="text-xs opacity-65">마지막 공부</div>
+            <div className="text-xs opacity-65">{t('lastStudy')}</div>
           </div>
           <div>
             <div className="text-base font-bold">{monthCount}회</div>
-            <div className="text-xs opacity-65">이번달 세션</div>
+            <div className="text-xs opacity-65">{t('monthlySession')}</div>
           </div>
         </div>
       </div>
@@ -140,7 +143,7 @@ export default function HomeTab({
       <div className="bg-white rounded-xl border border-gray-200 p-4">
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-            오늘 할 것
+            {t('today')}
           </p>
           <button
             onClick={() => setAddingItem(true)}
@@ -156,7 +159,7 @@ export default function HomeTab({
               autoFocus
               type="text"
               className={inputCls}
-              placeholder="오늘 할 것..."
+              placeholder={t('todayInput')}
               value={newItem}
               onChange={(e) => setNewItem(e.target.value)}
               onKeyDown={(e) => {
@@ -166,7 +169,7 @@ export default function HomeTab({
             <input
               type="text"
               className={inputCls}
-              placeholder="태그 (예: Angular L3)"
+              placeholder={t('tagInput')}
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
             />
@@ -188,9 +191,7 @@ export default function HomeTab({
         )}
 
         {todayItems.length === 0 && !addingItem ? (
-          <p className="text-sm text-gray-400">
-            + 버튼으로 오늘 할 것을 추가해봐.
-          </p>
+          <p className="text-sm text-gray-400">{t('todayPlaceholder')}</p>
         ) : (
           <div className="flex flex-col divide-y divide-gray-50">
             {todayItems.map((item) => (
@@ -226,7 +227,7 @@ export default function HomeTab({
       {/* 이번주 활동 */}
       <div className="bg-white rounded-xl border border-gray-200 p-4">
         <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
-          이번 주 활동
+          {t('activity')}
         </p>
         <div className="flex gap-2 mb-4">
           {week.map(({ label, hasSession, isToday }) => (
@@ -249,13 +250,13 @@ export default function HomeTab({
             <div className="text-lg font-bold text-indigo-500">
               {week.filter((d) => d.hasSession).length}일
             </div>
-            <div className="text-xs text-gray-400 mt-0.5">이번주</div>
+            <div className="text-xs text-gray-400 mt-0.5">{t('thisWeek')}</div>
           </div>
           <div className="bg-gray-50 rounded-lg p-3 text-center">
             <div className="text-lg font-bold text-gray-800">
               {monthCount}회
             </div>
-            <div className="text-xs text-gray-400 mt-0.5">이번달</div>
+            <div className="text-xs text-gray-400 mt-0.5">{t('thisMonth')}</div>
           </div>
           <div className="bg-gray-50 rounded-lg p-3 text-center">
             <div
@@ -263,7 +264,7 @@ export default function HomeTab({
             >
               {daysSince !== null ? `${daysSince}일` : '-'}
             </div>
-            <div className="text-xs text-gray-400 mt-0.5">공백</div>
+            <div className="text-xs text-gray-400 mt-0.5">{t('gap')}</div>
           </div>
         </div>
       </div>
@@ -271,7 +272,7 @@ export default function HomeTab({
       {/* 로드맵 */}
       <div className="bg-white rounded-xl border border-gray-200 p-4">
         <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
-          로드맵
+          {t('roadmap')}
         </p>
         <div className="flex flex-col">
           {roadmapGoals.map((g, idx) => (
@@ -306,11 +307,7 @@ export default function HomeTab({
                         : 'bg-gray-100 text-gray-400'
                   }`}
                 >
-                  {g.status === 'completed'
-                    ? '완료'
-                    : g.status === 'in_progress'
-                      ? '진행 중'
-                      : '예정'}
+                  {tStatus(g.status)}
                 </span>
               </div>
               {idx < roadmapGoals.length - 1 && (

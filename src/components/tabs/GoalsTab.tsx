@@ -1,11 +1,6 @@
 'use client'
 
-import {
-  goalStatusLabel,
-  goalStatusStyle,
-  priorityLabel,
-  priorityStyle,
-} from '@/lib/statusConfig'
+import { goalStatusStyle, priorityStyle } from '@/lib/statusConfig'
 import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
 import type { Goal, Topic } from '@/types'
@@ -17,6 +12,7 @@ import {
   Star,
   Trash2,
 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import Modal from '../Modal'
@@ -37,6 +33,10 @@ const emptyForm = {
 
 export default function GoalsTab({ goals, topics, onRefresh }: Props) {
   const router = useRouter()
+  const t = useTranslations('goals')
+  const tCommon = useTranslations('common')
+  const tStatus = useTranslations('status')
+  const tPriority = useTranslations('priority')
   const [modal, setModal] = useState<'add' | 'edit' | null>(null)
   const [selected, setSelected] = useState<Goal | null>(null)
   const [form, setForm] = useState(emptyForm)
@@ -114,7 +114,7 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-              목표
+              {t('title')}
             </p>
             <button
               onClick={() => open('add')}
@@ -125,7 +125,7 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
           </div>
 
           {goals.length === 0 ? (
-            <p className="text-sm text-gray-400">목표가 없어.</p>
+            <p className="text-sm text-gray-400">{t('empty')}</p>
           ) : (
             <div className="flex flex-col gap-2">
               {goals.map((g) => {
@@ -150,7 +150,7 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
                       </button>
                       <div
                         className="flex-1 min-w-0 cursor-pointer"
-                        onClick={() => router.push(`/goals/${g.id}`)}
+                        onClick={() => router.push(`goals/${g.id}`)}
                       >
                         <div className="flex items-center gap-1.5">
                           {g.is_focus && (
@@ -174,12 +174,12 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
                         <span
                           className={`text-xs px-2 py-0.5 rounded-full ${priorityStyle[g.priority]}`}
                         >
-                          {priorityLabel[g.priority]}
+                          {tPriority(g.priority)}
                         </span>
                         <span
                           className={`text-xs px-2 py-0.5 rounded-full ${goalStatusStyle[g.status]}`}
                         >
-                          {goalStatusLabel[g.status]}
+                          {tStatus(g.status)}
                         </span>
                         <button
                           onClick={() => open('edit', g)}
@@ -237,12 +237,12 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
 
       {modal && (
         <Modal
-          title={modal === 'add' ? '목표 추가' : '목표 수정'}
+          title={modal === 'add' ? t('addModal') : t('editModal')}
           onClose={close}
         >
           <div className="flex flex-col gap-3">
             <div>
-              <label className={labelCls}>목표 이름</label>
+              <label className={labelCls}>{t('name')}</label>
               <input
                 type="text"
                 className={inputCls}
@@ -252,7 +252,7 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
               />
             </div>
             <div>
-              <label className={labelCls}>설명</label>
+              <label className={labelCls}>{t('description')}</label>
               <input
                 type="text"
                 className={inputCls}
@@ -265,7 +265,7 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
             </div>
             <div className="flex gap-3">
               <div className="flex-1">
-                <label className={labelCls}>우선순위</label>
+                <label className={labelCls}>{t('priority')}</label>
                 <select
                   className={inputCls}
                   value={form.priority}
@@ -276,14 +276,14 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
                     })
                   }
                 >
-                  <option value="urgent">Urgent</option>
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
+                  <option value="urgent">{tPriority('urgent')}</option>
+                  <option value="high">{tPriority('high')}</option>
+                  <option value="medium">{tPriority('medium')}</option>
+                  <option value="low">{tPriority('low')}</option>
                 </select>
               </div>
               <div className="flex-1">
-                <label className={labelCls}>상태</label>
+                <label className={labelCls}>{t('status')}</label>
                 <select
                   className={inputCls}
                   value={form.status}
@@ -294,9 +294,9 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
                     })
                   }
                 >
-                  <option value="in_progress">진행 중</option>
-                  <option value="completed">완료</option>
-                  <option value="planned">예정</option>
+                  <option value="in_progress">{tStatus('in_progress')}</option>
+                  <option value="completed">{tStatus('completed')}</option>
+                  <option value="planned">{tStatus('planned')}</option>
                 </select>
               </div>
             </div>
@@ -310,7 +310,7 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
                 }
               />
               <label htmlFor="is_focus" className="text-sm text-gray-600">
-                현재 집중 목표로 설정
+                {t('focus')}
               </label>
             </div>
           </div>
@@ -327,10 +327,10 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
             )}
             <div className="flex gap-2">
               <button onClick={close} className={cancelBtnCls}>
-                취소
+                {tCommon('cancel')}
               </button>
               <button onClick={save} disabled={saving} className={saveBtnCls}>
-                {saving ? '저장 중...' : '저장'}
+                {saving ? tCommon('saving') : tCommon('save')}
               </button>
             </div>
           </div>

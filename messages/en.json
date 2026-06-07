@@ -1,0 +1,76 @@
+{
+  "nav": {
+    "home": "Home",
+    "study": "Study Log",
+    "goals": "Goals",
+    "projects": "Projects"
+  },
+  "home": {
+    "location": "Here's where I am",
+    "today": "Today's Tasks",
+    "todayPlaceholder": "Press + to add today's tasks.",
+    "todayInput": "What's on today...",
+    "tagInput": "Tag (e.g. Angular L3)",
+    "activity": "This Week",
+    "thisWeek": "This week",
+    "thisMonth": "This month",
+    "gap": "Gap",
+    "roadmap": "Roadmap",
+    "progressLabel": "Focus goal progress",
+    "lastStudy": "Last study",
+    "monthlySession": "Sessions this month"
+  },
+  "status": {
+    "in_progress": "In Progress",
+    "completed": "Completed",
+    "planned": "Planned"
+  },
+  "priority": {
+    "urgent": "Urgent",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "common": {
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "add": "Add",
+    "edit": "Edit"
+  },
+  "study": {
+    "title": "Study Log",
+    "empty": "No entries yet.",
+    "addModal": "Add Entry",
+    "editModal": "Edit Entry",
+    "date": "Date",
+    "name": "Title",
+    "duration": "Duration (minutes)",
+    "tags": "Tags (comma separated)",
+    "placeholder": "What did you do today?"
+  },
+  "goals": {
+    "title": "Goals",
+    "empty": "No goals yet.",
+    "addModal": "Add Goal",
+    "editModal": "Edit Goal",
+    "name": "Goal name",
+    "description": "Description",
+    "priority": "Priority",
+    "status": "Status",
+    "focus": "Set as current focus goal"
+  },
+  "projects": {
+    "title": "Projects",
+    "tasks": "Tasks",
+    "addProject": "Add Project",
+    "editProject": "Edit Project",
+    "addTask": "Add Task",
+    "editTask": "Edit Task",
+    "name": "Project name",
+    "description": "Description",
+    "status": "Status",
+    "taskName": "Task name"
+  }
+}
