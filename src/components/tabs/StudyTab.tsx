@@ -7,7 +7,6 @@ import { Trash2 } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 import Modal from '../Modal'
-import AddForm from './study/AddForm'
 import SessionList from './study/SessionList'
 import TilList from './study/TilList'
 
@@ -157,45 +156,17 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
         </button>
       </div>
 
-      {/* 데스크탑: 2컬럼 */}
-      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6">
-        <div>
-          {subTab === 'sessions' ? (
-            <SessionList
-              sessions={sessions}
-              grouped={grouped}
-              onAdd={openAdd}
-              onEdit={openEdit}
-            />
-          ) : (
-            <TilList sessions={tilSessions} />
-          )}
-        </div>
-        <AddForm
-          form={form}
-          selectedDate={selectedDate}
-          selectedDuration={selectedDuration}
-          saving={saving}
-          onFormChange={setForm}
-          onDateChange={setSelectedDate}
-          onDurationChange={setSelectedDuration}
-          onSave={save}
+      {/* 콘텐츠 */}
+      {subTab === 'sessions' ? (
+        <SessionList
+          sessions={sessions}
+          grouped={grouped}
+          onAdd={openAdd}
+          onEdit={openEdit}
         />
-      </div>
-
-      {/* 모바일: 단일 컬럼 */}
-      <div className="lg:hidden flex flex-col gap-4">
-        {subTab === 'sessions' ? (
-          <SessionList
-            sessions={sessions}
-            grouped={grouped}
-            onAdd={openAdd}
-            onEdit={openEdit}
-          />
-        ) : (
-          <TilList sessions={tilSessions} />
-        )}
-      </div>
+      ) : (
+        <TilList sessions={tilSessions} />
+      )}
 
       {/* 모바일 모달 */}
       {modal && (
