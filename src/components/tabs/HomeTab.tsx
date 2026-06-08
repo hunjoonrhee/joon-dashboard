@@ -44,6 +44,8 @@ export default function HomeTab({
   const [addingItem, setAddingItem] = useState(false)
   const [newItem, setNewItem] = useState('')
   const [newTag, setNewTag] = useState('')
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [completedItemName, setCompletedItemName] = useState('')
 
   const streak = calcStreak(sessions)
   const maxStreak = calcMaxStreak(sessions)
@@ -116,6 +118,11 @@ export default function HomeTab({
       .from('today_items')
       .update({ completed: !item.completed })
       .eq('id', item.id)
+    if (!item.completed) {
+      // 완료 체크할 때 기록 모달 자동 오픈
+      setCompletedItemName(item.name)
+      setShowAddModal(true)
+    }
     onRefresh()
   }
 
@@ -561,6 +568,43 @@ export default function HomeTab({
               {msg}
             </div>
           ))}
+        </div>
+      )}
+      {showAddModal && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-end lg:items-center justify-center z-50 p-4"
+          onClick={() => setShowAddModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl w-full max-w-md p-5 flex flex-col gap-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div>
+              <p className="text-base font-bold text-gray-800 mb-0.5">
+                공부 기록 남길까? 📝
+              </p>
+              <p className="text-sm text-gray-400">
+                &ldquo;{completedItemName}&rdquo; 완료했어!
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-500 font-medium hover:bg-gray-50"
+              >
+                나중에
+              </button>
+              <button
+                onClick={() => {
+                  setShowAddModal(false)
+                  router.push('study')
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-indigo-500 text-white text-sm font-bold hover:bg-indigo-600"
+              >
+                기록 남기기 →
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
