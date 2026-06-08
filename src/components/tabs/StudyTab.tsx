@@ -72,9 +72,21 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
       tags: session.tags.join(', '),
       til: session.til ?? '',
     })
-    setModal('edit')
+    setSelectedDate('custom')
+    setSelectedDuration(
+      session.duration_minutes === 30
+        ? '30'
+        : session.duration_minutes === 60
+          ? '60'
+          : session.duration_minutes === 90
+            ? '90'
+            : 'custom'
+    )
+    // 모바일에서만 모달
+    if (window.innerWidth < 1024) {
+      setModal('edit')
+    }
   }
-
   const close = () => {
     setModal(null)
     setSelected(null)

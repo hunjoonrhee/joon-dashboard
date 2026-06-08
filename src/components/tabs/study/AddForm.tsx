@@ -1,7 +1,11 @@
 'use client'
 
 import { inputCls, labelCls, saveBtnCls } from '@/lib/styles'
-import { StudyForm } from '@/types'
+import type { StudyForm } from '@/types'
+import { de, enUS, ko } from 'date-fns/locale'
+import { useLocale } from 'next-intl'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 
 interface Props {
   form: StudyForm
@@ -24,6 +28,26 @@ export default function AddForm({
   onDurationChange,
   onSave,
 }: Props) {
+  const locale = useLocale()
+
+  const dateFnsLocale = locale === 'ko' ? ko : locale === 'de' ? de : enUS
+
+  const dateFormat =
+    locale === 'ko'
+      ? 'yyyy.MM.dd'
+      : locale === 'de'
+        ? 'dd.MM.yyyy'
+        : 'MM/dd/yyyy'
+  const getDateObj = () => {
+    if (selectedDate === 'today') return new Date()
+    if (selectedDate === 'yesterday') {
+      const d = new Date()
+      d.setDate(d.getDate() - 1)
+      return d
+    }
+    return form.date ? new Date(form.date) : new Date()
+  }
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4">
       <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
@@ -43,7 +67,7 @@ export default function AddForm({
 
         <div>
           <label className={labelCls}>날짜</label>
-          <div className="flex gap-2">
+          <div className="flex gap-2 mb-2">
             {(['today', 'yesterday', 'custom'] as const).map((d) => (
               <button
                 key={d}
@@ -59,11 +83,21 @@ export default function AddForm({
             ))}
           </div>
           {selectedDate === 'custom' && (
-            <input
-              type="date"
-              className={`${inputCls} mt-2`}
-              value={form.date}
-              onChange={(e) => onFormChange({ ...form, date: e.target.value })}
+            <DatePicker
+              selected={getDateObj()}
+              onChange={(date: Date | null) => {
+                if (date) {
+                  onFormChange({
+                    ...form,
+                    date: date.toISOString().split('T')[0],
+                  })
+                }
+              }}
+              locale={dateFnsLocale}
+              dateFormat={dateFormat}
+              className={inputCls}
+              placeholderText="날짜 선택"
+              maxDate={new Date()}
             />
           )}
         </div>
@@ -112,7 +146,7 @@ export default function AddForm({
         <div>
           <label className={labelCls}>💡 TIL — 오늘 배운 것 (선택)</label>
           <textarea
-            className={`${inputCls} min-h-[200px] resize-none`}
+            className={`${inputCls} min-h-[120px] resize-none`}
             placeholder="짧게라도 괜찮아. 오늘 기억하고 싶은 것..."
             value={form.til}
             onChange={(e) => onFormChange({ ...form, til: e.target.value })}

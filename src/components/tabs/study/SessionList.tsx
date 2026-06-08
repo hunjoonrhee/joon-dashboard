@@ -10,7 +10,7 @@ interface Props {
   sessions: Session[]
   grouped: Record<string, Session[]>
   onAdd: () => void
-  onEdit: (s: Session) => void
+  onEdit: (s: Session) => void // 모바일 → 모달
 }
 
 export default function SessionList({
