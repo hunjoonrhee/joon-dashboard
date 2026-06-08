@@ -26,12 +26,12 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
   const router = useRouter()
   const t = useTranslations('study')
   const tCommon = useTranslations('common')
+  const locale = useLocale()
+  const [subTab, setSubTab] = useState<'sessions' | 'til'>('sessions')
   const [modal, setModal] = useState<'add' | 'edit' | null>(null)
   const [selected, setSelected] = useState<Session | null>(null)
   const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
-
-  const locale = useLocale()
 
   const open = (type: 'add' | 'edit', session?: Session) => {
     if (type === 'edit' && session) {
@@ -98,82 +98,163 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
     {} as Record<string, Session[]>
   )
 
+  const tilSessions = sessions.filter((s) => s.til)
+
   return (
     <>
       <div className="flex flex-col gap-4">
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-              {t('title')}
-            </p>
-            <button
-              onClick={() => open('add')}
-              className="text-indigo-500 hover:text-indigo-700 transition-colors"
-            >
-              <Plus size={18} />
-            </button>
-          </div>
+        {/* 서브탭 */}
+        <div className="flex gap-1 bg-white border border-gray-200 rounded-xl p-1">
+          <button
+            onClick={() => setSubTab('sessions')}
+            className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${subTab === 'sessions' ? 'bg-indigo-500 text-white' : 'text-gray-400 hover:text-gray-600'}`}
+          >
+            {t('title')}
+          </button>
+          <button
+            onClick={() => setSubTab('til')}
+            className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${subTab === 'til' ? 'bg-indigo-500 text-white' : 'text-gray-400 hover:text-gray-600'}`}
+          >
+            TIL 모음
+          </button>
+        </div>
 
-          {sessions.length === 0 ? (
-            <p className="text-sm text-gray-400">{t('empty')}</p>
-          ) : (
-            Object.entries(grouped).map(([month, items]) => (
-              <div key={month}>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider my-2">
-                  {month}
-                </p>
-                <div className="flex flex-col divide-y divide-gray-50">
-                  {items.map((s) => (
-                    <div
-                      key={s.id}
-                      className="flex items-start justify-between py-2.5"
-                    >
+        {subTab === 'sessions' && (
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                {t('title')}
+              </p>
+              <button
+                onClick={() => open('add')}
+                className="text-indigo-500 hover:text-indigo-700 transition-colors"
+              >
+                <Plus size={18} />
+              </button>
+            </div>
+
+            {sessions.length === 0 ? (
+              <p className="text-sm text-gray-400">{t('empty')}</p>
+            ) : (
+              Object.entries(grouped).map(([month, items]) => (
+                <div key={month}>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider my-2">
+                    {month}
+                  </p>
+                  <div className="flex flex-col divide-y divide-gray-50">
+                    {items.map((s) => (
                       <div
-                        className="flex items-start gap-2.5 flex-1 min-w-0 cursor-pointer"
-                        onClick={() => router.push(`sessions/${s.id}`)}
+                        key={s.id}
+                        className="flex items-start justify-between py-2.5"
                       >
-                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 flex-shrink-0" />
-                        <div className="min-w-0">
-                          <p className="text-sm text-gray-800 hover:text-indigo-500 transition-colors truncate">
-                            {s.title}
-                          </p>
-                          <p className="text-xs text-gray-400 mt-0.5">
-                            {new Date(s.date).toLocaleDateString(
-                              locale === 'ko'
-                                ? 'ko-KR'
-                                : locale === 'de'
-                                  ? 'de-DE'
-                                  : 'en-US'
+                        <div
+                          className="flex items-start gap-2.5 flex-1 min-w-0 cursor-pointer"
+                          onClick={() => router.push(`sessions/${s.id}`)}
+                        >
+                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-sm text-gray-800 hover:text-indigo-500 transition-colors truncate">
+                              {s.title}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-0.5">
+                              {new Date(s.date).toLocaleDateString(
+                                locale === 'ko'
+                                  ? 'ko-KR'
+                                  : locale === 'de'
+                                    ? 'de-DE'
+                                    : 'en-US'
+                              )}
+                              {s.duration_minutes &&
+                                ` · ${s.duration_minutes}분`}
+                            </p>
+                            {s.tags.length > 0 && (
+                              <div className="flex gap-1 flex-wrap mt-1">
+                                {s.tags.map((tag) => (
+                                  <span
+                                    key={tag}
+                                    className={`text-xs px-2 py-0.5 rounded-full ${getTagColor(tag)}`}
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
                             )}
-                            {s.duration_minutes && ` · ${s.duration_minutes}분`}
-                          </p>
-                          {s.tags.length > 0 && (
-                            <div className="flex gap-1 flex-wrap mt-1">
-                              {s.tags.map((tag) => (
-                                <span
-                                  key={tag}
-                                  className={`text-xs px-2 py-0.5 rounded-full ${getTagColor(tag)}`}
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
+                          {s.til && (
+                            <span className="text-xs px-2 py-0.5 rounded bg-green-50 text-green-600 font-medium">
+                              TIL
+                            </span>
                           )}
+                          <button
+                            onClick={() => open('edit', s)}
+                            className="text-gray-400 hover:text-indigo-500 transition-colors"
+                          >
+                            <Pencil size={14} />
+                          </button>
                         </div>
                       </div>
-                      <button
-                        onClick={() => open('edit', s)}
-                        className="text-gray-400 hover:text-indigo-500 transition-colors ml-2 flex-shrink-0"
-                      >
-                        <Pencil size={14} />
-                      </button>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {subTab === 'til' && (
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                TIL 모음 — 지식 자산
+              </p>
+            </div>
+            {tilSessions.length === 0 ? (
+              <p className="text-sm text-gray-400">
+                아직 TIL이 없어. 공부 기록 클릭해서 추가해봐.
+              </p>
+            ) : (
+              <div className="flex flex-col divide-y divide-gray-100">
+                {tilSessions.map((s) => (
+                  <div
+                    key={s.id}
+                    className="py-3 cursor-pointer"
+                    onClick={() => router.push(`sessions/${s.id}`)}
+                  >
+                    <p className="text-xs text-gray-400 mb-1">
+                      {new Date(s.date).toLocaleDateString(
+                        locale === 'ko'
+                          ? 'ko-KR'
+                          : locale === 'de'
+                            ? 'de-DE'
+                            : 'en-US'
+                      )}
+                    </p>
+                    <p className="text-sm font-medium text-gray-800 mb-1">
+                      {s.title}
+                    </p>
+                    <p className="text-xs text-gray-500 line-clamp-2">
+                      {s.til}
+                    </p>
+                    {s.tags.length > 0 && (
+                      <div className="flex gap-1 flex-wrap mt-2">
+                        {s.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className={`text-xs px-2 py-0.5 rounded-full ${getTagColor(tag)}`}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
 
       {modal && (

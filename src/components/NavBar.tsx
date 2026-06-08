@@ -9,10 +9,9 @@ import { useEffect, useState } from 'react'
 const tabs = [
   { key: 'home', path: '' },
   { key: 'study', path: '/study' },
-  { key: 'goals', path: '/goals' },
+  { key: 'roadmap', path: '/roadmap' },
   { key: 'projects', path: '/projects' },
 ]
-
 export default function NavBar() {
   const pathname = usePathname()
   const router = useRouter()

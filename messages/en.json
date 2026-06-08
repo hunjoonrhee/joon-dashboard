@@ -3,7 +3,8 @@
     "home": "Home",
     "study": "Study Log",
     "goals": "Goals",
-    "projects": "Projects"
+    "projects": "Projects",
+    "roadmap": "Roadmap"
   },
   "home": {
     "location": "Here's where I am",

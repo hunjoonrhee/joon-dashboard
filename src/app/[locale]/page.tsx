@@ -2,7 +2,14 @@
 
 import HomeTab from '@/components/tabs/HomeTab'
 import { supabase } from '@/lib/supabase'
-import type { Goal, Session, Setting, TodayItem, Topic } from '@/types'
+import type {
+  Goal,
+  ProjectTask,
+  Session,
+  Setting,
+  TodayItem,
+  Topic,
+} from '@/types'
 import { useEffect, useState } from 'react'
 
 export default function HomePage() {
@@ -11,6 +18,7 @@ export default function HomePage() {
   const [goals, setGoals] = useState<Goal[]>([])
   const [settings, setSettings] = useState<Record<string, string>>({})
   const [todayItems, setTodayItems] = useState<TodayItem[]>([])
+  const [projectTasks, setProjectTasks] = useState<ProjectTask[]>([])
   const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
@@ -25,7 +33,8 @@ export default function HomePage() {
         .select('*')
         .eq('date', today)
         .order('created_at'),
-    ]).then(([s, t, g, st, ti]) => {
+      supabase.from('project_tasks').select('*').eq('status', 'in_progress'),
+    ]).then(([s, t, g, st, ti, pt]) => {
       if (s.data) setSessions(s.data)
       if (t.data) setTopics(t.data)
       if (g.data) setGoals(g.data)
@@ -37,6 +46,7 @@ export default function HomePage() {
         setSettings(map)
       }
       if (ti.data) setTodayItems(ti.data)
+      if (pt.data) setProjectTasks(pt.data)
     })
   }, [refreshKey])
 
@@ -48,6 +58,7 @@ export default function HomePage() {
         goals={goals}
         settings={settings}
         todayItems={todayItems}
+        projectTasks={projectTasks}
         onRefresh={() => setRefreshKey((k) => k + 1)}
       />
     </main>

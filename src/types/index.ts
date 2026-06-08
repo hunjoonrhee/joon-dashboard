@@ -49,9 +49,10 @@ export interface TodayItem {
   tag: string | null
   completed: boolean
   date: string
+  source_type: 'manual' | 'topic' | 'task'
+  source_id: string | null
   created_at: string
 }
-
 export interface Project {
   id: string
   name: string

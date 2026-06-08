@@ -3,7 +3,8 @@
     "home": "Start",
     "study": "Lernprotokoll",
     "goals": "Ziele",
-    "projects": "Projekte"
+    "projects": "Projekte",
+    "roadmap": "Roadmap"
   },
   "home": {
     "location": "Hier bin ich gerade",
