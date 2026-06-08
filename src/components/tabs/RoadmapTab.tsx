@@ -1,26 +1,31 @@
 'use client'
 
-import { goalStatusStyle, priorityStyle } from '@/lib/statusConfig'
-import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import type { Goal, Topic } from '@/types'
 import {
+  Plus,
+  Pencil,
+  Trash2,
   ChevronDown,
   ChevronRight,
-  Pencil,
-  Plus,
   Star,
-  Trash2,
 } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
 import Modal from '../Modal'
+import type { Goal, Topic } from '@/types'
+import {
+  goalStatusStyle,
+  priorityStyle,
+  priorityLabel,
+} from '@/lib/statusConfig'
+import { inputCls, labelCls, saveBtnCls, cancelBtnCls } from '@/lib/styles'
+import { useTranslations } from 'next-intl'
 
 interface Props {
   goals: Goal[]
   topics: Topic[]
   onRefresh: () => void
+  settings?: Record<string, string>
 }
 
 const emptyForm = {
@@ -31,7 +36,12 @@ const emptyForm = {
   is_focus: false,
 }
 
-export default function RoadmapTab({ goals, topics, onRefresh }: Props) {
+export default function RoadmapTab({
+  goals,
+  topics,
+  onRefresh,
+  settings = {},
+}: Props) {
   const router = useRouter()
   const t = useTranslations('goals')
   const tCommon = useTranslations('common')
@@ -53,8 +63,18 @@ export default function RoadmapTab({ goals, topics, onRefresh }: Props) {
 
   const getTopics = (goalId: string) =>
     topics.filter((t) => t.goal_id === goalId)
+  const getCategories = (goalId: string) => [
+    ...new Set(getTopics(goalId).map((t) => t.category)),
+  ]
+
   const getPct = (goalId: string) => {
     const t = getTopics(goalId)
+    if (t.length === 0) return 0
+    return Math.round((t.filter((t) => t.completed).length / t.length) * 100)
+  }
+
+  const getCatPct = (goalId: string, cat: string) => {
+    const t = getTopics(goalId).filter((t) => t.category === cat)
     if (t.length === 0) return 0
     return Math.round((t.filter((t) => t.completed).length / t.length) * 100)
   }
@@ -125,13 +145,13 @@ export default function RoadmapTab({ goals, topics, onRefresh }: Props) {
     onRefresh()
   }
 
+  const finalGoal = settings.big_goal ?? '리드 아키텍트'
+
   return (
     <>
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-            로드맵
-          </p>
+          <p className="text-sm font-semibold text-gray-700">{finalGoal}까지</p>
           <button
             onClick={() => open('add')}
             className="text-indigo-500 hover:text-indigo-700 transition-colors"
@@ -142,15 +162,15 @@ export default function RoadmapTab({ goals, topics, onRefresh }: Props) {
 
         {sortedGoals.map((g, idx) => {
           const goalTopics = getTopics(g.id)
+          const categories = getCategories(g.id)
           const pct = getPct(g.id)
           const isOpen = openGoals[g.id] ?? false
 
           return (
             <div key={g.id}>
-              {/* 연결선 */}
               {idx > 0 && (
-                <div className="flex justify-start pl-4 py-1">
-                  <div className="w-px h-4 bg-gray-200" />
+                <div className="flex justify-start pl-4 py-0.5">
+                  <div className="w-px h-3 bg-gray-200" />
                 </div>
               )}
 
@@ -165,7 +185,6 @@ export default function RoadmapTab({ goals, topics, onRefresh }: Props) {
               >
                 <div className="p-3">
                   <div className="flex items-center gap-2">
-                    {/* 상태 dot */}
                     <div
                       className={`w-3 h-3 rounded-full flex-shrink-0 ${
                         g.status === 'completed'
@@ -176,7 +195,6 @@ export default function RoadmapTab({ goals, topics, onRefresh }: Props) {
                       }`}
                     />
 
-                    {/* 이름 */}
                     <div
                       className="flex-1 min-w-0 cursor-pointer"
                       onClick={() => router.push(`goals/${g.id}`)}
@@ -209,11 +227,11 @@ export default function RoadmapTab({ goals, topics, onRefresh }: Props) {
                     </div>
 
                     <div className="flex items-center gap-1.5 flex-shrink-0">
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${priorityStyle[g.priority]}`}
-                      >
-                        {tPriority(g.priority)}
-                      </span>
+                      {goalTopics.length > 0 && (
+                        <span className="text-xs font-semibold text-indigo-500">
+                          {pct}%
+                        </span>
+                      )}
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full ${goalStatusStyle[g.status]}`}
                       >
@@ -240,10 +258,9 @@ export default function RoadmapTab({ goals, topics, onRefresh }: Props) {
                     </div>
                   </div>
 
-                  {/* 프로그레스 바 */}
                   {goalTopics.length > 0 && (
                     <div className="flex items-center gap-2 mt-2 ml-5">
-                      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all ${
                             g.status === 'completed'
@@ -253,7 +270,6 @@ export default function RoadmapTab({ goals, topics, onRefresh }: Props) {
                           style={{ width: `${pct}%` }}
                         />
                       </div>
-                      <span className="text-xs text-gray-400">{pct}%</span>
                       <span className="text-xs text-gray-300">
                         {goalTopics.filter((t) => t.completed).length}/
                         {goalTopics.length}
@@ -262,36 +278,60 @@ export default function RoadmapTab({ goals, topics, onRefresh }: Props) {
                   )}
                 </div>
 
-                {/* 토픽 목록 */}
-                {isOpen && goalTopics.length > 0 && (
-                  <div className="border-t border-gray-100 px-3 py-2 flex flex-col gap-1.5">
-                    {goalTopics.map((topic) => (
-                      <div
-                        key={topic.id}
-                        className="flex items-center gap-2 cursor-pointer"
-                        onClick={() => toggleTopic(topic)}
-                      >
-                        <div
-                          className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
-                            topic.completed
-                              ? 'bg-indigo-500 border-indigo-500'
-                              : 'border-gray-300'
-                          }`}
-                        >
-                          {topic.completed && (
-                            <span className="text-white text-xs">✓</span>
-                          )}
+                {isOpen && (
+                  <div className="border-t border-gray-100 px-3 py-2 flex flex-col gap-3">
+                    {categories.map((cat) => {
+                      const catTopics = goalTopics.filter(
+                        (t) => t.category === cat
+                      )
+                      const catPct = getCatPct(g.id, cat)
+                      return (
+                        <div key={cat}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-medium text-gray-500">
+                              {cat}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {catPct}%
+                            </span>
+                          </div>
+                          <div className="h-1 bg-gray-100 rounded-full overflow-hidden mb-1.5">
+                            <div
+                              className="h-full bg-indigo-400 rounded-full"
+                              style={{ width: `${catPct}%` }}
+                            />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            {catTopics.map((topic) => (
+                              <div
+                                key={topic.id}
+                                className="flex items-center gap-2 cursor-pointer py-0.5"
+                                onClick={() => toggleTopic(topic)}
+                              >
+                                <span
+                                  className={`text-xs flex-shrink-0 w-4 ${
+                                    topic.completed
+                                      ? 'text-green-500'
+                                      : 'text-indigo-400'
+                                  }`}
+                                >
+                                  {topic.completed ? '✓' : '○'}
+                                </span>
+                                <span
+                                  className={`text-xs flex-1 ${
+                                    topic.completed
+                                      ? 'line-through text-gray-300'
+                                      : 'text-gray-600'
+                                  }`}
+                                >
+                                  {topic.name}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <span
-                          className={`text-xs flex-1 ${topic.completed ? 'line-through text-gray-300' : 'text-gray-600'}`}
-                        >
-                          {topic.name}
-                        </span>
-                        <span className="text-xs text-gray-300">
-                          {topic.category}
-                        </span>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 )}
               </div>
@@ -299,16 +339,13 @@ export default function RoadmapTab({ goals, topics, onRefresh }: Props) {
           )
         })}
 
-        {/* 최종 목표 */}
-        <div className="flex justify-start pl-4 py-1">
-          <div className="w-px h-4 bg-gray-200" />
+        <div className="flex justify-start pl-4 py-0.5">
+          <div className="w-px h-3 bg-gray-200" />
         </div>
         <div className="bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-200 rounded-xl p-3 flex items-center gap-3">
           <div className="w-3 h-3 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex-shrink-0" />
           <div>
-            <p className="text-sm font-bold text-indigo-800">
-              리드 아키텍트 🎯
-            </p>
+            <p className="text-sm font-bold text-indigo-800">{finalGoal} 🎯</p>
             <p className="text-xs text-indigo-500 mt-0.5">최종 목표</p>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { calcMaxStreak, calcStreak } from '@/lib/streak'
 import { inputCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
 import type { Goal, ProjectTask, Session, TodayItem, Topic } from '@/types'
-import { Check, Plus, X } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -52,7 +52,6 @@ export default function HomeTab({
     (s) => new Date(s.date).getMonth() === thisMonth
   ).length
 
-  // 자동 제안 — 미완료 토픽 + in_progress 태스크
   const suggestedTopics = totalTopics
     .filter((t) => !t.completed)
     .filter((t) => !todayItems.some((ti) => ti.source_id === t.id))
@@ -131,7 +130,6 @@ export default function HomeTab({
 
   const week = thisWeek()
 
-  // 성취 메시지
   const achievements = []
   if (completedTopics.length > 0) {
     achievements.push(
@@ -220,49 +218,80 @@ export default function HomeTab({
         </div>
       )}
 
-      {/* streak */}
+      {/* streak + 이번주 활동 통합 */}
       <div className="bg-white rounded-xl border border-gray-200 p-4">
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
             {t('activity')}
           </p>
         </div>
-        {streak > 0 && (
+
+        {streak > 0 ? (
           <div
-            className="flex items-center gap-3 p-3 rounded-xl mb-3"
+            className="flex items-center gap-3 p-3 rounded-xl mb-4"
             style={{
-              background: 'rgba(249,115,22,0.06)',
-              border: '1px solid rgba(249,115,22,0.15)',
+              background:
+                'linear-gradient(135deg,rgba(249,115,22,0.1),rgba(245,158,11,0.08))',
+              border: '1px solid rgba(249,115,22,0.2)',
             }}
           >
-            <span className="text-2xl">🔥</span>
+            <span className="text-3xl">🔥</span>
             <div className="flex-1">
-              <div className="text-lg font-bold" style={{ color: '#ea580c' }}>
+              <div className="text-xl font-bold" style={{ color: '#ea580c' }}>
                 {streak}일 연속
               </div>
-              <div className="text-xs" style={{ color: '#9a3412' }}>
-                최고 기록 {maxStreak}일
+              <div className="text-xs font-medium" style={{ color: '#9a3412' }}>
+                지금 불타고 있어
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-xs text-gray-400">최고 기록</div>
+              <div className="text-lg font-bold" style={{ color: '#ea580c' }}>
+                {maxStreak}일
               </div>
             </div>
           </div>
+        ) : (
+          <div className="flex items-center gap-3 p-3 rounded-xl mb-4 bg-gray-50 border border-gray-100">
+            <span className="text-2xl">💤</span>
+            <div>
+              <div className="text-sm font-medium text-gray-500">
+                아직 streak이 없어
+              </div>
+              <div className="text-xs text-gray-400">오늘 공부하면 시작돼!</div>
+            </div>
+          </div>
         )}
-        <div className="flex gap-2">
+
+        <div className="flex gap-2 mb-3">
           {week.map(({ label, hasSession, isToday }) => (
             <div
               key={label}
-              className={`flex-1 aspect-square rounded-lg flex items-center justify-center text-xs font-medium ${
+              className={`flex-1 aspect-square rounded-lg flex flex-col items-center justify-center text-xs font-medium gap-0.5 ${
                 isToday
                   ? 'bg-indigo-500 text-white'
                   : hasSession
-                    ? 'bg-orange-100 text-orange-700 border border-orange-200'
+                    ? 'text-orange-700 border border-orange-200'
                     : 'bg-gray-50 text-gray-400 border border-gray-100'
               }`}
+              style={
+                hasSession && !isToday
+                  ? {
+                      background:
+                        'linear-gradient(135deg,rgba(249,115,22,0.12),rgba(245,158,11,0.08))',
+                    }
+                  : {}
+              }
             >
-              {label}
+              <span>{label}</span>
+              {hasSession && !isToday && (
+                <span style={{ fontSize: '8px' }}>✓</span>
+              )}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-2 gap-2 mt-3">
+
+        <div className="grid grid-cols-2 gap-2">
           <div className="bg-gray-50 rounded-lg p-3 text-center">
             <div className="text-lg font-bold text-indigo-500">
               {week.filter((d) => d.hasSession).length}
@@ -288,16 +317,17 @@ export default function HomeTab({
           </p>
           <button
             onClick={() => setAddingItem(true)}
-            className="text-indigo-500 hover:text-indigo-700 transition-colors"
+            className="text-xs text-indigo-500 hover:text-indigo-700 font-medium"
           >
-            <Plus size={18} />
+            + 직접 추가
           </button>
         </div>
 
-        {/* 자동 제안 */}
         {(suggestedTopics.length > 0 || suggestedTasks.length > 0) && (
           <div className="mb-3">
-            <p className="text-xs text-gray-400 mb-2 font-medium">추천</p>
+            <p className="text-xs text-gray-400 mb-2 font-medium">
+              추천 — 집중 목표에서
+            </p>
             {suggestedTopics.map((topic) => (
               <div
                 key={topic.id}
@@ -381,13 +411,19 @@ export default function HomeTab({
           </div>
         )}
 
-        {todayItems.length === 0 &&
-        !addingItem &&
-        suggestedTopics.length === 0 ? (
-          <p className="text-sm text-gray-400">{t('todayPlaceholder')}</p>
-        ) : todayItems.length > 0 ? (
-          <div className="border-t border-gray-100 pt-3">
-            <p className="text-xs text-gray-400 mb-2 font-medium">선택한 것</p>
+        {todayItems.length > 0 && (
+          <div
+            className={
+              suggestedTopics.length > 0 || suggestedTasks.length > 0
+                ? 'border-t border-gray-100 pt-3'
+                : ''
+            }
+          >
+            {(suggestedTopics.length > 0 || suggestedTasks.length > 0) && (
+              <p className="text-xs text-gray-400 mb-2 font-medium">
+                오늘 선택한 것
+              </p>
+            )}
             <div className="flex flex-col divide-y divide-gray-50">
               {todayItems.map((item) => (
                 <div key={item.id} className="flex items-center gap-3 py-2.5">
@@ -417,7 +453,14 @@ export default function HomeTab({
               ))}
             </div>
           </div>
-        ) : null}
+        )}
+
+        {todayItems.length === 0 &&
+          !addingItem &&
+          suggestedTopics.length === 0 &&
+          suggestedTasks.length === 0 && (
+            <p className="text-sm text-gray-400">{t('todayPlaceholder')}</p>
+          )}
       </div>
 
       {/* 로드맵 미니 */}
