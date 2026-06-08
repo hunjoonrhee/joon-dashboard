@@ -51,7 +51,7 @@ export default function HomePage() {
   }, [refreshKey])
 
   return (
-    <main className="max-w-xl mx-auto px-4 py-4">
+    <main className="mx-auto px-4 py-4">
       <HomeTab
         sessions={sessions}
         topics={topics}

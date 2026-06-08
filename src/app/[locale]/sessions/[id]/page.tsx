@@ -132,7 +132,7 @@ export default function SessionDetail() {
     )
 
   return (
-    <main className="max-w-xl mx-auto px-4 py-4">
+    <main className="mx-auto px-4 py-4">
       <button
         onClick={() => router.back()}
         className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 mb-6 transition-colors"
@@ -354,7 +354,7 @@ export default function SessionDetail() {
           </div>
           {editingTil ? (
             <textarea
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400 resize-none min-h-[200px]"
+              className="w-full flex-1 min-h-[calc(100vh-400px)] overflow-hidden resize-none border border-gray-200 rounded-xl p-4 text-sm font-mono outline-none focus:border-indigo-400 transition-colors"
               placeholder="오늘 배운 것을 마크다운으로 작성해봐..."
               value={tilDraft}
               onChange={(e) => setTilDraft(e.target.value)}

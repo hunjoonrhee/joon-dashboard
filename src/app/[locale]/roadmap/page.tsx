@@ -30,7 +30,7 @@ export default function RoadmapPage() {
   }, [refreshKey])
 
   return (
-    <main className="max-w-xl mx-auto px-4 py-4">
+    <main className="mx-auto px-4 py-4">
       <RoadmapTab
         goals={goals}
         topics={topics}

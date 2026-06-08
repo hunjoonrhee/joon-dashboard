@@ -21,7 +21,7 @@ export default function ProjectsPage() {
   }, [refreshKey])
 
   return (
-    <main className="max-w-xl mx-auto px-4 py-4">
+    <main className="mx-auto px-4 py-4">
       <ProjectsTab
         projects={projects}
         projectTasks={projectTasks}

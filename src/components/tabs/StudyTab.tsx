@@ -2,51 +2,77 @@
 
 import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
-import { getTagColor } from '@/lib/tagColor'
-import type { Session } from '@/types'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import type { Session, StudyForm } from '@/types'
+import { Trash2 } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import Modal from '../Modal'
+import AddForm from './study/AddForm'
+import SessionList from './study/SessionList'
+import TilList from './study/TilList'
 
 interface Props {
   sessions: Session[]
   onRefresh: () => void
 }
 
-const emptyForm = {
-  date: '',
+const emptyForm: StudyForm = {
   title: '',
+  date: '',
   duration_minutes: '',
   tags: '',
+  til: '',
 }
 
 export default function StudyTab({ sessions, onRefresh }: Props) {
-  const router = useRouter()
   const t = useTranslations('study')
   const tCommon = useTranslations('common')
   const locale = useLocale()
   const [subTab, setSubTab] = useState<'sessions' | 'til'>('sessions')
   const [modal, setModal] = useState<'add' | 'edit' | null>(null)
   const [selected, setSelected] = useState<Session | null>(null)
-  const [form, setForm] = useState(emptyForm)
+  const [form, setForm] = useState<StudyForm>(emptyForm)
   const [saving, setSaving] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<
+    'today' | 'yesterday' | 'custom'
+  >('today')
+  const [selectedDuration, setSelectedDuration] = useState<
+    '30' | '60' | '90' | 'custom'
+  >('60')
 
-  const open = (type: 'add' | 'edit', session?: Session) => {
-    if (type === 'edit' && session) {
-      setSelected(session)
-      setForm({
-        date: session.date,
-        title: session.title,
-        duration_minutes: session.duration_minutes?.toString() ?? '',
-        tags: session.tags.join(', '),
-      })
-    } else {
-      setSelected(null)
-      setForm(emptyForm)
+  const getDateValue = () => {
+    if (selectedDate === 'today') return new Date().toISOString().split('T')[0]
+    if (selectedDate === 'yesterday') {
+      const d = new Date()
+      d.setDate(d.getDate() - 1)
+      return d.toISOString().split('T')[0]
     }
-    setModal(type)
+    return form.date
+  }
+
+  const getDurationValue = () => {
+    if (selectedDuration !== 'custom') return selectedDuration
+    return form.duration_minutes
+  }
+
+  const openAdd = () => {
+    setSelected(null)
+    setForm(emptyForm)
+    setSelectedDate('today')
+    setSelectedDuration('60')
+    setModal('add')
+  }
+
+  const openEdit = (session: Session) => {
+    setSelected(session)
+    setForm({
+      date: session.date,
+      title: session.title,
+      duration_minutes: session.duration_minutes?.toString() ?? '',
+      tags: session.tags.join(', '),
+      til: session.til ?? '',
+    })
+    setModal('edit')
   }
 
   const close = () => {
@@ -58,15 +84,16 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
   const save = async () => {
     setSaving(true)
     const payload = {
-      date: form.date,
+      date: getDateValue(),
       title: form.title,
-      duration_minutes: form.duration_minutes
-        ? parseInt(form.duration_minutes)
+      duration_minutes: getDurationValue()
+        ? parseInt(getDurationValue()!)
         : null,
       tags: form.tags
         .split(',')
         .map((t) => t.trim())
         .filter(Boolean),
+      til: form.til || null,
     }
     if (modal === 'add') {
       await supabase.from('sessions').insert(payload)
@@ -102,161 +129,63 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
 
   return (
     <>
-      <div className="flex flex-col gap-4">
-        {/* 서브탭 */}
-        <div className="flex gap-1 bg-white border border-gray-200 rounded-xl p-1">
-          <button
-            onClick={() => setSubTab('sessions')}
-            className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${subTab === 'sessions' ? 'bg-indigo-500 text-white' : 'text-gray-400 hover:text-gray-600'}`}
-          >
-            {t('title')}
-          </button>
-          <button
-            onClick={() => setSubTab('til')}
-            className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${subTab === 'til' ? 'bg-indigo-500 text-white' : 'text-gray-400 hover:text-gray-600'}`}
-          >
-            TIL 모음
-          </button>
+      {/* 서브탭 */}
+      <div className="flex gap-1 bg-white border border-gray-200 rounded-xl p-1 mb-4">
+        <button
+          onClick={() => setSubTab('sessions')}
+          className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${subTab === 'sessions' ? 'bg-indigo-500 text-white' : 'text-gray-400 hover:text-gray-600'}`}
+        >
+          📝 {t('title')}
+        </button>
+        <button
+          onClick={() => setSubTab('til')}
+          className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${subTab === 'til' ? 'bg-indigo-500 text-white' : 'text-gray-400 hover:text-gray-600'}`}
+        >
+          💡 TIL 모음
+        </button>
+      </div>
+
+      {/* 데스크탑: 2컬럼 */}
+      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6">
+        <div>
+          {subTab === 'sessions' ? (
+            <SessionList
+              sessions={sessions}
+              grouped={grouped}
+              onAdd={openAdd}
+              onEdit={openEdit}
+            />
+          ) : (
+            <TilList sessions={tilSessions} />
+          )}
         </div>
+        <AddForm
+          form={form}
+          selectedDate={selectedDate}
+          selectedDuration={selectedDuration}
+          saving={saving}
+          onFormChange={setForm}
+          onDateChange={setSelectedDate}
+          onDurationChange={setSelectedDuration}
+          onSave={save}
+        />
+      </div>
 
-        {subTab === 'sessions' && (
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                {t('title')}
-              </p>
-              <button
-                onClick={() => open('add')}
-                className="text-indigo-500 hover:text-indigo-700 transition-colors"
-              >
-                <Plus size={18} />
-              </button>
-            </div>
-
-            {sessions.length === 0 ? (
-              <p className="text-sm text-gray-400">{t('empty')}</p>
-            ) : (
-              Object.entries(grouped).map(([month, items]) => (
-                <div key={month}>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider my-2">
-                    {month}
-                  </p>
-                  <div className="flex flex-col divide-y divide-gray-50">
-                    {items.map((s) => (
-                      <div
-                        key={s.id}
-                        className="flex items-start justify-between py-2.5"
-                      >
-                        <div
-                          className="flex items-start gap-2.5 flex-1 min-w-0 cursor-pointer"
-                          onClick={() => router.push(`sessions/${s.id}`)}
-                        >
-                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 flex-shrink-0" />
-                          <div className="min-w-0">
-                            <p className="text-sm text-gray-800 hover:text-indigo-500 transition-colors truncate">
-                              {s.title}
-                            </p>
-                            <p className="text-xs text-gray-400 mt-0.5">
-                              {new Date(s.date).toLocaleDateString(
-                                locale === 'ko'
-                                  ? 'ko-KR'
-                                  : locale === 'de'
-                                    ? 'de-DE'
-                                    : 'en-US'
-                              )}
-                              {s.duration_minutes &&
-                                ` · ${s.duration_minutes}분`}
-                            </p>
-                            {s.tags.length > 0 && (
-                              <div className="flex gap-1 flex-wrap mt-1">
-                                {s.tags.map((tag) => (
-                                  <span
-                                    key={tag}
-                                    className={`text-xs px-2 py-0.5 rounded-full ${getTagColor(tag)}`}
-                                  >
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
-                          {s.til && (
-                            <span className="text-xs px-2 py-0.5 rounded bg-green-50 text-green-600 font-medium">
-                              TIL
-                            </span>
-                          )}
-                          <button
-                            onClick={() => open('edit', s)}
-                            className="text-gray-400 hover:text-indigo-500 transition-colors"
-                          >
-                            <Pencil size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-
-        {subTab === 'til' && (
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                TIL 모음 — 지식 자산
-              </p>
-            </div>
-            {tilSessions.length === 0 ? (
-              <p className="text-sm text-gray-400">
-                아직 TIL이 없어. 공부 기록 클릭해서 추가해봐.
-              </p>
-            ) : (
-              <div className="flex flex-col divide-y divide-gray-100">
-                {tilSessions.map((s) => (
-                  <div
-                    key={s.id}
-                    className="py-3 cursor-pointer"
-                    onClick={() => router.push(`sessions/${s.id}`)}
-                  >
-                    <p className="text-xs text-gray-400 mb-1">
-                      {new Date(s.date).toLocaleDateString(
-                        locale === 'ko'
-                          ? 'ko-KR'
-                          : locale === 'de'
-                            ? 'de-DE'
-                            : 'en-US'
-                      )}
-                    </p>
-                    <p className="text-sm font-medium text-gray-800 mb-1">
-                      {s.title}
-                    </p>
-                    <p className="text-xs text-gray-500 line-clamp-2">
-                      {s.til}
-                    </p>
-                    {s.tags.length > 0 && (
-                      <div className="flex gap-1 flex-wrap mt-2">
-                        {s.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className={`text-xs px-2 py-0.5 rounded-full ${getTagColor(tag)}`}
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+      {/* 모바일: 단일 컬럼 */}
+      <div className="lg:hidden flex flex-col gap-4">
+        {subTab === 'sessions' ? (
+          <SessionList
+            sessions={sessions}
+            grouped={grouped}
+            onAdd={openAdd}
+            onEdit={openEdit}
+          />
+        ) : (
+          <TilList sessions={tilSessions} />
         )}
       </div>
 
+      {/* 모바일 모달 */}
       {modal && (
         <Modal
           title={modal === 'add' ? t('addModal') : t('editModal')}
@@ -264,38 +193,68 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
         >
           <div className="flex flex-col gap-3">
             <div>
-              <label className={labelCls}>{t('date')}</label>
-              <input
-                type="date"
-                className={inputCls}
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className={labelCls}>{t('name')}</label>
+              <label className={labelCls}>오늘 뭐 했어?</label>
               <input
                 type="text"
                 className={inputCls}
-                placeholder={t('placeholder')}
+                placeholder="예: async pipe 공부"
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
               />
             </div>
             <div>
-              <label className={labelCls}>{t('duration')}</label>
-              <input
-                type="number"
-                className={inputCls}
-                placeholder="60"
-                value={form.duration_minutes}
-                onChange={(e) =>
-                  setForm({ ...form, duration_minutes: e.target.value })
-                }
-              />
+              <label className={labelCls}>날짜</label>
+              <div className="flex gap-2">
+                {(['today', 'yesterday', 'custom'] as const).map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setSelectedDate(d)}
+                    className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedDate === d ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500'}`}
+                  >
+                    {d === 'today'
+                      ? '오늘'
+                      : d === 'yesterday'
+                        ? '어제'
+                        : '직접'}
+                  </button>
+                ))}
+              </div>
+              {selectedDate === 'custom' && (
+                <input
+                  type="date"
+                  className={`${inputCls} mt-2`}
+                  value={form.date}
+                  onChange={(e) => setForm({ ...form, date: e.target.value })}
+                />
+              )}
             </div>
             <div>
-              <label className={labelCls}>{t('tags')}</label>
+              <label className={labelCls}>시간</label>
+              <div className="flex gap-2">
+                {(['30', '60', '90', 'custom'] as const).map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setSelectedDuration(d)}
+                    className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedDuration === d ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500'}`}
+                  >
+                    {d === 'custom' ? '직접' : `${d}분`}
+                  </button>
+                ))}
+              </div>
+              {selectedDuration === 'custom' && (
+                <input
+                  type="number"
+                  className={`${inputCls} mt-2`}
+                  placeholder="분"
+                  value={form.duration_minutes}
+                  onChange={(e) =>
+                    setForm({ ...form, duration_minutes: e.target.value })
+                  }
+                />
+              )}
+            </div>
+            <div>
+              <label className={labelCls}>태그</label>
               <input
                 type="text"
                 className={inputCls}
@@ -304,12 +263,21 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
                 onChange={(e) => setForm({ ...form, tags: e.target.value })}
               />
             </div>
+            <div>
+              <label className={labelCls}>💡 TIL (선택)</label>
+              <textarea
+                className={`${inputCls} min-h-[80px] resize-none`}
+                placeholder="오늘 기억하고 싶은 것..."
+                value={form.til}
+                onChange={(e) => setForm({ ...form, til: e.target.value })}
+              />
+            </div>
           </div>
           <div className="flex justify-between pt-1">
             {modal === 'edit' ? (
               <button
                 onClick={remove}
-                className="text-red-400 hover:text-red-600 transition-colors"
+                className="text-red-400 hover:text-red-600"
               >
                 <Trash2 size={16} />
               </button>

@@ -70,3 +70,11 @@ export interface ProjectTask {
   order_index: number
   created_at: string
 }
+
+export interface StudyForm {
+  title: string
+  date: string
+  duration_minutes: string
+  tags: string
+  til: string
+}

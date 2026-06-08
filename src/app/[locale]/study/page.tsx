@@ -20,7 +20,7 @@ export default function StudyPage() {
   }, [refreshKey])
 
   return (
-    <main className="max-w-xl mx-auto px-4 py-4">
+    <main className="mx-auto px-4 py-4">
       <StudyTab
         sessions={sessions}
         onRefresh={() => setRefreshKey((k) => k + 1)}
