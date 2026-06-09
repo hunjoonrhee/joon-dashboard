@@ -460,9 +460,17 @@ export default function HomeTab({
             </button>
           </div>
           {tilSessions.length === 0 ? (
-            <p className="text-sm text-gray-400">
-              아직 TIL이 없어. 공부하고 나서 배운 것을 기록해봐.
-            </p>
+            <div className="flex flex-col items-center gap-2 py-4 text-center">
+              <span className="text-2xl opacity-40">💡</span>
+              <p className="text-sm font-semibold text-gray-700">아직 TIL이 없어</p>
+              <p className="text-xs text-gray-400 leading-relaxed">공부 기록할 때 배운 것을<br/>한 줄이라도 적어봐</p>
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="mt-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 transition-colors"
+              >
+                + 공부기록 추가
+              </button>
+            </div>
           ) : (
             <div className="flex flex-col divide-y divide-gray-100">
               {tilSessions.map((s) => (
@@ -512,9 +520,17 @@ export default function HomeTab({
             </button>
           </div>
           {notes.length === 0 ? (
-            <p className="text-sm text-gray-400">
-              아직 노트가 없어. 고민이나 생각을 자유롭게 적어봐.
-            </p>
+            <div className="flex flex-col items-center gap-2 py-4 text-center">
+              <span className="text-2xl opacity-40">🔥</span>
+              <p className="text-sm font-semibold text-gray-700">아직 노트가 없어</p>
+              <p className="text-xs text-gray-400 leading-relaxed">고민이나 오늘 느낀 것,<br/>뭐든 자유롭게 적어봐</p>
+              <button
+                onClick={() => router.push('notes')}
+                className="mt-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-orange-600 bg-orange-50 border border-orange-100 hover:bg-orange-100 transition-colors"
+              >
+                + 첫 노트 쓰기
+              </button>
+            </div>
           ) : (
             <div className="flex flex-col divide-y divide-gray-100">
               {notes.map((note) => (

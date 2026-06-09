@@ -145,6 +145,9 @@ export default function RoadmapTab({
     onRefresh()
   }
 
+  const activeGoals = sortedGoals.filter((g) => g.status !== 'completed')
+  const completedGoals = sortedGoals.filter((g) => g.status === 'completed')
+  const [showCompleted, setShowCompleted] = useState(false)
   const finalGoal = settings.big_goal ?? '리드 아키텍트'
 
   return (
@@ -160,7 +163,7 @@ export default function RoadmapTab({
           </button>
         </div>
 
-        {sortedGoals.map((g, idx) => {
+        {activeGoals.map((g, idx) => {
           const goalTopics = getTopics(g.id)
           const categories = getCategories(g.id)
           const pct = getPct(g.id)
@@ -349,6 +352,52 @@ export default function RoadmapTab({
             <p className="text-xs text-indigo-500 mt-0.5">최종 목표</p>
           </div>
         </div>
+
+        {completedGoals.length > 0 && (
+          <div className="mt-4">
+            <button
+              onClick={() => setShowCompleted((v) => !v)}
+              className="flex items-center gap-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition-colors"
+            >
+              {showCompleted ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+              완료된 목표 ({completedGoals.length})
+            </button>
+            {showCompleted && (
+              <div className="flex flex-col gap-2 mt-2">
+                {completedGoals.map((g) => {
+                  const goalTopics = getTopics(g.id)
+                  const pct = getPct(g.id)
+                  return (
+                    <div key={g.id} className="bg-white rounded-xl border border-green-100 overflow-hidden opacity-70">
+                      <div className="p-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-green-400 flex-shrink-0" />
+                          <div className="flex-1 min-w-0 cursor-pointer" onClick={() => router.push(`goals/${g.id}`)}>
+                            <p className="text-sm font-semibold line-through text-gray-400 truncate">{g.name}</p>
+                            {g.description && <p className="text-xs text-gray-300 mt-0.5 truncate">{g.description}</p>}
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            {goalTopics.length > 0 && <span className="text-xs font-semibold text-green-500">{pct}%</span>}
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-600">완료</span>
+                            <button onClick={() => open('edit', g)} className="text-gray-300 hover:text-indigo-500 transition-colors"><Pencil size={13} /></button>
+                          </div>
+                        </div>
+                        {goalTopics.length > 0 && (
+                          <div className="flex items-center gap-2 mt-2 ml-5">
+                            <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
+                              <div className="h-full bg-green-400 rounded-full" style={{ width: `${pct}%` }} />
+                            </div>
+                            <span className="text-xs text-gray-300">{goalTopics.filter((t) => t.completed).length}/{goalTopics.length}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {modal && (

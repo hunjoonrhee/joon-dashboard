@@ -17,6 +17,15 @@ const pageTitles: Record<string, string> = {
   settings: '설정',
 }
 
+const headerButtonConfig: Record<string, { label: string; modal: boolean }> = {
+  '':       { label: '+ 공부기록 추가', modal: true },
+  study:    { label: '+ 공부기록 추가', modal: true },
+  notes:    { label: '+ 새 노트',       modal: false },
+  roadmap:  { label: '+ 목표 추가',     modal: false },
+  projects: { label: '+ 프로젝트 추가', modal: false },
+  settings: { label: '+ 공부기록 추가', modal: true },
+}
+
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [onboarding, setOnboarding] = useState<boolean | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
@@ -42,7 +51,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       })
   }, [])
 
-  if (onboarding === null) return null
+  const btnConfig = headerButtonConfig[segment] ?? headerButtonConfig['']
+
+  const handleHeaderBtn = () => {
+    if (btnConfig.modal) {
+      setShowAddModal(true)
+    } else {
+      // notes, roadmap, projects — 해당 페이지로 이동 (이미 해당 탭에 있을 때는 아무 동작 없음)
+      // 실제 동작은 각 탭 컴포넌트에서 처리 — 여기선 모달만 열지 않음
+    }
+  }
 
   if (onboarding) {
     return <Onboarding onComplete={() => setOnboarding(false)} />
@@ -60,10 +78,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-400">{today}</span>
             <button
-              onClick={() => setShowAddModal(true)}
+              onClick={handleHeaderBtn}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-600 transition-colors"
             >
-              + 기록 추가
+              {btnConfig.label}
             </button>
           </div>
         </div>

@@ -34,9 +34,13 @@ export default function ProjectsTab({
   const t = useTranslations('projects')
   const tCommon = useTranslations('common')
   const tStatus = useTranslations('status')
-  const [openProjects, setOpenProjects] = useState<Record<string, boolean>>({
-    [projects[0]?.id ?? '']: true,
-  })
+  const [openProjects, setOpenProjects] = useState<Record<string, boolean>>(
+    Object.fromEntries(
+      projects
+        .filter((p) => p.status === 'in_progress')
+        .map((p) => [p.id, true])
+    )
+  )
   const [projectModal, setProjectModal] = useState<'add' | 'edit' | null>(null)
   const [taskModal, setTaskModal] = useState<'add' | 'edit' | null>(null)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
