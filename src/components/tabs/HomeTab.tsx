@@ -2,20 +2,15 @@
 
 import AddSessionModal from '@/components/AddSessionModal'
 import { calcMaxStreak, calcStreak } from '@/lib/streak'
-import { inputCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
-import type {
-  Goal,
-  Note,
-  ProjectTask,
-  Session,
-  TodayItem,
-  Topic,
-} from '@/types'
-import { Check, X } from 'lucide-react'
+import type { Goal, Note, ProjectTask, Session, TodayItem, Topic } from '@/types'
 import { useLocale, useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import HeroCard from './home/HeroCard'
+import NotesPreviewCard from './home/NotesPreviewCard'
+import TilPreviewCard from './home/TilPreviewCard'
+import TodayCard from './home/TodayCard'
+import WeeklyActivityCard from './home/WeeklyActivityCard'
 
 interface Props {
   sessions: Session[]
@@ -39,12 +34,7 @@ export default function HomeTab({
   onRefresh,
 }: Props) {
   const t = useTranslations('home')
-  const tStatus = useTranslations('status')
   const locale = useLocale()
-  const router = useRouter()
-  const [addingItem, setAddingItem] = useState(false)
-  const [newItem, setNewItem] = useState('')
-  const [newTag, setNewTag] = useState('')
   const [showSessionModal, setShowSessionModal] = useState(false)
   const [completedItemName, setCompletedItemName] = useState('')
 
@@ -52,19 +42,14 @@ export default function HomeTab({
   const maxStreak = calcMaxStreak(sessions)
 
   const focusGoals = goals.filter((g) => g.is_focus)
-  const totalTopics = topics.filter((t) =>
-    focusGoals.some((g) => g.id === t.goal_id)
-  )
+  const totalTopics = topics.filter((t) => focusGoals.some((g) => g.id === t.goal_id))
   const completedTopics = totalTopics.filter((t) => t.completed)
-  const overallPct =
-    totalTopics.length === 0
-      ? 0
-      : Math.round((completedTopics.length / totalTopics.length) * 100)
+  const overallPct = totalTopics.length === 0
+    ? 0
+    : Math.round((completedTopics.length / totalTopics.length) * 100)
 
   const thisMonth = new Date().getMonth()
-  const monthCount = sessions.filter(
-    (s) => new Date(s.date).getMonth() === thisMonth
-  ).length
+  const monthCount = sessions.filter((s) => new Date(s.date).getMonth() === thisMonth).length
 
   const suggestedTopics = totalTopics
     .filter((t) => !t.completed)
@@ -76,87 +61,10 @@ export default function HomeTab({
     .filter((t) => !todayItems.some((ti) => ti.source_id === t.id))
     .slice(0, 2)
 
-  const addFromSuggestion = async (
-    name: string,
-    tag: string,
-    sourceType: 'topic' | 'task',
-    sourceId: string
-  ) => {
-    const today = new Date().toISOString().split('T')[0]
-    await supabase.from('today_items').insert({
-      name,
-      tag,
-      date: today,
-      source_type: sourceType,
-      source_id: sourceId,
-    })
-    onRefresh()
-  }
+  const getTopicGoalName = (topic: Topic) =>
+    focusGoals.find((g) => g.id === topic.goal_id)?.name ?? ''
 
-  const thisWeek = () => {
-    const today = new Date()
-    const dayOfWeek = today.getDay()
-    const monday = new Date(today)
-    monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(monday)
-      d.setDate(monday.getDate() + i)
-      const dateStr = d.toISOString().split('T')[0]
-      const hasSession = sessions.some((s) => s.date === dateStr)
-      const isToday = d.toDateString() === today.toDateString()
-      const label = d
-        .toLocaleDateString(
-          locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
-          { weekday: 'short' }
-        )
-        .slice(0, 2)
-      return { label, hasSession, isToday }
-    })
-  }
-
-  const toggleToday = async (item: TodayItem) => {
-    const nowCompleted = !item.completed
-    await supabase
-      .from('today_items')
-      .update({ completed: nowCompleted })
-      .eq('id', item.id)
-
-    // source_type이 topic이고 완료 체크할 때 → topic도 완료 처리
-    if (nowCompleted && item.source_type === 'topic' && item.source_id) {
-      await supabase
-        .from('topics')
-        .update({ completed: true })
-        .eq('id', item.source_id)
-    }
-
-    if (nowCompleted) {
-      setCompletedItemName(item.name)
-      setShowSessionModal(true)
-    }
-    onRefresh()
-  }
-
-  const addTodayItem = async () => {
-    if (!newItem.trim()) return
-    const today = new Date().toISOString().split('T')[0]
-    await supabase.from('today_items').insert({
-      name: newItem.trim(),
-      tag: newTag.trim() || null,
-      date: today,
-      source_type: 'manual',
-    })
-    setNewItem('')
-    setNewTag('')
-    setAddingItem(false)
-    onRefresh()
-  }
-
-  const removeToday = async (item: TodayItem) => {
-    await supabase.from('today_items').delete().eq('id', item.id)
-    onRefresh()
-  }
-
-  const week = thisWeek()
+  // 이번 주 통계
   const weeklyStats = (() => {
     const today = new Date()
     const dayOfWeek = today.getDay()
@@ -167,466 +75,86 @@ export default function HomeTab({
       const sd = new Date(s.date)
       return sd >= monday && sd <= today
     })
-    const totalMinutes = weeklySessions.reduce(
-      (sum, s) => sum + (s.duration_minutes ?? 0),
-      0
-    )
-    const tilCount = weeklySessions.filter((s) => s.til).length
     return {
-      hours: Math.round((totalMinutes / 60) * 10) / 10,
-      tilCount,
+      hours: Math.round((weeklySessions.reduce((sum, s) => sum + (s.duration_minutes ?? 0), 0) / 60) * 10) / 10,
+      tilCount: weeklySessions.filter((s) => s.til).length,
     }
   })()
-  const tilSessions = sessions.filter((s) => s.til).slice(0, 2)
 
-  const achievements = []
+  // 이번 주 요일 배열
+  const week = (() => {
+    const today = new Date()
+    const dayOfWeek = today.getDay()
+    const monday = new Date(today)
+    monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(monday)
+      d.setDate(monday.getDate() + i)
+      const dateStr = d.toISOString().split('T')[0]
+      return {
+        label: d.toLocaleDateString(
+          locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
+          { weekday: 'short' }
+        ).slice(0, 2),
+        hasSession: sessions.some((s) => s.date === dateStr),
+        isToday: d.toDateString() === today.toDateString(),
+      }
+    })
+  })()
+
+  const toggleToday = async (item: TodayItem) => {
+    const nowCompleted = !item.completed
+    await supabase.from('today_items').update({ completed: nowCompleted }).eq('id', item.id)
+    if (nowCompleted && item.source_type === 'topic' && item.source_id) {
+      await supabase.from('topics').update({ completed: true }).eq('id', item.source_id)
+    }
+    if (nowCompleted) {
+      setCompletedItemName(item.name)
+      setShowSessionModal(true)
+    }
+    onRefresh()
+  }
+
+  const achievements: string[] = []
   if (completedTopics.length > 0)
-    achievements.push(
-      `🎉 ${focusGoals[0]?.name ?? ''} ${t('achievementTopics', { count: completedTopics.length })}`
-    )
+    achievements.push(`🎉 ${focusGoals[0]?.name ?? ''} ${t('achievementTopics', { count: completedTopics.length })}`)
   if (streak >= 3)
     achievements.push(`🔥 ${t('achievementStreak', { count: streak })}`)
   if (monthCount >= 5)
     achievements.push(`📈 ${t('achievementMonth', { count: monthCount })}`)
 
-  const getTopicGoalName = (topic: Topic) => {
-    const goal = focusGoals.find((g) => g.id === topic.goal_id)
-    return goal?.name ?? ''
-  }
-
-  const dateLabel = (d: string) =>
-    new Date(d).toLocaleDateString(
-      locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
-      { month: 'short', day: 'numeric' }
-    )
-
   return (
     <div className="flex flex-col gap-4">
       {/* 상단: 히어로 + streak */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* 히어로 */}
-        <div className="lg:col-span-2 bg-gradient-to-br from-indigo-500 to-violet-500 rounded-2xl p-5 text-white relative overflow-hidden">
-          <div className="absolute right-[-20px] top-[-20px] w-32 h-32 rounded-full bg-white/10" />
-          <p className="text-xs font-bold tracking-widest opacity-70 uppercase mb-1">
-            {t('location')}
-          </p>
-          <p className="text-2xl font-bold tracking-tight mb-0.5">
-            {settings.big_goal ?? '리드 아키텍트'}
-          </p>
-          <p className="text-xs opacity-70 mb-4">
-            {settings.big_goal_sub ?? '시니어 → 리드 → 아키텍트'}
-          </p>
-          <div className="h-1 bg-white/20 rounded-full overflow-hidden mb-1">
-            <div
-              className="h-full bg-white rounded-full"
-              style={{ width: `${overallPct}%` }}
-            />
-          </div>
-          <div className="flex gap-6 mt-3">
-            <div>
-              <div className="text-base font-bold">{overallPct}%</div>
-              <div className="text-xs opacity-65">{t('progressLabel')}</div>
-            </div>
-            <div>
-              <div className="text-base font-bold">
-                {streak > 0 ? `${streak}일 🔥` : '-'}
-              </div>
-              <div className="text-xs opacity-65">{t('currentStreak')}</div>
-            </div>
-            <div>
-              <div className="text-base font-bold">
-                {monthCount}
-                {t('countUnit')}
-              </div>
-              <div className="text-xs opacity-65">{t('monthlySession')}</div>
-            </div>
-            <div>
-              <div className="text-base font-bold">
-                {completedTopics.length}개
-              </div>
-              <div className="text-xs opacity-65">{t('completedTopics')}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* streak */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
-            {t('activity')}
-          </p>
-          {streak > 0 ? (
-            <div
-              className="flex items-center gap-3 p-3 rounded-xl mb-3"
-              style={{
-                background:
-                  'linear-gradient(135deg,rgba(249,115,22,0.1),rgba(245,158,11,0.08))',
-                border: '1px solid rgba(249,115,22,0.2)',
-              }}
-            >
-              <span className="text-2xl">🔥</span>
-              <div className="flex-1">
-                <div className="text-lg font-bold" style={{ color: '#ea580c' }}>
-                  {streak}
-                  {t('streakDays')}
-                </div>
-                <div
-                  className="text-xs font-medium"
-                  style={{ color: '#9a3412' }}
-                >
-                  {t('streakActive')}
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-xs text-gray-400">최고 기록</div>
-                <div
-                  className="text-base font-bold"
-                  style={{ color: '#ea580c' }}
-                >
-                  {maxStreak}
-                  {t('streakDays')}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3 p-3 rounded-xl mb-3 bg-gray-50 border border-gray-100">
-              <span className="text-xl">💤</span>
-              <div>
-                <div className="text-sm font-medium text-gray-500">
-                  {t('streakNone')}
-                </div>
-                <div className="text-xs text-gray-400">{t('streakStart')}</div>
-              </div>
-            </div>
-          )}
-
-          {/* 주간 요약 숫자 */}
-          <div className="grid grid-cols-3 gap-2 mb-3">
-            <div className="bg-gray-50 rounded-lg px-2 py-2 text-center">
-              <div className="text-base font-bold text-gray-800">
-                {weeklyStats.hours}h
-              </div>
-              <div className="text-xs text-gray-400 mt-0.5">
-                {t('weeklyHours')}
-              </div>
-            </div>
-            <div className="bg-gray-50 rounded-lg px-2 py-2 text-center">
-              <div className="text-base font-bold text-gray-800">
-                {weeklyStats.tilCount}
-              </div>
-              <div className="text-xs text-gray-400 mt-0.5">
-                {t('weeklyTil')}
-              </div>
-            </div>
-            <div className="bg-gray-50 rounded-lg px-2 py-2 text-center">
-              <div className="text-base font-bold text-gray-800">
-                {completedTopics.length}
-              </div>
-              <div className="text-xs text-gray-400 mt-0.5">
-                {t('weeklyTopics')}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex gap-1.5">
-            {week.map(({ label, hasSession, isToday }) => (
-              <div
-                key={label}
-                className={`flex-1 aspect-square rounded-lg flex flex-col items-center justify-center text-xs font-medium gap-0.5 ${isToday ? 'bg-indigo-500 text-white' : hasSession ? 'text-orange-700 border border-orange-200' : 'bg-gray-50 text-gray-400 border border-gray-100'}`}
-                style={
-                  hasSession && !isToday
-                    ? {
-                        background:
-                          'linear-gradient(135deg,rgba(249,115,22,0.12),rgba(245,158,11,0.08))',
-                      }
-                    : {}
-                }
-              >
-                <span>{label}</span>
-                {hasSession && !isToday && (
-                  <span style={{ fontSize: '7px' }}>✓</span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+        <HeroCard
+          settings={settings}
+          overallPct={overallPct}
+          streak={streak}
+          monthCount={monthCount}
+          completedTopicsCount={completedTopics.length}
+        />
+        <WeeklyActivityCard
+          streak={streak}
+          maxStreak={maxStreak}
+          week={week}
+          weeklyStats={weeklyStats}
+          completedTopicsCount={completedTopics.length}
+        />
       </div>
 
-      {/* 중단: 오늘 할 것 + TIL + 노트 */}
+      {/* 중단: 오늘할것 + TIL + 노트 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* 오늘 할 것 */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-              {t('today')}
-            </p>
-            <button
-              onClick={() => setAddingItem(true)}
-              className="text-xs text-indigo-500 hover:text-indigo-700 font-medium"
-            >
-              + 추가
-            </button>
-          </div>
-
-          {(suggestedTopics.length > 0 || suggestedTasks.length > 0) && (
-            <div className="mb-3">
-              <p className="text-xs text-gray-400 mb-1.5 font-medium">
-                {t('suggested')}
-              </p>
-              {suggestedTopics.map((topic) => (
-                <div
-                  key={topic.id}
-                  className="flex items-center gap-2 px-2.5 py-1.5 bg-gray-50 border border-gray-100 rounded-lg mb-1 cursor-pointer hover:border-indigo-300 hover:bg-indigo-50 transition-all"
-                  onClick={() =>
-                    addFromSuggestion(
-                      topic.name,
-                      `${getTopicGoalName(topic)} · ${topic.category}`,
-                      'topic',
-                      topic.id
-                    )
-                  }
-                >
-                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-700 truncate font-medium">
-                      {topic.name}
-                    </p>
-                    <p className="text-xs text-gray-400">{topic.category}</p>
-                  </div>
-                  <span className="text-xs text-indigo-500 font-bold flex-shrink-0">
-                    +
-                  </span>
-                </div>
-              ))}
-              {suggestedTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="flex items-center gap-2 px-2.5 py-1.5 bg-gray-50 border border-gray-100 rounded-lg mb-1 cursor-pointer hover:border-green-300 hover:bg-green-50 transition-all"
-                  onClick={() =>
-                    addFromSuggestion(task.name, 'Project', 'task', task.id)
-                  }
-                >
-                  <div className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-700 truncate font-medium">
-                      {task.name}
-                    </p>
-                    <p className="text-xs text-gray-400">Project</p>
-                  </div>
-                  <span className="text-xs text-green-500 font-bold flex-shrink-0">
-                    +
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {addingItem && (
-            <div className="flex flex-col gap-2 mb-3 p-3 bg-gray-50 rounded-lg">
-              <input
-                autoFocus
-                type="text"
-                className={inputCls}
-                placeholder={t('todayInput')}
-                value={newItem}
-                onChange={(e) => setNewItem(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') addTodayItem()
-                }}
-              />
-              <input
-                type="text"
-                className={inputCls}
-                placeholder={t('tagInput')}
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-              />
-              <div className="flex gap-2 justify-end">
-                <button
-                  onClick={() => setAddingItem(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X size={16} />
-                </button>
-                <button
-                  onClick={addTodayItem}
-                  className="text-indigo-500 hover:text-indigo-700"
-                >
-                  <Check size={16} />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {todayItems.length > 0 && (
-            <div
-              className={
-                suggestedTopics.length > 0 || suggestedTasks.length > 0
-                  ? 'border-t border-gray-100 pt-2 mt-1'
-                  : ''
-              }
-            >
-              {(suggestedTopics.length > 0 || suggestedTasks.length > 0) && (
-                <p className="text-xs text-gray-400 mb-1.5 font-medium">
-                  {t('selected')}
-                </p>
-              )}
-              <div className="flex flex-col divide-y divide-gray-50">
-                {todayItems.map((item) => (
-                  <div key={item.id} className="flex items-center gap-2.5 py-2">
-                    <button
-                      onClick={() => toggleToday(item)}
-                      className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-colors ${item.completed ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-300'}`}
-                    >
-                      {item.completed && <Check size={10} />}
-                    </button>
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className={`text-sm font-medium truncate ${item.completed ? 'line-through text-gray-300' : 'text-gray-800'}`}
-                      >
-                        {item.name}
-                      </p>
-                      {item.tag && (
-                        <p className="text-xs text-gray-400">{item.tag}</p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => removeToday(item)}
-                      className="text-gray-300 hover:text-red-400 transition-colors flex-shrink-0"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {todayItems.length === 0 &&
-            !addingItem &&
-            suggestedTopics.length === 0 &&
-            suggestedTasks.length === 0 && (
-              <p className="text-sm text-gray-400">{t('todayPlaceholder')}</p>
-            )}
-        </div>
-
-        {/* 최근 TIL */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-              💡 최근 TIL
-            </p>
-            <button
-              onClick={() => router.push('study')}
-              className="text-xs text-indigo-500 font-medium hover:text-indigo-700"
-            >
-              전체 보기
-            </button>
-          </div>
-          {tilSessions.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-4 text-center">
-              <span className="text-2xl opacity-40">💡</span>
-              <p className="text-sm font-semibold text-gray-700">
-                {t('tilEmpty')}
-              </p>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                {t('tilEmptySub')}
-              </p>
-              <button
-                onClick={() => setShowSessionModal(true)}
-                className="mt-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 transition-colors"
-              >
-                {t('addStudy')}
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-col divide-y divide-gray-100">
-              {tilSessions.map((s) => (
-                <div
-                  key={s.id}
-                  className="py-2.5 cursor-pointer"
-                  onClick={() => router.push(`sessions/${s.id}`)}
-                >
-                  <p className="text-xs text-gray-400 mb-1">
-                    {dateLabel(s.date)}
-                  </p>
-                  <p className="text-sm font-semibold text-gray-800 mb-1 truncate">
-                    {s.title}
-                  </p>
-                  <p className="text-xs text-gray-500 line-clamp-3 leading-relaxed">
-                    {s.til}
-                  </p>
-                  {s.tags.length > 0 && (
-                    <div className="flex gap-1 flex-wrap mt-1.5">
-                      {s.tags.slice(0, 2).map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-xs px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* 최근 노트 */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-              ✍️ 최근 노트
-            </p>
-            <button
-              onClick={() => router.push('notes')}
-              className="text-xs text-indigo-500 font-medium hover:text-indigo-700"
-            >
-              전체 보기
-            </button>
-          </div>
-          {notes.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-4 text-center">
-              <span className="text-2xl opacity-40">🔥</span>
-              <p className="text-sm font-semibold text-gray-700">
-                {t('notesEmpty')}
-              </p>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                {t('notesEmptySub')}
-              </p>
-              <button
-                onClick={() => router.push('notes')}
-                className="mt-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-orange-600 bg-orange-50 border border-orange-100 hover:bg-orange-100 transition-colors"
-              >
-                {t('firstNote')}
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-col divide-y divide-gray-100">
-              {notes.map((note) => (
-                <div
-                  key={note.id}
-                  className="py-2.5 cursor-pointer"
-                  onClick={() => router.push('notes')}
-                >
-                  <div className="flex items-center gap-1.5 mb-1">
-                    {note.mood && <span className="text-sm">{note.mood}</span>}
-                    <p className="text-sm font-semibold text-gray-800 truncate">
-                      {note.title || '제목 없음'}
-                    </p>
-                  </div>
-                  <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
-                    {note.content}
-                  </p>
-                  <p className="text-xs text-gray-300 mt-1">
-                    {dateLabel(note.updated_at)}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <TodayCard
+          todayItems={todayItems}
+          suggestedTopics={suggestedTopics}
+          suggestedTasks={suggestedTasks}
+          getTopicGoalName={getTopicGoalName}
+          onToggle={toggleToday}
+          onRefresh={onRefresh}
+        />
+        <TilPreviewCard sessions={sessions} onAddStudy={() => setShowSessionModal(true)} />
+        <NotesPreviewCard notes={notes} />
       </div>
 
       {/* 하단: 성취 메시지 */}
@@ -637,18 +165,8 @@ export default function HomeTab({
               key={i}
               className="text-sm font-medium px-3 py-2.5 rounded-xl border"
               style={{
-                background:
-                  i === 0
-                    ? 'rgba(16,185,129,0.08)'
-                    : i === 1
-                      ? 'rgba(249,115,22,0.08)'
-                      : 'rgba(99,102,241,0.08)',
-                borderColor:
-                  i === 0
-                    ? 'rgba(16,185,129,0.2)'
-                    : i === 1
-                      ? 'rgba(249,115,22,0.2)'
-                      : 'rgba(99,102,241,0.2)',
+                background: i === 0 ? 'rgba(16,185,129,0.08)' : i === 1 ? 'rgba(249,115,22,0.08)' : 'rgba(99,102,241,0.08)',
+                borderColor: i === 0 ? 'rgba(16,185,129,0.2)' : i === 1 ? 'rgba(249,115,22,0.2)' : 'rgba(99,102,241,0.2)',
                 color: i === 0 ? '#065f46' : i === 1 ? '#9a3412' : '#312e81',
               }}
             >
@@ -661,15 +179,8 @@ export default function HomeTab({
       {showSessionModal && (
         <AddSessionModal
           initialTitle={completedItemName}
-          onClose={() => {
-            setShowSessionModal(false)
-            setCompletedItemName('')
-          }}
-          onSaved={() => {
-            setShowSessionModal(false)
-            setCompletedItemName('')
-            onRefresh()
-          }}
+          onClose={() => { setShowSessionModal(false); setCompletedItemName('') }}
+          onSaved={() => { setShowSessionModal(false); setCompletedItemName(''); onRefresh() }}
         />
       )}
     </div>

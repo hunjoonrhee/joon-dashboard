@@ -165,7 +165,7 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
           onEdit={openEdit}
         />
       ) : (
-        <TilList sessions={sessions} onAdd={() => setModal('add')} />
+        <TilList sessions={tilSessions} />
       )}
 
       {/* 모바일 모달 */}
