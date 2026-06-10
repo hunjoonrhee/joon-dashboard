@@ -124,3 +124,14 @@ export interface CareerData {
   paths: CareerPath[]
   categories: CareerCategory[]
 }
+
+export interface Goal {
+  id: string
+  name: string
+  description: string | null
+  status: 'in_progress' | 'completed' | 'planned'
+  is_focus: boolean
+  priority: 'urgent' | 'high' | 'medium' | 'low'
+  tags: string[]
+  created_at: string
+}

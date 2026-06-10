@@ -18,11 +18,7 @@ const pageTitles: Record<string, string> = {
 }
 
 const headerButtonConfig: Record<string, { label: string; modal: boolean }> = {
-  '':       { label: '+ 공부기록 추가', modal: true },
-  study:    { label: '+ 공부기록 추가', modal: true },
-  notes:    { label: '+ 새 노트',       modal: false },
-  roadmap:  { label: '+ 목표 추가',     modal: false },
-  projects: { label: '+ 프로젝트 추가', modal: false },
+  study: { label: '+ 공부기록 추가', modal: true },
   settings: { label: '+ 공부기록 추가', modal: true },
 }
 
@@ -34,16 +30,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const locale = pathname.split('/')[1] ?? 'ko'
   const segment = pathname.split('/')[2] ?? ''
   const pageTitle = pageTitles[segment] ?? ''
-  const [today, setToday] = useState('')
 
-  useEffect(() => {
-    setToday(
-      new Date().toLocaleDateString(
-        locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
-        { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }
-      )
-    )
-  }, [locale])
+  const today = new Date().toLocaleDateString(
+    locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
+    { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }
+  )
 
   useEffect(() => {
     supabase
@@ -82,13 +73,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <div className="hidden lg:flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100 sticky top-0 z-10">
           <h1 className="text-base font-bold text-gray-800">{pageTitle}</h1>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-400">{today}</span>
-            <button
-              onClick={handleHeaderBtn}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-600 transition-colors"
-            >
-              {btnConfig.label}
-            </button>
+            <span className="text-sm text-gray-400" suppressHydrationWarning>
+              {today}
+            </span>
+            {btnConfig && (
+              <button
+                onClick={handleHeaderBtn}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-600 transition-colors"
+              >
+                {btnConfig.label}
+              </button>
+            )}
           </div>
         </div>
 

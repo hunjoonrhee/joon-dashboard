@@ -15,6 +15,7 @@ interface Props {
   sessions?: Session[]
   onRefresh: () => void
   settings?: Record<string, string>
+  initialOpenAdd?: boolean
 }
 
 type RoadmapView = 'my' | 'career' | 'gap'
@@ -25,6 +26,7 @@ const emptyForm = {
   status: 'in_progress' as Goal['status'],
   priority: 'medium' as Goal['priority'],
   is_focus: false,
+  tags: [] as string[],
 }
 
 export default function RoadmapTab({
@@ -33,8 +35,11 @@ export default function RoadmapTab({
   sessions = [],
   onRefresh,
   settings = {},
+  initialOpenAdd = false,
 }: Props) {
-  const [modal, setModal] = useState<'add' | 'edit' | null>(null)
+  const [modal, setModal] = useState<'add' | 'edit' | null>(
+    initialOpenAdd ? 'add' : null
+  )
   const [selected, setSelected] = useState<Goal | null>(null)
   const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
@@ -117,6 +122,7 @@ export default function RoadmapTab({
             status: goal.status,
             priority: goal.priority,
             is_focus: goal.is_focus,
+            tags: goal.tags ?? [],
           }
         : emptyForm
     )
@@ -137,6 +143,7 @@ export default function RoadmapTab({
       status: form.status,
       priority: form.priority,
       is_focus: form.is_focus,
+      tags: form.tags,
     }
     if (form.is_focus)
       await supabase

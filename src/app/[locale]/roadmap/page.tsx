@@ -3,7 +3,8 @@
 import RoadmapTab from '@/components/tabs/RoadmapTab'
 import { supabase } from '@/lib/supabase'
 import type { Goal, Session, Setting, Topic } from '@/types'
-import { useEffect, useState } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
 
 export default function RoadmapPage() {
   const [goals, setGoals] = useState<Goal[]>([])
@@ -11,6 +12,20 @@ export default function RoadmapPage() {
   const [sessions, setSessions] = useState<Session[]>([])
   const [settings, setSettings] = useState<Record<string, string>>({})
   const [refreshKey, setRefreshKey] = useState(0)
+
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+  const didClean = useRef(false)
+
+  const initialOpenAdd = searchParams.get('action') === 'add'
+
+  useEffect(() => {
+    if (initialOpenAdd && !didClean.current) {
+      didClean.current = true
+      router.replace(pathname)
+    }
+  }, [])
 
   useEffect(() => {
     Promise.all([
@@ -39,6 +54,7 @@ export default function RoadmapPage() {
         topics={topics}
         sessions={sessions}
         settings={settings}
+        initialOpenAdd={initialOpenAdd}
         onRefresh={() => setRefreshKey((k) => k + 1)}
       />
     </main>
