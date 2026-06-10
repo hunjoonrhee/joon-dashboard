@@ -43,7 +43,10 @@
     "completeModalTitle": "공부 기록 남길까? 📝",
     "completeModalSub": "완료했어!",
     "later": "나중에",
-    "addRecord": "기록 남기기"
+    "addRecord": "기록 남기기",
+    "weeklyHours": "이번 주 시간",
+    "weeklyTil": "TIL",
+    "weeklyTopics": "완료 토픽"
   },
   "goals": {
     "title": "목표",
@@ -86,7 +89,10 @@
     "name": "제목",
     "duration": "시간 (분)",
     "tags": "태그 (쉼표로 구분)",
-    "placeholder": "오늘 뭐 했어?"
+    "placeholder": "오늘 뭐 했어?",
+    "emptySubStudy": "오늘 뭘 공부했는지 기록해봐.",
+    "tilEmpty": "아직 TIL이 없어",
+    "tilEmptySub": "공부 기록 추가할 때 TIL도 같이 써봐."
   },
   "projects": {
     "title": "프로젝트",

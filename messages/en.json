@@ -43,7 +43,10 @@
     "completeModalTitle": "Add a study entry? 📝",
     "completeModalSub": "completed!",
     "later": "Later",
-    "addRecord": "Add entry"
+    "addRecord": "Add entry",
+    "weeklyHours": "Hours this week",
+    "weeklyTil": "TIL",
+    "weeklyTopics": "Topics done"
   },
   "goals": {
     "title": "Goals",
@@ -86,7 +89,10 @@
     "name": "Title",
     "duration": "Duration (minutes)",
     "tags": "Tags (comma separated)",
-    "placeholder": "What did you do today?"
+    "placeholder": "What did you do today?",
+    "emptySubStudy": "Write down what you studied today.",
+    "tilEmpty": "No TIL yet",
+    "tilEmptySub": "Add a TIL when logging your study session."
   },
   "projects": {
     "title": "Projects",

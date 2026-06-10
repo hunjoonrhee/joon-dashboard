@@ -1,5 +1,6 @@
 'use client'
 
+import AddSessionModal from '@/components/AddSessionModal'
 import { calcMaxStreak, calcStreak } from '@/lib/streak'
 import { inputCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
@@ -44,7 +45,7 @@ export default function HomeTab({
   const [addingItem, setAddingItem] = useState(false)
   const [newItem, setNewItem] = useState('')
   const [newTag, setNewTag] = useState('')
-  const [showAddModal, setShowAddModal] = useState(false)
+  const [showSessionModal, setShowSessionModal] = useState(false)
   const [completedItemName, setCompletedItemName] = useState('')
 
   const streak = calcStreak(sessions)
@@ -114,14 +115,23 @@ export default function HomeTab({
   }
 
   const toggleToday = async (item: TodayItem) => {
+    const nowCompleted = !item.completed
     await supabase
       .from('today_items')
-      .update({ completed: !item.completed })
+      .update({ completed: nowCompleted })
       .eq('id', item.id)
-    if (!item.completed) {
-      // 완료 체크할 때 기록 모달 자동 오픈
+
+    // source_type이 topic이고 완료 체크할 때 → topic도 완료 처리
+    if (nowCompleted && item.source_type === 'topic' && item.source_id) {
+      await supabase
+        .from('topics')
+        .update({ completed: true })
+        .eq('id', item.source_id)
+    }
+
+    if (nowCompleted) {
       setCompletedItemName(item.name)
-      setShowAddModal(true)
+      setShowSessionModal(true)
     }
     onRefresh()
   }
@@ -147,6 +157,26 @@ export default function HomeTab({
   }
 
   const week = thisWeek()
+  const weeklyStats = (() => {
+    const today = new Date()
+    const dayOfWeek = today.getDay()
+    const monday = new Date(today)
+    monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+    monday.setHours(0, 0, 0, 0)
+    const weeklySessions = sessions.filter((s) => {
+      const sd = new Date(s.date)
+      return sd >= monday && sd <= today
+    })
+    const totalMinutes = weeklySessions.reduce(
+      (sum, s) => sum + (s.duration_minutes ?? 0),
+      0
+    )
+    const tilCount = weeklySessions.filter((s) => s.til).length
+    return {
+      hours: Math.round((totalMinutes / 60) * 10) / 10,
+      tilCount,
+    }
+  })()
   const tilSessions = sessions.filter((s) => s.til).slice(0, 2)
 
   const achievements = []
@@ -154,8 +184,10 @@ export default function HomeTab({
     achievements.push(
       `🎉 ${focusGoals[0]?.name ?? ''} ${t('achievementTopics', { count: completedTopics.length })}`
     )
-  if (streak >= 3) achievements.push(`🔥 ${t('achievementStreak', { count: streak })}`)
-  if (monthCount >= 5) achievements.push(`📈 ${t('achievementMonth', { count: monthCount })}`)
+  if (streak >= 3)
+    achievements.push(`🔥 ${t('achievementStreak', { count: streak })}`)
+  if (monthCount >= 5)
+    achievements.push(`📈 ${t('achievementMonth', { count: monthCount })}`)
 
   const getTopicGoalName = (topic: Topic) => {
     const goal = focusGoals.find((g) => g.id === topic.goal_id)
@@ -234,9 +266,13 @@ export default function HomeTab({
               <span className="text-2xl">🔥</span>
               <div className="flex-1">
                 <div className="text-lg font-bold" style={{ color: '#ea580c' }}>
-                  {streak}{t('streakDays')}
+                  {streak}
+                  {t('streakDays')}
                 </div>
-                <div className="text-xs font-medium" style={{ color: '#9a3412' }}>
+                <div
+                  className="text-xs font-medium"
+                  style={{ color: '#9a3412' }}
+                >
                   {t('streakActive')}
                 </div>
               </div>
@@ -246,7 +282,8 @@ export default function HomeTab({
                   className="text-base font-bold"
                   style={{ color: '#ea580c' }}
                 >
-                  {maxStreak}{t('streakDays')}
+                  {maxStreak}
+                  {t('streakDays')}
                 </div>
               </div>
             </div>
@@ -257,12 +294,39 @@ export default function HomeTab({
                 <div className="text-sm font-medium text-gray-500">
                   {t('streakNone')}
                 </div>
-                <div className="text-xs text-gray-400">
-                  {t('streakStart')}
-                </div>
+                <div className="text-xs text-gray-400">{t('streakStart')}</div>
               </div>
             </div>
           )}
+
+          {/* 주간 요약 숫자 */}
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            <div className="bg-gray-50 rounded-lg px-2 py-2 text-center">
+              <div className="text-base font-bold text-gray-800">
+                {weeklyStats.hours}h
+              </div>
+              <div className="text-xs text-gray-400 mt-0.5">
+                {t('weeklyHours')}
+              </div>
+            </div>
+            <div className="bg-gray-50 rounded-lg px-2 py-2 text-center">
+              <div className="text-base font-bold text-gray-800">
+                {weeklyStats.tilCount}
+              </div>
+              <div className="text-xs text-gray-400 mt-0.5">
+                {t('weeklyTil')}
+              </div>
+            </div>
+            <div className="bg-gray-50 rounded-lg px-2 py-2 text-center">
+              <div className="text-base font-bold text-gray-800">
+                {completedTopics.length}
+              </div>
+              <div className="text-xs text-gray-400 mt-0.5">
+                {t('weeklyTopics')}
+              </div>
+            </div>
+          </div>
+
           <div className="flex gap-1.5">
             {week.map(({ label, hasSession, isToday }) => (
               <div
@@ -305,7 +369,9 @@ export default function HomeTab({
 
           {(suggestedTopics.length > 0 || suggestedTasks.length > 0) && (
             <div className="mb-3">
-              <p className="text-xs text-gray-400 mb-1.5 font-medium">{t('suggested')}</p>
+              <p className="text-xs text-gray-400 mb-1.5 font-medium">
+                {t('suggested')}
+              </p>
               {suggestedTopics.map((topic) => (
                 <div
                   key={topic.id}
@@ -400,7 +466,9 @@ export default function HomeTab({
               }
             >
               {(suggestedTopics.length > 0 || suggestedTasks.length > 0) && (
-                <p className="text-xs text-gray-400 mb-1.5 font-medium">{t('selected')}</p>
+                <p className="text-xs text-gray-400 mb-1.5 font-medium">
+                  {t('selected')}
+                </p>
               )}
               <div className="flex flex-col divide-y divide-gray-50">
                 {todayItems.map((item) => (
@@ -457,10 +525,14 @@ export default function HomeTab({
           {tilSessions.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-4 text-center">
               <span className="text-2xl opacity-40">💡</span>
-              <p className="text-sm font-semibold text-gray-700">{t('tilEmpty')}</p>
-              <p className="text-xs text-gray-400 leading-relaxed">{t('tilEmptySub')}</p>
+              <p className="text-sm font-semibold text-gray-700">
+                {t('tilEmpty')}
+              </p>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                {t('tilEmptySub')}
+              </p>
               <button
-                onClick={() => setShowAddModal(true)}
+                onClick={() => setShowSessionModal(true)}
                 className="mt-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 transition-colors"
               >
                 {t('addStudy')}
@@ -517,8 +589,12 @@ export default function HomeTab({
           {notes.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-4 text-center">
               <span className="text-2xl opacity-40">🔥</span>
-              <p className="text-sm font-semibold text-gray-700">{t('notesEmpty')}</p>
-              <p className="text-xs text-gray-400 leading-relaxed">{t('notesEmptySub')}</p>
+              <p className="text-sm font-semibold text-gray-700">
+                {t('notesEmpty')}
+              </p>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                {t('notesEmptySub')}
+              </p>
               <button
                 onClick={() => router.push('notes')}
                 className="mt-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-orange-600 bg-orange-50 border border-orange-100 hover:bg-orange-100 transition-colors"
@@ -581,42 +657,20 @@ export default function HomeTab({
           ))}
         </div>
       )}
-      {showAddModal && (
-        <div
-          className="fixed inset-0 bg-black/40 flex items-end lg:items-center justify-center z-50 p-4"
-          onClick={() => setShowAddModal(false)}
-        >
-          <div
-            className="bg-white rounded-2xl w-full max-w-md p-5 flex flex-col gap-3"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div>
-              <p className="text-base font-bold text-gray-800 mb-0.5">
-                {t('completeModalTitle')}
-              </p>
-              <p className="text-sm text-gray-400">
-                &ldquo;{completedItemName}&rdquo; {t('completeModalSub')}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-500 font-medium hover:bg-gray-50"
-              >
-                {t('later')}
-              </button>
-              <button
-                onClick={() => {
-                  setShowAddModal(false)
-                  router.push('study')
-                }}
-                className="flex-1 py-2.5 rounded-xl bg-indigo-500 text-white text-sm font-bold hover:bg-indigo-600"
-              >
-                {t('addRecord')} →
-              </button>
-            </div>
-          </div>
-        </div>
+
+      {showSessionModal && (
+        <AddSessionModal
+          initialTitle={completedItemName}
+          onClose={() => {
+            setShowSessionModal(false)
+            setCompletedItemName('')
+          }}
+          onSaved={() => {
+            setShowSessionModal(false)
+            setCompletedItemName('')
+            onRefresh()
+          }}
+        />
       )}
     </div>
   )

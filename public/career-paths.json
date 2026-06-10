@@ -1,0 +1,1359 @@
+{
+  "version": "1.0.0",
+  "categories": [
+    { "id": "core", "label": "핵심 기본기", "color": "indigo" },
+    {
+      "id": "framework",
+      "label": "프레임워크 / 라이브러리",
+      "color": "violet"
+    },
+    { "id": "architecture", "label": "설계 / 아키텍처", "color": "blue" },
+    { "id": "tooling", "label": "도구 / 인프라", "color": "teal" },
+    { "id": "testing", "label": "테스트", "color": "green" },
+    { "id": "performance", "label": "성능 / 최적화", "color": "amber" },
+    { "id": "security", "label": "보안", "color": "red" },
+    { "id": "soft", "label": "소프트 스킬", "color": "gray" },
+    { "id": "leadership", "label": "리더십 / 조직", "color": "pink" },
+    { "id": "data", "label": "데이터 / DB", "color": "coral" }
+  ],
+
+  "paths": [
+    {
+      "id": "frontend",
+      "title": "Frontend 계열",
+      "description": "UI/UX 구현 중심. 브라우저, 렌더링, 사용자 경험에 깊이 있는 전문성을 쌓는 경로.",
+      "icon": "🖥",
+      "stages": [
+        {
+          "id": "junior-frontend",
+          "title": "Junior Frontend Developer",
+          "level": 1,
+          "description": "기본 UI 구현 가능. 주어진 스펙을 코드로 옮길 수 있는 단계.",
+          "skills": [
+            {
+              "id": "html-semantics",
+              "name": "HTML — 시맨틱 마크업",
+              "category": "core",
+              "description": "div 남용 없이 시맨틱 태그(article, section, nav 등)를 목적에 맞게 사용. SEO와 접근성의 기초.",
+              "tags": ["HTML", "Semantic HTML"]
+            },
+            {
+              "id": "css-fundamentals",
+              "name": "CSS — 박스모델, Flexbox, Grid",
+              "category": "core",
+              "description": "레이아웃 구성의 핵심. Flexbox와 Grid를 상황에 맞게 선택해서 쓸 수 있어야 함.",
+              "tags": ["CSS", "Flexbox", "CSS Grid"]
+            },
+            {
+              "id": "css-responsive",
+              "name": "반응형 디자인 — Media Query",
+              "category": "core",
+              "description": "모바일 퍼스트 접근법. breakpoint 설계와 유동적 레이아웃.",
+              "tags": ["CSS", "Responsive Design", "Mobile First"]
+            },
+            {
+              "id": "js-basics",
+              "name": "JavaScript — ES6+ 기초",
+              "category": "core",
+              "description": "변수, 함수, 배열/객체 조작, 구조분해, 스프레드, 템플릿 리터럴. 현대 JS의 기본 문법.",
+              "tags": ["JavaScript", "ES6"]
+            },
+            {
+              "id": "js-dom",
+              "name": "DOM 조작 및 이벤트",
+              "category": "core",
+              "description": "querySelector, addEventListener, 이벤트 버블링/캡처링. 브라우저와 JS의 상호작용 이해.",
+              "tags": ["JavaScript", "DOM", "Events"]
+            },
+            {
+              "id": "js-async-basics",
+              "name": "비동기 처리 — Promise, async/await",
+              "category": "core",
+              "description": "콜백 지옥에서 벗어나기. fetch API로 데이터 가져오기. 에러 핸들링 기초.",
+              "tags": ["JavaScript", "Async", "Promise", "Fetch API"]
+            },
+            {
+              "id": "git-basics",
+              "name": "Git — 기본 워크플로우",
+              "category": "tooling",
+              "description": "commit, branch, merge, pull request. 팀 협업의 기본 단위.",
+              "tags": ["Git", "Version Control"]
+            },
+            {
+              "id": "npm-basics",
+              "name": "npm / 패키지 매니저",
+              "category": "tooling",
+              "description": "의존성 관리, scripts, package.json 이해. 빌드 도구의 시작점.",
+              "tags": ["npm", "Package Manager"]
+            }
+          ]
+        },
+        {
+          "id": "mid-frontend",
+          "title": "Mid Frontend Developer",
+          "level": 2,
+          "description": "프레임워크를 실무 수준으로 활용. 컴포넌트 설계와 상태관리를 독립적으로 처리.",
+          "skills": [
+            {
+              "id": "framework-proficiency",
+              "name": "SPA 프레임워크 심화 (Angular / React / Vue)",
+              "category": "framework",
+              "description": "컴포넌트 생명주기, 상태 흐름, 라우팅, 폼 처리. 단순 사용을 넘어 내부 동작 원리 이해.",
+              "tags": ["Angular", "React", "Vue", "SPA"]
+            },
+            {
+              "id": "typescript-intermediate",
+              "name": "TypeScript — 타입 시스템 활용",
+              "category": "core",
+              "description": "interface, type, generic, union, utility types(Pick/Omit/Partial). 런타임 에러를 컴파일 타임에 잡기.",
+              "tags": ["TypeScript", "Generics", "Type System"]
+            },
+            {
+              "id": "state-management",
+              "name": "상태 관리 — NgRx / Redux / Zustand",
+              "category": "framework",
+              "description": "전역 상태의 필요성과 단방향 데이터 흐름. action → reducer → state 패턴.",
+              "tags": ["NgRx", "Redux", "State Management", "Zustand"]
+            },
+            {
+              "id": "rxjs-intermediate",
+              "name": "RxJS — 리액티브 프로그래밍",
+              "category": "framework",
+              "description": "Observable, Subject, 주요 operator(switchMap, mergeMap, combineLatest). 비동기 흐름을 선언적으로 다루기.",
+              "tags": ["RxJS", "Reactive Programming", "Observable"]
+            },
+            {
+              "id": "css-architecture",
+              "name": "CSS 아키텍처 — BEM, CSS Modules, Tailwind",
+              "category": "framework",
+              "description": "스타일 충돌 없이 확장 가능한 CSS 구조 설계. 팀 협업을 위한 네이밍 컨벤션.",
+              "tags": ["CSS", "BEM", "Tailwind CSS", "CSS Modules", "SCSS"]
+            },
+            {
+              "id": "api-integration",
+              "name": "REST API 연동 — HTTP, CORS, 인증",
+              "category": "core",
+              "description": "HTTP 메서드, 상태 코드, 헤더. CORS 이슈 해결. JWT / 세션 기반 인증 처리.",
+              "tags": ["REST API", "HTTP", "CORS", "JWT", "Authentication"]
+            },
+            {
+              "id": "testing-basics",
+              "name": "단위 테스트 — Jest / Jasmine",
+              "category": "testing",
+              "description": "컴포넌트와 서비스의 단위 테스트 작성. mocking, spyOn, 테스트 커버리지 기초.",
+              "tags": ["Jest", "Jasmine", "Unit Testing", "Testing"]
+            },
+            {
+              "id": "build-tools",
+              "name": "빌드 도구 — Webpack / Vite / esbuild",
+              "category": "tooling",
+              "description": "번들링, 코드 스플리팅, tree-shaking. 빌드 최적화의 기초 이해.",
+              "tags": ["Webpack", "Vite", "Build Tools"]
+            }
+          ]
+        },
+        {
+          "id": "senior-frontend",
+          "title": "Senior Frontend Developer",
+          "level": 3,
+          "description": "기술적 결정을 내리고 팀에 영향을 줌. 성능, 접근성, 설계 품질에 책임.",
+          "skills": [
+            {
+              "id": "performance-optimization",
+              "name": "웹 성능 최적화 — Core Web Vitals",
+              "category": "performance",
+              "description": "LCP, FID, CLS 측정과 개선. 레이지 로딩, 코드 스플리팅, 이미지 최적화. Lighthouse 활용.",
+              "tags": [
+                "Performance",
+                "Core Web Vitals",
+                "Lighthouse",
+                "Web Performance"
+              ]
+            },
+            {
+              "id": "accessibility",
+              "name": "웹 접근성 — WCAG, ARIA",
+              "category": "core",
+              "description": "WCAG 2.1 기준 준수. 스크린 리더 호환, 키보드 내비게이션, 색상 대비. ARIA 속성 올바른 사용.",
+              "tags": ["Accessibility", "WCAG", "ARIA", "a11y"]
+            },
+            {
+              "id": "component-architecture",
+              "name": "컴포넌트 설계 — 재사용성과 합성",
+              "category": "architecture",
+              "description": "단일 책임 원칙, Container/Presentational 패턴, 합성(Composition) vs 상속. 라이브러리 수준의 컴포넌트 설계.",
+              "tags": [
+                "Component Architecture",
+                "Design Patterns",
+                "Reusability"
+              ]
+            },
+            {
+              "id": "angular-advanced",
+              "name": "Angular 심화 — Standalone, Signals, Zoneless",
+              "category": "framework",
+              "description": "Zone.js 없는 Change Detection, Signal 기반 반응성, Standalone Components, inject() 함수. Angular 현대화 트렌드.",
+              "tags": [
+                "Angular",
+                "Signals",
+                "Standalone Components",
+                "Zoneless",
+                "Change Detection"
+              ]
+            },
+            {
+              "id": "cva-custom-forms",
+              "name": "Angular — CVA, Custom Form Controls",
+              "category": "framework",
+              "description": "ControlValueAccessor 구현으로 재사용 가능한 폼 컴포넌트 설계. forwardRef, FormArray 고급 활용.",
+              "tags": [
+                "Angular",
+                "CVA",
+                "ControlValueAccessor",
+                "Reactive Forms",
+                "FormArray"
+              ]
+            },
+            {
+              "id": "e2e-testing",
+              "name": "E2E 테스트 — Cypress / Playwright",
+              "category": "testing",
+              "description": "사용자 시나리오 기반 테스트. 핵심 플로우 커버리지. CI 파이프라인과 통합.",
+              "tags": ["Cypress", "Playwright", "E2E Testing", "Testing"]
+            },
+            {
+              "id": "design-systems",
+              "name": "디자인 시스템 구축",
+              "category": "architecture",
+              "description": "토큰 기반 디자인 시스템, Storybook으로 컴포넌트 문서화. 디자이너-개발자 협업 프로세스.",
+              "tags": ["Design System", "Storybook", "Component Library"]
+            },
+            {
+              "id": "seo-ssr",
+              "name": "SSR / SSG — Next.js / Angular Universal",
+              "category": "framework",
+              "description": "SEO를 위한 서버 사이드 렌더링. hydration, 메타 태그 관리, 정적 생성 vs 동적 렌더링 선택 기준.",
+              "tags": ["SSR", "Next.js", "Angular Universal", "SEO"]
+            },
+            {
+              "id": "code-review-mentoring",
+              "name": "코드 리뷰 & 주니어 멘토링",
+              "category": "soft",
+              "description": "건설적인 피드백 제공. 팀 코드 품질 기준 수립. 주니어 개발자 성장 지원.",
+              "tags": ["Code Review", "Mentoring", "Soft Skills"]
+            }
+          ]
+        },
+        {
+          "id": "lead-frontend",
+          "title": "Lead Frontend Developer",
+          "level": 4,
+          "description": "팀의 기술 방향을 결정. 프로젝트 전체 프론트엔드 아키텍처에 책임.",
+          "skills": [
+            {
+              "id": "frontend-architecture",
+              "name": "프론트엔드 아키텍처 설계",
+              "category": "architecture",
+              "description": "모노레포 vs 멀티레포, 마이크로 프론트엔드, 모듈 경계 설계. 팀 규모에 맞는 아키텍처 선택.",
+              "tags": ["Frontend Architecture", "Micro Frontend", "Monorepo"]
+            },
+            {
+              "id": "technical-decision",
+              "name": "기술 의사결정 — ADR 작성",
+              "category": "architecture",
+              "description": "Architecture Decision Record. 기술 선택의 근거를 문서화하고 팀과 공유. 트레이드오프 분석.",
+              "tags": [
+                "ADR",
+                "Technical Decision",
+                "Documentation",
+                "Architecture"
+              ]
+            },
+            {
+              "id": "ci-cd-frontend",
+              "name": "CI/CD 파이프라인 설계",
+              "category": "tooling",
+              "description": "GitHub Actions / GitLab CI로 자동 테스트, 빌드, 배포 파이프라인 구성. 팀 배포 프로세스 표준화.",
+              "tags": ["CI/CD", "GitHub Actions", "DevOps", "Deployment"]
+            },
+            {
+              "id": "team-standards",
+              "name": "팀 기술 표준 수립",
+              "category": "leadership",
+              "description": "코딩 컨벤션, 코드 리뷰 기준, 브랜치 전략, 문서화 표준. 팀 생산성과 일관성을 높이는 규칙 정의.",
+              "tags": ["Team Standards", "Technical Leadership", "Leadership"]
+            },
+            {
+              "id": "cross-functional",
+              "name": "cross-functional 협업 — PM, 디자이너, 백엔드",
+              "category": "soft",
+              "description": "요구사항 분석, 기술적 제약 커뮤니케이션, API 계약 협상. 비개발직군과의 효과적인 소통.",
+              "tags": [
+                "Communication",
+                "Cross-functional",
+                "Soft Skills",
+                "Collaboration"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "frontend-architect",
+          "title": "Frontend Architect",
+          "level": 5,
+          "description": "조직 전체의 프론트엔드 기술 전략 수립. 여러 팀에 걸친 아키텍처 결정.",
+          "skills": [
+            {
+              "id": "enterprise-frontend",
+              "name": "엔터프라이즈 프론트엔드 패턴",
+              "category": "architecture",
+              "description": "대규모 SPA의 성능/유지보수성 확보. 코드 스플리팅 전략, lazy loading, 번들 최적화. 수백만 사용자 대응.",
+              "tags": [
+                "Enterprise Architecture",
+                "Frontend Architecture",
+                "Scalability"
+              ]
+            },
+            {
+              "id": "web-security",
+              "name": "웹 보안 — XSS, CSRF, CSP",
+              "category": "security",
+              "description": "프론트엔드 보안 위협과 대응책. Content Security Policy 설정. OWASP Top 10 프론트엔드 관점.",
+              "tags": ["Security", "XSS", "CSRF", "CSP", "OWASP"]
+            },
+            {
+              "id": "platform-thinking",
+              "name": "플랫폼 사고 — 개발자 경험(DX) 설계",
+              "category": "architecture",
+              "description": "내부 개발자를 위한 도구/라이브러리/가이드라인 설계. DX를 높이는 추상화 레이어 구성.",
+              "tags": [
+                "Platform Engineering",
+                "Developer Experience",
+                "DX",
+                "Internal Tools"
+              ]
+            },
+            {
+              "id": "tech-strategy",
+              "name": "기술 전략 수립 및 로드맵 관리",
+              "category": "leadership",
+              "description": "1~3년 단위 기술 로드맵. 레거시 마이그레이션 전략. 비즈니스 목표와 기술 방향 정렬.",
+              "tags": [
+                "Tech Strategy",
+                "Technical Leadership",
+                "Roadmap",
+                "Leadership"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "backend",
+      "title": "Backend 계열",
+      "description": "서버, API, 데이터베이스, 시스템 안정성 중심. 비즈니스 로직과 데이터를 다루는 경로.",
+      "icon": "⚙️",
+      "stages": [
+        {
+          "id": "junior-backend",
+          "title": "Junior Backend Developer",
+          "level": 1,
+          "description": "기본 CRUD API 구현 가능. 주어진 스펙으로 서버 기능을 만들 수 있는 단계.",
+          "skills": [
+            {
+              "id": "language-basics",
+              "name": "서버 언어 기초 (Java / Python / Node.js)",
+              "category": "core",
+              "description": "OOP 기초, 타입 시스템, 예외 처리. 하나의 서버 언어를 깊이 있게.",
+              "tags": ["Java", "Python", "Node.js", "Go", "Kotlin"]
+            },
+            {
+              "id": "rest-api-basics",
+              "name": "REST API 설계 기초",
+              "category": "core",
+              "description": "HTTP 메서드 의미론적 사용, 리소스 기반 URL 설계, 상태 코드 올바른 사용, 요청/응답 구조.",
+              "tags": ["REST API", "HTTP", "API Design"]
+            },
+            {
+              "id": "sql-basics",
+              "name": "SQL — 기초 쿼리와 관계형 DB",
+              "category": "data",
+              "description": "SELECT, JOIN, WHERE, GROUP BY. 정규화(1NF~3NF). 인덱스 개념 기초. PostgreSQL / MySQL.",
+              "tags": [
+                "SQL",
+                "PostgreSQL",
+                "MySQL",
+                "Database",
+                "Relational DB"
+              ]
+            },
+            {
+              "id": "framework-basics",
+              "name": "웹 프레임워크 기초 (Spring Boot / Express / FastAPI)",
+              "category": "framework",
+              "description": "라우팅, 미들웨어, 컨트롤러, 서비스 레이어 분리. MVC 패턴 이해.",
+              "tags": ["Spring Boot", "Express", "FastAPI", "NestJS", "MVC"]
+            },
+            {
+              "id": "auth-basics",
+              "name": "인증/인가 — JWT, Session, OAuth",
+              "category": "security",
+              "description": "세션 vs 토큰 기반 인증. JWT 구조와 검증. OAuth 2.0 플로우 기초.",
+              "tags": [
+                "JWT",
+                "OAuth",
+                "Authentication",
+                "Authorization",
+                "Security"
+              ]
+            },
+            {
+              "id": "git-collaboration",
+              "name": "Git — 팀 협업 워크플로우",
+              "category": "tooling",
+              "description": "Git Flow / Trunk-based 전략. PR 리뷰 프로세스. conflict 해결.",
+              "tags": ["Git", "Version Control", "Git Flow"]
+            }
+          ]
+        },
+        {
+          "id": "mid-backend",
+          "title": "Mid Backend Developer",
+          "level": 2,
+          "description": "독립적으로 기능 설계 및 구현. 성능과 유지보수성을 고려한 코드 작성.",
+          "skills": [
+            {
+              "id": "oop-solid",
+              "name": "OOP 심화 — SOLID 원칙",
+              "category": "architecture",
+              "description": "단일 책임, 개방-폐쇄, 리스코프 치환, 인터페이스 분리, 의존성 역전. 변경에 강한 코드 설계.",
+              "tags": ["SOLID", "OOP", "Design Principles", "Clean Code"]
+            },
+            {
+              "id": "design-patterns",
+              "name": "디자인 패턴 — GoF 핵심",
+              "category": "architecture",
+              "description": "Factory, Builder, Strategy, Observer, Decorator, Repository 패턴. 반복 문제의 검증된 해법.",
+              "tags": [
+                "Design Patterns",
+                "GoF",
+                "Factory Pattern",
+                "Strategy Pattern",
+                "Repository Pattern"
+              ]
+            },
+            {
+              "id": "database-advanced",
+              "name": "DB 심화 — 인덱스, 트랜잭션, 쿼리 최적화",
+              "category": "data",
+              "description": "실행 계획(EXPLAIN), 인덱스 전략, 트랜잭션 격리 수준, N+1 문제 해결, 쿼리 튜닝.",
+              "tags": [
+                "SQL",
+                "Database",
+                "Query Optimization",
+                "Index",
+                "Transaction",
+                "N+1"
+              ]
+            },
+            {
+              "id": "spring-boot-intermediate",
+              "name": "Spring Boot 심화 — DI, AOP, JPA",
+              "category": "framework",
+              "description": "의존성 주입 원리, AOP로 횡단 관심사 분리, JPA/Hibernate로 ORM 활용. Spring Security 기초.",
+              "tags": [
+                "Spring Boot",
+                "Spring",
+                "JPA",
+                "Hibernate",
+                "DI",
+                "AOP",
+                "Spring Security"
+              ]
+            },
+            {
+              "id": "caching",
+              "name": "캐싱 전략 — Redis",
+              "category": "performance",
+              "description": "Cache-Aside, Write-Through 패턴. TTL 설계. 캐시 무효화 전략. Redis 자료구조 활용.",
+              "tags": ["Redis", "Caching", "Performance"]
+            },
+            {
+              "id": "testing-backend",
+              "name": "테스트 — 단위/통합/E2E",
+              "category": "testing",
+              "description": "TDD 기초, Mockito/Jest로 의존성 mocking. 통합 테스트에서 TestContainers 활용.",
+              "tags": [
+                "JUnit",
+                "Mockito",
+                "TDD",
+                "Integration Testing",
+                "Testing"
+              ]
+            },
+            {
+              "id": "api-documentation",
+              "name": "API 문서화 — OpenAPI / Swagger",
+              "category": "tooling",
+              "description": "OpenAPI 3.0 스펙 기반 문서 자동 생성. API 버전 관리 전략.",
+              "tags": ["OpenAPI", "Swagger", "API Documentation", "API Design"]
+            }
+          ]
+        },
+        {
+          "id": "senior-backend",
+          "title": "Senior Backend Developer",
+          "level": 3,
+          "description": "시스템 설계 가능. 성능 병목 찾고 해결. 팀 기술 방향에 기여.",
+          "skills": [
+            {
+              "id": "system-design-basics",
+              "name": "시스템 설계 — 확장성과 가용성",
+              "category": "architecture",
+              "description": "수평/수직 확장, 로드 밸런싱, CDN, 데이터베이스 샤딩, 복제. CAP 이론 이해.",
+              "tags": [
+                "System Design",
+                "Scalability",
+                "Load Balancing",
+                "CAP Theorem"
+              ]
+            },
+            {
+              "id": "microservices",
+              "name": "마이크로서비스 — 설계와 트레이드오프",
+              "category": "architecture",
+              "description": "서비스 분리 기준(DDD Bounded Context), 서비스 간 통신(REST/gRPC/메시지 큐), 분산 트랜잭션 문제.",
+              "tags": ["Microservices", "DDD", "gRPC", "Distributed Systems"]
+            },
+            {
+              "id": "message-queue",
+              "name": "메시지 큐 — Kafka / RabbitMQ",
+              "category": "architecture",
+              "description": "비동기 처리와 이벤트 기반 아키텍처. 메시지 보장(at-least-once, exactly-once). Consumer Group 설계.",
+              "tags": [
+                "Kafka",
+                "RabbitMQ",
+                "Message Queue",
+                "Event-Driven Architecture"
+              ]
+            },
+            {
+              "id": "nosql",
+              "name": "NoSQL — MongoDB, Redis, ElasticSearch",
+              "category": "data",
+              "description": "SQL vs NoSQL 선택 기준. 문서형/키-값/검색 엔진 각각의 적합한 유스케이스.",
+              "tags": ["MongoDB", "NoSQL", "Elasticsearch", "Database"]
+            },
+            {
+              "id": "cloud-basics",
+              "name": "클라우드 — AWS/GCP 핵심 서비스",
+              "category": "tooling",
+              "description": "EC2, S3, RDS, Lambda, API Gateway. IaaS vs PaaS vs Serverless 선택 기준.",
+              "tags": ["AWS", "GCP", "Cloud", "Lambda", "Serverless"]
+            },
+            {
+              "id": "observability",
+              "name": "모니터링 & 관찰가능성 — 로그, 메트릭, 트레이싱",
+              "category": "tooling",
+              "description": "구조화된 로깅, Prometheus/Grafana 메트릭, OpenTelemetry 분산 트레이싱. 장애 탐지와 디버깅.",
+              "tags": [
+                "Monitoring",
+                "Prometheus",
+                "Grafana",
+                "Logging",
+                "Observability"
+              ]
+            },
+            {
+              "id": "security-backend",
+              "name": "백엔드 보안 — OWASP Top 10",
+              "category": "security",
+              "description": "SQL Injection, XSS, CSRF, Broken Authentication. 입력 검증, 파라미터화 쿼리, Rate Limiting.",
+              "tags": ["Security", "OWASP", "SQL Injection", "Rate Limiting"]
+            }
+          ]
+        },
+        {
+          "id": "lead-backend",
+          "title": "Lead Backend Developer",
+          "level": 4,
+          "description": "팀 백엔드 아키텍처 전체에 책임. 기술 부채 관리와 팀 성장 주도.",
+          "skills": [
+            {
+              "id": "ddd",
+              "name": "도메인 주도 설계 — DDD",
+              "category": "architecture",
+              "description": "Ubiquitous Language, Bounded Context, Aggregate, Domain Event. 복잡한 비즈니스 도메인을 코드로 표현하는 방법론.",
+              "tags": [
+                "DDD",
+                "Domain-Driven Design",
+                "Bounded Context",
+                "Aggregate"
+              ]
+            },
+            {
+              "id": "clean-architecture",
+              "name": "클린 아키텍처 / 헥사고날 아키텍처",
+              "category": "architecture",
+              "description": "의존성 방향 제어, 포트-어댑터 패턴. 비즈니스 로직의 외부 의존성 격리. 테스트 용이성 확보.",
+              "tags": [
+                "Clean Architecture",
+                "Hexagonal Architecture",
+                "Ports and Adapters",
+                "Architecture"
+              ]
+            },
+            {
+              "id": "event-sourcing-cqrs",
+              "name": "이벤트 소싱 & CQRS",
+              "category": "architecture",
+              "description": "Command/Query 책임 분리. 이벤트 로그로 상태 재구성. 읽기/쓰기 모델 분리의 트레이드오프.",
+              "tags": [
+                "CQRS",
+                "Event Sourcing",
+                "Architecture",
+                "Event-Driven Architecture"
+              ]
+            },
+            {
+              "id": "tech-debt-management",
+              "name": "기술 부채 관리",
+              "category": "leadership",
+              "description": "의도적 vs 비의도적 기술 부채 분류. 리팩터링 우선순위 결정. 비즈니스 임팩트와 기술 품질 균형.",
+              "tags": [
+                "Tech Debt",
+                "Refactoring",
+                "Technical Leadership",
+                "Code Quality"
+              ]
+            },
+            {
+              "id": "incident-management",
+              "name": "장애 대응 — On-Call, 포스트모텀",
+              "category": "soft",
+              "description": "SLO/SLI/SLA 정의. 장애 대응 프로세스. Blameless 포스트모텀 문화. Runbook 작성.",
+              "tags": [
+                "SRE",
+                "Incident Management",
+                "Postmortem",
+                "SLO",
+                "On-Call"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "backend-architect",
+          "title": "Backend Architect",
+          "level": 5,
+          "description": "조직 전체 백엔드 기술 전략. 여러 팀에 걸친 시스템 설계와 표준 수립.",
+          "skills": [
+            {
+              "id": "enterprise-integration",
+              "name": "엔터프라이즈 통합 패턴",
+              "category": "architecture",
+              "description": "EIP(Enterprise Integration Patterns) — Message Router, Filter, Transformer, Saga 패턴. 복잡한 시스템 간 통합.",
+              "tags": [
+                "Enterprise Integration",
+                "Saga Pattern",
+                "Architecture",
+                "EIP"
+              ]
+            },
+            {
+              "id": "platform-engineering",
+              "name": "플랫폼 엔지니어링 — 내부 개발자 플랫폼",
+              "category": "architecture",
+              "description": "IDP(Internal Developer Platform) 설계. 공통 인프라/서비스 추상화. 개발자 경험 향상.",
+              "tags": [
+                "Platform Engineering",
+                "IDP",
+                "Developer Experience",
+                "Internal Tools"
+              ]
+            },
+            {
+              "id": "data-architecture",
+              "name": "데이터 아키텍처 — 데이터 레이크, 파이프라인",
+              "category": "data",
+              "description": "OLTP vs OLAP 분리. 데이터 파이프라인 설계. 이벤트 스트리밍과 배치 처리 선택 기준.",
+              "tags": [
+                "Data Architecture",
+                "Data Lake",
+                "Data Pipeline",
+                "OLAP"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "fullstack",
+      "title": "Fullstack 계열",
+      "description": "프론트엔드와 백엔드를 모두 다루며 제품 전체를 독립적으로 구현. Software Architect로 자연스럽게 연결.",
+      "icon": "⚡",
+      "stages": [
+        {
+          "id": "junior-fullstack",
+          "title": "Junior Fullstack Developer",
+          "level": 1,
+          "description": "프론트엔드/백엔드 기초를 모두 갖춤. 간단한 CRUD 앱을 혼자 만들 수 있는 단계.",
+          "skills": [
+            {
+              "id": "fs-frontend-basics",
+              "name": "HTML / CSS / JavaScript 기초",
+              "category": "core",
+              "description": "시맨틱 HTML, 반응형 CSS, ES6+ JS. 브라우저 동작 기초 이해.",
+              "tags": ["HTML", "CSS", "JavaScript", "ES6"]
+            },
+            {
+              "id": "fs-backend-basics",
+              "name": "서버 기초 — Node.js / Express 또는 Python",
+              "category": "core",
+              "description": "HTTP 서버 구성, 라우팅, 미들웨어, JSON API 응답.",
+              "tags": ["Node.js", "Express", "Python", "FastAPI"]
+            },
+            {
+              "id": "fs-database-basics",
+              "name": "데이터베이스 기초 — SQL + NoSQL",
+              "category": "data",
+              "description": "관계형 DB와 NoSQL의 기본 CRUD. ORM 기초 (Prisma / Sequelize / TypeORM).",
+              "tags": ["SQL", "PostgreSQL", "MongoDB", "ORM", "Prisma"]
+            },
+            {
+              "id": "fs-git",
+              "name": "Git 협업 워크플로우",
+              "category": "tooling",
+              "description": "브랜치 전략, PR, conflict 해결, GitHub Actions 기초.",
+              "tags": ["Git", "GitHub Actions", "Version Control"]
+            },
+            {
+              "id": "fs-deployment-basics",
+              "name": "기본 배포 — Vercel / Heroku / Railway",
+              "category": "tooling",
+              "description": "PaaS를 이용한 간단한 배포. 환경 변수 관리. 도메인 연결 기초.",
+              "tags": ["Deployment", "Vercel", "Heroku", "Railway", "PaaS"]
+            }
+          ]
+        },
+        {
+          "id": "mid-fullstack",
+          "title": "Mid Fullstack Developer",
+          "level": 2,
+          "description": "독립적으로 제품 기능 구현. API 설계부터 UI 구현까지 혼자 처리 가능.",
+          "skills": [
+            {
+              "id": "fs-framework",
+              "name": "풀스택 프레임워크 — Next.js / Nuxt / SvelteKit",
+              "category": "framework",
+              "description": "SSR/SSG/ISR 개념과 적용. App Router, Server Components. API Routes.",
+              "tags": ["Next.js", "Nuxt", "SvelteKit", "SSR", "App Router"]
+            },
+            {
+              "id": "fs-typescript",
+              "name": "TypeScript 전체 스택 적용",
+              "category": "core",
+              "description": "프론트-백 공유 타입 정의. Zod로 런타임 검증. End-to-end 타입 안정성.",
+              "tags": ["TypeScript", "Zod", "Type Safety"]
+            },
+            {
+              "id": "fs-auth",
+              "name": "인증 구현 — NextAuth / Supabase Auth",
+              "category": "security",
+              "description": "OAuth provider 통합, 세션 관리, 보호된 라우트, RLS 정책 설계.",
+              "tags": ["Authentication", "NextAuth", "Supabase", "OAuth", "RLS"]
+            },
+            {
+              "id": "fs-state",
+              "name": "클라이언트 상태 관리 + 서버 상태",
+              "category": "framework",
+              "description": "React Query / SWR로 서버 상태 관리. Zustand / Jotai로 클라이언트 상태. 캐싱 전략.",
+              "tags": [
+                "React Query",
+                "SWR",
+                "Zustand",
+                "State Management",
+                "Caching"
+              ]
+            },
+            {
+              "id": "fs-testing",
+              "name": "테스트 전략 — 프론트/백 통합",
+              "category": "testing",
+              "description": "Vitest / Jest 단위 테스트. MSW로 API mocking. Playwright E2E. Testing Trophy 개념.",
+              "tags": ["Vitest", "Jest", "MSW", "Playwright", "Testing"]
+            }
+          ]
+        },
+        {
+          "id": "senior-fullstack",
+          "title": "Senior Fullstack Developer",
+          "level": 3,
+          "description": "제품 전체 기술 결정 가능. 성능, 보안, 확장성을 고려한 설계.",
+          "skills": [
+            {
+              "id": "fs-performance",
+              "name": "풀스택 성능 최적화",
+              "category": "performance",
+              "description": "프론트엔드 Core Web Vitals + 백엔드 쿼리 최적화 + CDN + 캐싱 레이어를 전체적으로 설계.",
+              "tags": [
+                "Performance",
+                "Core Web Vitals",
+                "Query Optimization",
+                "CDN",
+                "Caching"
+              ]
+            },
+            {
+              "id": "fs-system-design",
+              "name": "서비스 설계 — API 계약, 데이터 모델링",
+              "category": "architecture",
+              "description": "OpenAPI 스펙 설계, ERD 설계, 프론트-백 계약 우선 개발(API-first). 변경에 강한 데이터 모델.",
+              "tags": [
+                "API Design",
+                "OpenAPI",
+                "Data Modeling",
+                "ERD",
+                "API First"
+              ]
+            },
+            {
+              "id": "fs-infrastructure",
+              "name": "인프라 기초 — Docker, CI/CD",
+              "category": "tooling",
+              "description": "Docker로 환경 표준화. Docker Compose로 로컬 개발 환경. GitHub Actions CI/CD 파이프라인.",
+              "tags": [
+                "Docker",
+                "Docker Compose",
+                "CI/CD",
+                "GitHub Actions",
+                "Infrastructure"
+              ]
+            },
+            {
+              "id": "fs-real-time",
+              "name": "실시간 기능 — WebSocket, SSE",
+              "category": "framework",
+              "description": "WebSocket 양방향 통신, Server-Sent Events 단방향 스트림. 실시간 알림/채팅/협업 기능 구현.",
+              "tags": ["WebSocket", "SSE", "Real-time", "Socket.io"]
+            }
+          ]
+        },
+        {
+          "id": "lead-fullstack",
+          "title": "Lead Fullstack / Tech Lead",
+          "level": 4,
+          "description": "팀 전체 기술 방향 결정. 소규모 팀에서 CTO 역할에 가장 가까운 포지션.",
+          "skills": [
+            {
+              "id": "fs-architecture-decision",
+              "name": "아키텍처 의사결정 — ADR, RFC",
+              "category": "architecture",
+              "description": "Architecture Decision Record, Request for Comments 프로세스. 팀과 함께 기술 결정을 투명하게.",
+              "tags": [
+                "ADR",
+                "RFC",
+                "Architecture",
+                "Technical Decision",
+                "Documentation"
+              ]
+            },
+            {
+              "id": "fs-tech-debt",
+              "name": "기술 부채 & 리팩터링 전략",
+              "category": "leadership",
+              "description": "점진적 마이그레이션 전략. Strangler Fig 패턴. 비즈니스 임팩트와 기술 품질의 균형점 찾기.",
+              "tags": [
+                "Tech Debt",
+                "Refactoring",
+                "Migration",
+                "Technical Leadership"
+              ]
+            },
+            {
+              "id": "fs-team-growth",
+              "name": "팀 성장 — 채용, 온보딩, 문화",
+              "category": "leadership",
+              "description": "기술 인터뷰 설계. 온보딩 문서 작성. 팀 엔지니어링 문화 형성. 심리적 안전감.",
+              "tags": [
+                "Leadership",
+                "Team Building",
+                "Hiring",
+                "Onboarding",
+                "Engineering Culture"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "software-architect",
+          "title": "Software Architect",
+          "level": 5,
+          "description": "제품/시스템 전체 아키텍처 설계. 기술과 비즈니스를 연결하는 역할.",
+          "skills": [
+            {
+              "id": "sa-quality-attributes",
+              "name": "품질 속성 — 성능, 확장성, 유지보수성",
+              "category": "architecture",
+              "description": "품질 속성 간 트레이드오프 분석. ATAM(Architecture Tradeoff Analysis Method) 활용. 비기능 요구사항 정의.",
+              "tags": [
+                "Software Architecture",
+                "Quality Attributes",
+                "ATAM",
+                "NFR"
+              ]
+            },
+            {
+              "id": "sa-patterns",
+              "name": "아키텍처 패턴 — Layered, Event-Driven, CQRS",
+              "category": "architecture",
+              "description": "레이어드, 파이프라인, 이벤트 기반, 마이크로서비스, 스페이스 기반 아키텍처. 각각의 적합한 문제 영역.",
+              "tags": [
+                "Architecture Patterns",
+                "Layered Architecture",
+                "Event-Driven Architecture",
+                "CQRS",
+                "Microservices"
+              ]
+            },
+            {
+              "id": "sa-documentation",
+              "name": "아키텍처 문서화 — C4 Model, Arc42",
+              "category": "architecture",
+              "description": "C4 Model로 Context/Container/Component/Code 다이어그램. Arc42 템플릿으로 아키텍처 문서화.",
+              "tags": [
+                "C4 Model",
+                "Arc42",
+                "Architecture Documentation",
+                "Diagrams"
+              ]
+            },
+            {
+              "id": "sa-isaqb",
+              "name": "iSAQB CPSA-F / CPSA-A 자격증",
+              "category": "architecture",
+              "description": "국제 소프트웨어 아키텍처 자격증. CPSA-F(Foundation)로 기초, CPSA-A(Advanced)로 심화 모듈 선택.",
+              "tags": [
+                "iSAQB",
+                "CPSA-F",
+                "CPSA-A",
+                "Software Architecture",
+                "Certification"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "devops",
+      "title": "DevOps / Infra 계열",
+      "description": "개발과 운영의 연결. 자동화, 안정성, 확장 가능한 인프라 구축 경로.",
+      "icon": "🔧",
+      "stages": [
+        {
+          "id": "junior-devops",
+          "title": "Junior DevOps Engineer",
+          "level": 1,
+          "description": "기본 리눅스 운영과 자동화 스크립트 작성. CI/CD 파이프라인 유지보수.",
+          "skills": [
+            {
+              "id": "linux-basics",
+              "name": "Linux / Shell — 기초 운영",
+              "category": "core",
+              "description": "파일 시스템, 프로세스 관리, 권한, 패키지 관리, 기본 네트워크 명령어.",
+              "tags": ["Linux", "Shell", "Bash", "CLI"]
+            },
+            {
+              "id": "docker-basics",
+              "name": "Docker — 컨테이너 기초",
+              "category": "tooling",
+              "description": "이미지 빌드, 컨테이너 실행, 볼륨, 네트워크. Docker Compose로 로컬 멀티 서비스 환경.",
+              "tags": ["Docker", "Docker Compose", "Container", "Dockerfile"]
+            },
+            {
+              "id": "ci-cd-basics",
+              "name": "CI/CD — GitHub Actions / GitLab CI",
+              "category": "tooling",
+              "description": "빌드, 테스트, 배포 파이프라인 구성. 시크릿 관리. 환경별 배포 전략.",
+              "tags": [
+                "CI/CD",
+                "GitHub Actions",
+                "GitLab CI",
+                "Pipeline",
+                "Automation"
+              ]
+            },
+            {
+              "id": "cloud-fundamentals",
+              "name": "클라우드 기초 — AWS 핵심 서비스",
+              "category": "tooling",
+              "description": "EC2, S3, VPC, IAM, Route53. 클라우드 네트워크 기초. 비용 관리 기초.",
+              "tags": ["AWS", "EC2", "S3", "VPC", "IAM", "Cloud"]
+            }
+          ]
+        },
+        {
+          "id": "mid-devops",
+          "title": "Mid DevOps Engineer",
+          "level": 2,
+          "description": "인프라 자동화와 안정성 확보. 팀 개발 환경 표준화.",
+          "skills": [
+            {
+              "id": "kubernetes",
+              "name": "Kubernetes — 컨테이너 오케스트레이션",
+              "category": "tooling",
+              "description": "Pod, Deployment, Service, Ingress, ConfigMap, Secret. Helm 차트로 패키지 관리.",
+              "tags": ["Kubernetes", "K8s", "Helm", "Container Orchestration"]
+            },
+            {
+              "id": "iac",
+              "name": "IaC — Terraform / Pulumi",
+              "category": "tooling",
+              "description": "코드로 인프라 관리. State 관리, 모듈화, 환경 분리. 인프라 변경 리뷰 프로세스.",
+              "tags": ["Terraform", "Pulumi", "IaC", "Infrastructure as Code"]
+            },
+            {
+              "id": "monitoring-devops",
+              "name": "모니터링 스택 — Prometheus, Grafana, ELK",
+              "category": "tooling",
+              "description": "메트릭 수집과 시각화. 로그 집계와 분석. 알람 설정. SLO 모니터링.",
+              "tags": [
+                "Prometheus",
+                "Grafana",
+                "ELK",
+                "Monitoring",
+                "Logging",
+                "Observability"
+              ]
+            },
+            {
+              "id": "security-devops",
+              "name": "DevSecOps — 보안 자동화",
+              "category": "security",
+              "description": "SAST/DAST 도구 CI 통합. 컨테이너 이미지 취약점 스캔. 시크릿 관리(Vault, AWS Secrets Manager).",
+              "tags": [
+                "DevSecOps",
+                "Security",
+                "SAST",
+                "DAST",
+                "Vault",
+                "Secret Management"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "senior-devops",
+          "title": "Senior DevOps / SRE",
+          "level": 3,
+          "description": "대규모 인프라 설계와 운영. SRE 원칙 적용. 조직의 개발 속도와 안정성 균형.",
+          "skills": [
+            {
+              "id": "sre-principles",
+              "name": "SRE — SLO, SLI, Error Budget",
+              "category": "architecture",
+              "description": "서비스 수준 목표 설계. Error Budget 기반 릴리스 결정. Toil 자동화. 온콜 최적화.",
+              "tags": ["SRE", "SLO", "SLI", "Error Budget", "Reliability"]
+            },
+            {
+              "id": "disaster-recovery",
+              "name": "재해 복구 — RTO, RPO, 멀티 리전",
+              "category": "architecture",
+              "description": "복구 시간/지점 목표 설계. 멀티 AZ/Region 아키텍처. Chaos Engineering으로 복원력 검증.",
+              "tags": [
+                "Disaster Recovery",
+                "RTO",
+                "RPO",
+                "Multi-Region",
+                "Chaos Engineering"
+              ]
+            },
+            {
+              "id": "cost-optimization",
+              "name": "클라우드 비용 최적화",
+              "category": "performance",
+              "description": "Reserved Instance, Spot Instance 활용. FinOps 원칙. 비용 태깅 전략. 워크로드 최적화.",
+              "tags": ["FinOps", "Cost Optimization", "AWS Cost", "Cloud Cost"]
+            }
+          ]
+        },
+        {
+          "id": "platform-engineer",
+          "title": "Platform Engineer",
+          "level": 4,
+          "description": "내부 개발자 플랫폼 구축. 개발팀이 인프라를 신경 쓰지 않고 개발에 집중하도록.",
+          "skills": [
+            {
+              "id": "idp-design",
+              "name": "내부 개발자 플랫폼 설계",
+              "category": "architecture",
+              "description": "Self-service 인프라 프로비저닝. 골든 패스(Golden Path) 정의. 플랫폼 팀 vs 스트림 팀 모델.",
+              "tags": [
+                "Platform Engineering",
+                "IDP",
+                "Golden Path",
+                "Self-Service",
+                "Team Topologies"
+              ]
+            },
+            {
+              "id": "gitops",
+              "name": "GitOps — ArgoCD / Flux",
+              "category": "tooling",
+              "description": "Git을 단일 진실 소스로. 선언적 인프라 관리. 자동 동기화와 롤백.",
+              "tags": ["GitOps", "ArgoCD", "Flux", "Kubernetes", "Automation"]
+            }
+          ]
+        },
+        {
+          "id": "cloud-architect",
+          "title": "Cloud / Infrastructure Architect",
+          "level": 5,
+          "description": "조직 전체 인프라 전략과 클라우드 아키텍처. 기술과 비용과 보안의 균형.",
+          "skills": [
+            {
+              "id": "well-architected",
+              "name": "AWS Well-Architected Framework",
+              "category": "architecture",
+              "description": "운영 우수성, 보안, 안정성, 성능 효율, 비용 최적화, 지속 가능성 6개 기둥.",
+              "tags": [
+                "AWS",
+                "Well-Architected",
+                "Cloud Architecture",
+                "Best Practices"
+              ]
+            },
+            {
+              "id": "zero-trust",
+              "name": "Zero Trust 보안 아키텍처",
+              "category": "security",
+              "description": "네트워크 경계 없는 보안 모델. 최소 권한 원칙. ID 기반 접근 제어. SASE 아키텍처.",
+              "tags": [
+                "Zero Trust",
+                "Security Architecture",
+                "IAM",
+                "Network Security"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "leadership",
+      "title": "리더십 전환",
+      "description": "개발자에서 기술 리더로. 코딩보다 사람과 시스템을 통해 더 큰 임팩트를 만드는 경로.",
+      "icon": "🎯",
+      "stages": [
+        {
+          "id": "tech-lead",
+          "title": "Tech Lead",
+          "level": 1,
+          "description": "여전히 코딩하면서 팀 기술 방향 리드. IC(Individual Contributor)와 매니저 사이.",
+          "skills": [
+            {
+              "id": "tl-technical-vision",
+              "name": "기술 비전 수립 및 공유",
+              "category": "leadership",
+              "description": "팀의 기술 방향을 정의하고 설득력 있게 전달. RFC 프로세스. 기술 로드맵 작성.",
+              "tags": [
+                "Technical Vision",
+                "Leadership",
+                "RFC",
+                "Technical Roadmap"
+              ]
+            },
+            {
+              "id": "tl-architecture",
+              "name": "실용적 아키텍처 결정",
+              "category": "architecture",
+              "description": "완벽한 설계보다 팀이 실행 가능한 설계. 복잡성 vs 유연성 트레이드오프. ADR로 결정 기록.",
+              "tags": [
+                "Architecture",
+                "ADR",
+                "Technical Decision",
+                "Trade-offs"
+              ]
+            },
+            {
+              "id": "tl-delivery",
+              "name": "프로젝트 딜리버리 — 추정, 리스크 관리",
+              "category": "soft",
+              "description": "기술 추정의 불확실성 관리. 리스크 식별과 완화. 스프린트 계획. PM과의 협업.",
+              "tags": [
+                "Project Management",
+                "Estimation",
+                "Risk Management",
+                "Agile",
+                "Scrum"
+              ]
+            },
+            {
+              "id": "tl-code-quality",
+              "name": "팀 코드 품질 관리",
+              "category": "leadership",
+              "description": "코드 리뷰 문화 정착. 정적 분석 도구 도입. 테스트 커버리지 기준 수립.",
+              "tags": [
+                "Code Quality",
+                "Code Review",
+                "Static Analysis",
+                "Technical Leadership"
+              ]
+            },
+            {
+              "id": "tl-mentoring",
+              "name": "시니어 멘토링 & 성장 지원",
+              "category": "leadership",
+              "description": "1:1 미팅 운영. 성장 계획 수립 지원. 피드백 주고받기. 위임과 권한 부여.",
+              "tags": ["Mentoring", "1:1", "Feedback", "Leadership", "Coaching"]
+            }
+          ]
+        },
+        {
+          "id": "engineering-manager",
+          "title": "Engineering Manager",
+          "level": 2,
+          "description": "사람 관리 중심. 팀 성과와 개인 성장에 집중. 코딩은 줄어들거나 없어짐.",
+          "skills": [
+            {
+              "id": "em-people",
+              "name": "피플 매니지먼트 — 채용, 성과, 성장",
+              "category": "leadership",
+              "description": "채용 프로세스 설계. 성과 리뷰(Performance Review). 성장 계획(IDP). 이직 방지.",
+              "tags": [
+                "People Management",
+                "Performance Review",
+                "IDP",
+                "Hiring",
+                "Leadership"
+              ]
+            },
+            {
+              "id": "em-org-design",
+              "name": "팀 구조 설계 — Team Topologies",
+              "category": "leadership",
+              "description": "Stream-aligned, Platform, Enabling, Complicated Subsystem 팀 유형. Conway's Law 이해.",
+              "tags": [
+                "Team Topologies",
+                "Org Design",
+                "Conway's Law",
+                "Leadership"
+              ]
+            },
+            {
+              "id": "em-stakeholder",
+              "name": "이해관계자 관리 — 위로, 아래로, 옆으로",
+              "category": "soft",
+              "description": "경영진 보고. 타 팀과의 의존성 조율. 투명한 커뮤니케이션. 기대치 관리.",
+              "tags": [
+                "Stakeholder Management",
+                "Communication",
+                "Leadership",
+                "Executive Communication"
+              ]
+            },
+            {
+              "id": "em-process",
+              "name": "개발 프로세스 최적화 — Agile, 딜리버리",
+              "category": "leadership",
+              "description": "팀에 맞는 Agile 프레임워크 선택(Scrum/Kanban). 개발 속도(Velocity) 측정. 프로세스 개선.",
+              "tags": [
+                "Agile",
+                "Scrum",
+                "Kanban",
+                "Delivery",
+                "Process Improvement"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "vp-engineering",
+          "title": "VP of Engineering",
+          "level": 3,
+          "description": "여러 팀을 관리하는 시니어 매니저. 조직 전체 엔지니어링 역량과 문화 책임.",
+          "skills": [
+            {
+              "id": "vp-strategy",
+              "name": "엔지니어링 전략 — OKR, 로드맵",
+              "category": "leadership",
+              "description": "비즈니스 목표를 엔지니어링 목표로 번역. OKR 설정과 추적. 분기/연간 기술 로드맵.",
+              "tags": ["OKR", "Engineering Strategy", "Leadership", "Roadmap"]
+            },
+            {
+              "id": "vp-culture",
+              "name": "엔지니어링 문화 구축",
+              "category": "leadership",
+              "description": "심리적 안전감, 실험 문화, 학습 문화. Blameless 포스트모텀. 다양성과 포용성.",
+              "tags": [
+                "Engineering Culture",
+                "Psychological Safety",
+                "Leadership",
+                "DEI"
+              ]
+            },
+            {
+              "id": "vp-budget",
+              "name": "기술 예산 관리 및 ROI",
+              "category": "leadership",
+              "description": "인프라 비용, 도구 비용, 채용 예산 관리. 기술 투자의 ROI 측정과 보고.",
+              "tags": ["Budget Management", "ROI", "FinOps", "Leadership"]
+            }
+          ]
+        },
+        {
+          "id": "cto",
+          "title": "CTO",
+          "level": 4,
+          "description": "회사 전체 기술 전략의 최고 책임자. 기술로 비즈니스 성장을 만드는 역할.",
+          "skills": [
+            {
+              "id": "cto-vision",
+              "name": "기술 비전 & 회사 전략 정렬",
+              "category": "leadership",
+              "description": "3~5년 기술 비전 수립. 비즈니스 전략과 기술 전략의 정렬. 이사회/투자자 커뮤니케이션.",
+              "tags": [
+                "CTO",
+                "Tech Vision",
+                "Business Strategy",
+                "Leadership",
+                "Board Communication"
+              ]
+            },
+            {
+              "id": "cto-build-buy",
+              "name": "Build vs Buy vs Partner 의사결정",
+              "category": "architecture",
+              "description": "핵심 역량과 상품화 기술 구분. 외부 파트너십 평가. 기술 M&A 판단.",
+              "tags": [
+                "Build vs Buy",
+                "Technical Decision",
+                "Partnerships",
+                "Strategy"
+              ]
+            },
+            {
+              "id": "cto-innovation",
+              "name": "기술 혁신 — R&D, 신기술 도입",
+              "category": "leadership",
+              "description": "신기술 평가 프레임워크. 혁신 문화 조성. 기술 스카우팅. 스태프 엔지니어 레버리지.",
+              "tags": [
+                "Innovation",
+                "R&D",
+                "Emerging Technology",
+                "Technical Leadership"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

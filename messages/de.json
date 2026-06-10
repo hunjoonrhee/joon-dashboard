@@ -43,7 +43,10 @@
     "completeModalTitle": "Lerneintrag hinzufügen? 📝",
     "completeModalSub": "erledigt!",
     "later": "Später",
-    "addRecord": "Eintrag hinzufügen"
+    "addRecord": "Eintrag hinzufügen",
+    "weeklyHours": "Stunden diese Woche",
+    "weeklyTil": "TIL",
+    "weeklyTopics": "Themen fertig"
   },
   "goals": {
     "title": "Ziele",
@@ -86,7 +89,10 @@
     "name": "Titel",
     "duration": "Dauer (Minuten)",
     "tags": "Tags (kommagetrennt)",
-    "placeholder": "Was hast du heute gemacht?"
+    "placeholder": "Was hast du heute gemacht?",
+    "emptySubStudy": "Schreib auf, was du heute gelernt hast.",
+    "tilEmpty": "Noch kein TIL",
+    "tilEmptySub": "Füge beim Lernen auch ein TIL hinzu."
   },
   "projects": {
     "title": "Projekte",

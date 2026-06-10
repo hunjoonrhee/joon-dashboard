@@ -10,7 +10,7 @@ interface Props {
   sessions: Session[]
   grouped: Record<string, Session[]>
   onAdd: () => void
-  onEdit: (s: Session) => void // 모바일 → 모달
+  onEdit: (s: Session) => void
 }
 
 export default function SessionList({
@@ -42,7 +42,19 @@ export default function SessionList({
         </button>
       </div>
       {sessions.length === 0 ? (
-        <p className="text-sm text-gray-400">{t('empty')}</p>
+        <div className="flex flex-col items-center gap-2 py-8 text-center">
+          <span className="text-3xl opacity-30">📖</span>
+          <p className="text-sm font-semibold text-gray-700">{t('empty')}</p>
+          <p className="text-xs text-gray-400 leading-relaxed">
+            {t('emptySubStudy')}
+          </p>
+          <button
+            onClick={onAdd}
+            className="mt-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 transition-colors"
+          >
+            {t('addModal')}
+          </button>
+        </div>
       ) : (
         Object.entries(grouped).map(([month, items]) => (
           <div key={month}>

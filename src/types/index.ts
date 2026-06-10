@@ -87,3 +87,40 @@ export interface Note {
   created_at: string
   updated_at: string
 }
+
+// career-paths.json 타입
+export interface CareerSkill {
+  id: string
+  name: string
+  category: string
+  description: string
+  tags: string[]
+}
+
+export interface CareerStage {
+  id: string
+  title: string
+  level: number
+  description: string
+  skills: CareerSkill[]
+}
+
+export interface CareerPath {
+  id: string
+  title: string
+  description: string
+  icon: string
+  stages: CareerStage[]
+}
+
+export interface CareerCategory {
+  id: string
+  label: string
+  color: string
+}
+
+export interface CareerData {
+  version: string
+  paths: CareerPath[]
+  categories: CareerCategory[]
+}

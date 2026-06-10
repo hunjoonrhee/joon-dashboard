@@ -2,36 +2,38 @@
 
 import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
-import type { StudyForm } from '@/types'
+import { CareerData } from '@/types'
 import { de, enUS, ko } from 'date-fns/locale'
 import { X } from 'lucide-react'
 import { useLocale } from 'next-intl'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 
 interface Props {
   onClose: () => void
   onSaved: () => void
+  initialTitle?: string
 }
 
-const emptyForm: StudyForm = {
-  title: '',
-  date: '',
-  duration_minutes: '',
-  tags: '',
-  til: '',
-}
-
-export default function AddSessionModal({ onClose, onSaved }: Props) {
+export default function AddSessionModal({
+  onClose,
+  onSaved,
+  initialTitle,
+}: Props) {
   const locale = useLocale()
-  const [form, setForm] = useState<StudyForm>(emptyForm)
+  const [title, setTitle] = useState(initialTitle ?? '')
+  const [til, setTil] = useState('')
   const [selectedDate, setSelectedDate] = useState<
     'today' | 'yesterday' | 'custom'
   >('today')
+  const [customDate, setCustomDate] = useState<Date>(new Date())
   const [selectedDuration, setSelectedDuration] = useState<
     '30' | '60' | '90' | 'custom'
   >('60')
+  const [customDuration, setCustomDuration] = useState('')
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [tagPool, setTagPool] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
 
   const dateFnsLocale = locale === 'ko' ? ko : locale === 'de' ? de : enUS
@@ -42,6 +44,22 @@ export default function AddSessionModal({ onClose, onSaved }: Props) {
         ? 'dd.MM.yyyy'
         : 'MM/dd/yyyy'
 
+  useEffect(() => {
+    fetch('/career-paths.json')
+      .then((r) => r.json())
+      .then((d: CareerData) => {
+        const allTags = [
+          ...new Set(
+            d.paths.flatMap((p) =>
+              p.stages.flatMap((s) => s.skills.flatMap((sk) => sk.tags))
+            )
+          ),
+        ]
+        setTagPool(allTags.sort())
+      })
+      .catch(() => {})
+  }, [])
+
   const getDateValue = () => {
     if (selectedDate === 'today') return new Date().toISOString().split('T')[0]
     if (selectedDate === 'yesterday') {
@@ -49,38 +67,31 @@ export default function AddSessionModal({ onClose, onSaved }: Props) {
       d.setDate(d.getDate() - 1)
       return d.toISOString().split('T')[0]
     }
-    return form.date
+    return customDate.toISOString().split('T')[0]
   }
 
   const getDurationValue = () => {
     if (selectedDuration !== 'custom') return selectedDuration
-    return form.duration_minutes
+    return customDuration
   }
 
-  const getDateObj = () => {
-    if (selectedDate === 'today') return new Date()
-    if (selectedDate === 'yesterday') {
-      const d = new Date()
-      d.setDate(d.getDate() - 1)
-      return d
-    }
-    return form.date ? new Date(form.date) : new Date()
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    )
   }
 
   const save = async () => {
-    if (!form.title.trim()) return
+    if (!title.trim()) return
     setSaving(true)
     await supabase.from('sessions').insert({
       date: getDateValue(),
-      title: form.title.trim(),
+      title: title.trim(),
       duration_minutes: getDurationValue()
         ? parseInt(getDurationValue()!)
         : null,
-      tags: form.tags
-        .split(',')
-        .map((t) => t.trim())
-        .filter(Boolean),
-      til: form.til.trim() || null,
+      tags: selectedTags,
+      til: til.trim() || null,
     })
     setSaving(false)
     onSaved()
@@ -96,6 +107,7 @@ export default function AddSessionModal({ onClose, onSaved }: Props) {
         className="bg-white rounded-2xl w-full max-w-lg p-5 flex flex-col gap-3 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* 헤더 */}
         <div className="flex items-center justify-between">
           <p className="text-base font-bold text-gray-800">📝 공부 기록 추가</p>
           <button
@@ -106,6 +118,17 @@ export default function AddSessionModal({ onClose, onSaved }: Props) {
           </button>
         </div>
 
+        {/* 완료 항목 뱃지 */}
+        {initialTitle && (
+          <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-lg">
+            <span className="text-xs text-indigo-500">✓</span>
+            <p className="text-xs text-indigo-700 font-medium">
+              &ldquo;{initialTitle}&rdquo; 완료 기록
+            </p>
+          </div>
+        )}
+
+        {/* 제목 */}
         <div>
           <label className={labelCls}>오늘 뭐 했어?</label>
           <input
@@ -113,14 +136,15 @@ export default function AddSessionModal({ onClose, onSaved }: Props) {
             type="text"
             className={inputCls}
             placeholder="예: async pipe 공부"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') save()
             }}
           />
         </div>
 
+        {/* 날짜 */}
         <div>
           <label className={labelCls}>날짜</label>
           <div className="flex gap-2 mb-2">
@@ -140,10 +164,9 @@ export default function AddSessionModal({ onClose, onSaved }: Props) {
           </div>
           {selectedDate === 'custom' && (
             <DatePicker
-              selected={getDateObj()}
+              selected={customDate}
               onChange={(date: Date | null) => {
-                if (date)
-                  setForm({ ...form, date: date.toISOString().split('T')[0] })
+                if (date) setCustomDate(date)
               }}
               locale={dateFnsLocale}
               dateFormat={dateFormat}
@@ -154,6 +177,7 @@ export default function AddSessionModal({ onClose, onSaved }: Props) {
           )}
         </div>
 
+        {/* 시간 */}
         <div>
           <label className={labelCls}>시간</label>
           <div className="flex gap-2">
@@ -176,42 +200,61 @@ export default function AddSessionModal({ onClose, onSaved }: Props) {
               type="number"
               className={`${inputCls} mt-2`}
               placeholder="분"
-              value={form.duration_minutes}
-              onChange={(e) =>
-                setForm({ ...form, duration_minutes: e.target.value })
-              }
+              value={customDuration}
+              onChange={(e) => setCustomDuration(e.target.value)}
             />
           )}
         </div>
 
+        {/* 태그 선택 */}
         <div>
           <label className={labelCls}>태그</label>
-          <input
-            type="text"
-            className={inputCls}
-            placeholder="Angular, FTL, RxJS"
-            value={form.tags}
-            onChange={(e) => setForm({ ...form, tags: e.target.value })}
-          />
+          <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 bg-gray-50 rounded-xl border border-gray-200">
+            {tagPool.length === 0 ? (
+              <p className="text-xs text-gray-400">불러오는 중...</p>
+            ) : (
+              tagPool.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => toggleTag(tag)}
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                    selectedTags.includes(tag)
+                      ? 'bg-indigo-500 text-white border-indigo-500'
+                      : 'bg-white text-gray-500 border-gray-200 hover:border-indigo-300'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))
+            )}
+          </div>
+          {selectedTags.length > 0 && (
+            <p className="text-xs text-gray-400 mt-1.5">
+              선택됨: {selectedTags.join(', ')}
+            </p>
+          )}
         </div>
 
+        {/* TIL */}
         <div>
           <label className={labelCls}>💡 TIL — 오늘 배운 것 (선택)</label>
           <textarea
             className={`${inputCls} min-h-[100px] resize-none`}
             placeholder="짧게라도 괜찮아. 오늘 기억하고 싶은 것..."
-            value={form.til}
-            onChange={(e) => setForm({ ...form, til: e.target.value })}
+            value={til}
+            onChange={(e) => setTil(e.target.value)}
           />
         </div>
 
+        {/* 버튼 */}
         <div className="flex gap-2 pt-1">
           <button onClick={onClose} className={cancelBtnCls}>
             취소
           </button>
           <button
             onClick={save}
-            disabled={saving}
+            disabled={saving || !title.trim()}
             className={`${saveBtnCls} flex-1`}
           >
             {saving ? '저장 중...' : '저장 💾'}
