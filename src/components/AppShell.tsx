@@ -34,11 +34,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const locale = pathname.split('/')[1] ?? 'ko'
   const segment = pathname.split('/')[2] ?? ''
   const pageTitle = pageTitles[segment] ?? ''
+  const [today, setToday] = useState('')
 
-  const today = new Date().toLocaleDateString(
-    locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
-    { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }
-  )
+  useEffect(() => {
+    setToday(
+      new Date().toLocaleDateString(
+        locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
+        { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }
+      )
+    )
+  }, [locale])
 
   useEffect(() => {
     supabase
@@ -56,10 +61,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const handleHeaderBtn = () => {
     if (btnConfig.modal) {
       setShowAddModal(true)
-    } else {
-      // notes, roadmap, projects — 해당 페이지로 이동 (이미 해당 탭에 있을 때는 아무 동작 없음)
-      // 실제 동작은 각 탭 컴포넌트에서 처리 — 여기선 모달만 열지 않음
+    } else if (segment === 'notes') {
+      // 노트 탭 — 해당 페이지에서 새 노트 버튼 트리거는 각 탭이 담당
+      // 여기선 notes 페이지로 이동만 (이미 있으면 무시)
     }
+    // roadmap, projects는 각 탭의 + 버튼 사용
   }
 
   if (onboarding) {

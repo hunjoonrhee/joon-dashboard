@@ -152,10 +152,10 @@ export default function HomeTab({
   const achievements = []
   if (completedTopics.length > 0)
     achievements.push(
-      `🎉 ${focusGoals[0]?.name ?? ''} 토픽 ${completedTopics.length}개 완료했어!`
+      `🎉 ${focusGoals[0]?.name ?? ''} ${t('achievementTopics', { count: completedTopics.length })}`
     )
-  if (streak >= 3) achievements.push(`🔥 ${streak}일 연속 공부 중 — 멈추지 마`)
-  if (monthCount >= 5) achievements.push(`📈 이번달 ${monthCount}회 공부했어`)
+  if (streak >= 3) achievements.push(`🔥 ${t('achievementStreak', { count: streak })}`)
+  if (monthCount >= 5) achievements.push(`📈 ${t('achievementMonth', { count: monthCount })}`)
 
   const getTopicGoalName = (topic: Topic) => {
     const goal = focusGoals.find((g) => g.id === topic.goal_id)
@@ -199,7 +199,7 @@ export default function HomeTab({
               <div className="text-base font-bold">
                 {streak > 0 ? `${streak}일 🔥` : '-'}
               </div>
-              <div className="text-xs opacity-65">현재 Streak</div>
+              <div className="text-xs opacity-65">{t('currentStreak')}</div>
             </div>
             <div>
               <div className="text-base font-bold">
@@ -212,7 +212,7 @@ export default function HomeTab({
               <div className="text-base font-bold">
                 {completedTopics.length}개
               </div>
-              <div className="text-xs opacity-65">완료한 토픽</div>
+              <div className="text-xs opacity-65">{t('completedTopics')}</div>
             </div>
           </div>
         </div>
@@ -234,13 +234,10 @@ export default function HomeTab({
               <span className="text-2xl">🔥</span>
               <div className="flex-1">
                 <div className="text-lg font-bold" style={{ color: '#ea580c' }}>
-                  {streak}일 연속
+                  {streak}{t('streakDays')}
                 </div>
-                <div
-                  className="text-xs font-medium"
-                  style={{ color: '#9a3412' }}
-                >
-                  지금 불타고 있어
+                <div className="text-xs font-medium" style={{ color: '#9a3412' }}>
+                  {t('streakActive')}
                 </div>
               </div>
               <div className="text-right">
@@ -249,7 +246,7 @@ export default function HomeTab({
                   className="text-base font-bold"
                   style={{ color: '#ea580c' }}
                 >
-                  {maxStreak}일
+                  {maxStreak}{t('streakDays')}
                 </div>
               </div>
             </div>
@@ -258,10 +255,10 @@ export default function HomeTab({
               <span className="text-xl">💤</span>
               <div>
                 <div className="text-sm font-medium text-gray-500">
-                  아직 streak이 없어
+                  {t('streakNone')}
                 </div>
                 <div className="text-xs text-gray-400">
-                  오늘 공부하면 시작돼!
+                  {t('streakStart')}
                 </div>
               </div>
             </div>
@@ -308,7 +305,7 @@ export default function HomeTab({
 
           {(suggestedTopics.length > 0 || suggestedTasks.length > 0) && (
             <div className="mb-3">
-              <p className="text-xs text-gray-400 mb-1.5 font-medium">추천</p>
+              <p className="text-xs text-gray-400 mb-1.5 font-medium">{t('suggested')}</p>
               {suggestedTopics.map((topic) => (
                 <div
                   key={topic.id}
@@ -403,9 +400,7 @@ export default function HomeTab({
               }
             >
               {(suggestedTopics.length > 0 || suggestedTasks.length > 0) && (
-                <p className="text-xs text-gray-400 mb-1.5 font-medium">
-                  선택한 것
-                </p>
+                <p className="text-xs text-gray-400 mb-1.5 font-medium">{t('selected')}</p>
               )}
               <div className="flex flex-col divide-y divide-gray-50">
                 {todayItems.map((item) => (
@@ -462,13 +457,13 @@ export default function HomeTab({
           {tilSessions.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-4 text-center">
               <span className="text-2xl opacity-40">💡</span>
-              <p className="text-sm font-semibold text-gray-700">아직 TIL이 없어</p>
-              <p className="text-xs text-gray-400 leading-relaxed">공부 기록할 때 배운 것을<br/>한 줄이라도 적어봐</p>
+              <p className="text-sm font-semibold text-gray-700">{t('tilEmpty')}</p>
+              <p className="text-xs text-gray-400 leading-relaxed">{t('tilEmptySub')}</p>
               <button
                 onClick={() => setShowAddModal(true)}
                 className="mt-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 transition-colors"
               >
-                + 공부기록 추가
+                {t('addStudy')}
               </button>
             </div>
           ) : (
@@ -522,13 +517,13 @@ export default function HomeTab({
           {notes.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-4 text-center">
               <span className="text-2xl opacity-40">🔥</span>
-              <p className="text-sm font-semibold text-gray-700">아직 노트가 없어</p>
-              <p className="text-xs text-gray-400 leading-relaxed">고민이나 오늘 느낀 것,<br/>뭐든 자유롭게 적어봐</p>
+              <p className="text-sm font-semibold text-gray-700">{t('notesEmpty')}</p>
+              <p className="text-xs text-gray-400 leading-relaxed">{t('notesEmptySub')}</p>
               <button
                 onClick={() => router.push('notes')}
                 className="mt-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-orange-600 bg-orange-50 border border-orange-100 hover:bg-orange-100 transition-colors"
               >
-                + 첫 노트 쓰기
+                {t('firstNote')}
               </button>
             </div>
           ) : (
@@ -597,10 +592,10 @@ export default function HomeTab({
           >
             <div>
               <p className="text-base font-bold text-gray-800 mb-0.5">
-                공부 기록 남길까? 📝
+                {t('completeModalTitle')}
               </p>
               <p className="text-sm text-gray-400">
-                &ldquo;{completedItemName}&rdquo; 완료했어!
+                &ldquo;{completedItemName}&rdquo; {t('completeModalSub')}
               </p>
             </div>
             <div className="flex gap-2">
@@ -608,7 +603,7 @@ export default function HomeTab({
                 onClick={() => setShowAddModal(false)}
                 className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-500 font-medium hover:bg-gray-50"
               >
-                나중에
+                {t('later')}
               </button>
               <button
                 onClick={() => {
@@ -617,7 +612,7 @@ export default function HomeTab({
                 }}
                 className="flex-1 py-2.5 rounded-xl bg-indigo-500 text-white text-sm font-bold hover:bg-indigo-600"
               >
-                기록 남기기 →
+                {t('addRecord')} →
               </button>
             </div>
           </div>

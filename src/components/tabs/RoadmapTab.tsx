@@ -349,7 +349,7 @@ export default function RoadmapTab({
           <div className="w-3 h-3 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex-shrink-0" />
           <div>
             <p className="text-sm font-bold text-indigo-800">{finalGoal} 🎯</p>
-            <p className="text-xs text-indigo-500 mt-0.5">최종 목표</p>
+            <p className="text-xs text-indigo-500 mt-0.5">{t('finalGoalSub')}</p>
           </div>
         </div>
 
@@ -360,7 +360,7 @@ export default function RoadmapTab({
               className="flex items-center gap-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition-colors"
             >
               {showCompleted ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-              완료된 목표 ({completedGoals.length})
+              {t('completedGoals')} ({completedGoals.length})
             </button>
             {showCompleted && (
               <div className="flex flex-col gap-2 mt-2">

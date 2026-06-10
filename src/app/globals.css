@@ -27,6 +27,13 @@ body {
   background-color: rgb(249 250 251);
 }
 
+/* 모바일 하단 navbar 높이만큼 padding — 콘텐츠가 가려지지 않도록 */
+@media (max-width: 1023px) {
+  main {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
 input::placeholder,
 textarea::placeholder {
   color: #9ca3af;
