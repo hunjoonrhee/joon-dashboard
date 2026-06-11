@@ -54,7 +54,8 @@
     "addRecord": "Add entry",
     "weeklyHours": "Hours this week",
     "weeklyTil": "TIL",
-    "weeklyTopics": "Topics done"
+    "weeklyTopics": "Topics done",
+    "gapLabel": "Learning match"
   },
   "goals": {
     "title": "Goals",

@@ -26,6 +26,7 @@ export interface Goal {
   status: 'in_progress' | 'completed' | 'planned'
   is_focus: boolean
   priority: 'urgent' | 'high' | 'medium' | 'low'
+  tags: string[]
   created_at: string
 }
 
@@ -53,6 +54,7 @@ export interface TodayItem {
   source_id: string | null
   created_at: string
 }
+
 export interface Project {
   id: string
   name: string
@@ -88,50 +90,25 @@ export interface Note {
   updated_at: string
 }
 
-// career-paths.json 타입
-export interface CareerSkill {
-  id: string
+// AI 로드맵
+export interface RoadmapSkill {
   name: string
-  category: string
   description: string
   tags: string[]
 }
 
-export interface CareerStage {
-  id: string
-  title: string
+export interface RoadmapStage {
   level: number
-  description: string
-  skills: CareerSkill[]
-}
-
-export interface CareerPath {
-  id: string
   title: string
   description: string
-  icon: string
-  stages: CareerStage[]
+  skills: RoadmapSkill[]
 }
 
-export interface CareerCategory {
+export interface AiRoadmap {
   id: string
-  label: string
-  color: string
-}
-
-export interface CareerData {
-  version: string
-  paths: CareerPath[]
-  categories: CareerCategory[]
-}
-
-export interface Goal {
-  id: string
-  name: string
-  description: string | null
-  status: 'in_progress' | 'completed' | 'planned'
-  is_focus: boolean
-  priority: 'urgent' | 'high' | 'medium' | 'low'
-  tags: string[]
+  goal: string
+  career_level: string
+  stages: RoadmapStage[]
+  adopted: boolean
   created_at: string
 }

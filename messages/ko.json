@@ -54,7 +54,8 @@
     "addRecord": "기록 남기기",
     "weeklyHours": "이번 주 시간",
     "weeklyTil": "TIL",
-    "weeklyTopics": "완료 토픽"
+    "weeklyTopics": "완료 토픽",
+    "gapLabel": "공부 방향 일치도"
   },
   "goals": {
     "title": "목표",

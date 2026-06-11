@@ -54,7 +54,8 @@
     "addRecord": "Eintrag hinzufügen",
     "weeklyHours": "Stunden diese Woche",
     "weeklyTil": "TIL",
-    "weeklyTopics": "Themen fertig"
+    "weeklyTopics": "Themen fertig",
+    "gapLabel": "Lernrichtung"
   },
   "goals": {
     "title": "Ziele",

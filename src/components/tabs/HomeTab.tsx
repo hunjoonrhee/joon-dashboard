@@ -3,9 +3,9 @@
 import AddSessionModal from '@/components/AddSessionModal'
 import { calcMaxStreak, calcStreak } from '@/lib/streak'
 import { supabase } from '@/lib/supabase'
-import type { Goal, Note, ProjectTask, Session, TodayItem, Topic } from '@/types'
+import type { CareerData, Goal, Note, ProjectTask, Session, TodayItem, Topic } from '@/types'
 import { useLocale, useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import HeroCard from './home/HeroCard'
 import NotesPreviewCard from './home/NotesPreviewCard'
 import TilPreviewCard from './home/TilPreviewCard'
@@ -37,6 +37,15 @@ export default function HomeTab({
   const locale = useLocale()
   const [showSessionModal, setShowSessionModal] = useState(false)
   const [completedItemName, setCompletedItemName] = useState('')
+  const [careerData, setCareerData] = useState<CareerData | null>(null)
+
+  // career-paths.json 로드
+  useEffect(() => {
+    fetch('/career-paths.json')
+      .then((r) => r.json())
+      .then((d: CareerData) => setCareerData(d))
+      .catch(() => {})
+  }, [])
 
   const streak = calcStreak(sessions)
   const maxStreak = calcMaxStreak(sessions)
@@ -44,12 +53,44 @@ export default function HomeTab({
   const focusGoals = goals.filter((g) => g.is_focus)
   const totalTopics = topics.filter((t) => focusGoals.some((g) => g.id === t.goal_id))
   const completedTopics = totalTopics.filter((t) => t.completed)
-  const overallPct = totalTopics.length === 0
-    ? 0
-    : Math.round((completedTopics.length / totalTopics.length) * 100)
+  const overallPct =
+    totalTopics.length === 0
+      ? 0
+      : Math.round((completedTopics.length / totalTopics.length) * 100)
 
   const thisMonth = new Date().getMonth()
   const monthCount = sessions.filter((s) => new Date(s.date).getMonth() === thisMonth).length
+
+  // 갭 분석 계산
+  const selectedPath = settings.career_path ?? null
+  const selectedStageLevel = parseInt(settings.career_stage ?? '1')
+  const studiedTags = new Set(sessions.flatMap((s) => s.tags))
+
+  const { gapPct, careerPathTitle, careerStageTitle } = (() => {
+    if (!selectedPath || !careerData) return { gapPct: null, careerPathTitle: null, careerStageTitle: null }
+
+    const currentPath = careerData.paths.find((p) => p.id === selectedPath)
+    if (!currentPath) return { gapPct: null, careerPathTitle: null, careerStageTitle: null }
+
+    const currentStage = currentPath.stages.find((s) => s.level === selectedStageLevel)
+
+    const relevantSkills = currentPath.stages
+      .filter((s) => s.level <= selectedStageLevel + 1)
+      .flatMap((s) => s.skills)
+
+    const totalSkills = relevantSkills.length
+    const studiedSkills = relevantSkills.filter((skill) =>
+      skill.tags.some((tag) => studiedTags.has(tag))
+    ).length
+
+    const pct = totalSkills === 0 ? 0 : Math.round((studiedSkills / totalSkills) * 100)
+
+    return {
+      gapPct: pct,
+      careerPathTitle: currentPath.title,
+      careerStageTitle: currentStage?.title ?? null,
+    }
+  })()
 
   const suggestedTopics = totalTopics
     .filter((t) => !t.completed)
@@ -92,10 +133,12 @@ export default function HomeTab({
       d.setDate(monday.getDate() + i)
       const dateStr = d.toISOString().split('T')[0]
       return {
-        label: d.toLocaleDateString(
-          locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
-          { weekday: 'short' }
-        ).slice(0, 2),
+        label: d
+          .toLocaleDateString(
+            locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
+            { weekday: 'short' }
+          )
+          .slice(0, 2),
         hasSession: sessions.some((s) => s.date === dateStr),
         isToday: d.toDateString() === today.toDateString(),
       }
@@ -133,6 +176,9 @@ export default function HomeTab({
           streak={streak}
           monthCount={monthCount}
           completedTopicsCount={completedTopics.length}
+          gapPct={gapPct}
+          careerPathTitle={careerPathTitle}
+          careerStageTitle={careerStageTitle}
         />
         <WeeklyActivityCard
           streak={streak}
@@ -165,9 +211,20 @@ export default function HomeTab({
               key={i}
               className="text-sm font-medium px-3 py-2.5 rounded-xl border"
               style={{
-                background: i === 0 ? 'rgba(16,185,129,0.08)' : i === 1 ? 'rgba(249,115,22,0.08)' : 'rgba(99,102,241,0.08)',
-                borderColor: i === 0 ? 'rgba(16,185,129,0.2)' : i === 1 ? 'rgba(249,115,22,0.2)' : 'rgba(99,102,241,0.2)',
-                color: i === 0 ? '#065f46' : i === 1 ? '#9a3412' : '#312e81',
+                background:
+                  i === 0
+                    ? 'rgba(16,185,129,0.08)'
+                    : i === 1
+                      ? 'rgba(249,115,22,0.08)'
+                      : 'rgba(99,102,241,0.08)',
+                borderColor:
+                  i === 0
+                    ? 'rgba(16,185,129,0.2)'
+                    : i === 1
+                      ? 'rgba(249,115,22,0.2)'
+                      : 'rgba(99,102,241,0.2)',
+                color:
+                  i === 0 ? '#065f46' : i === 1 ? '#9a3412' : '#312e81',
               }}
             >
               {msg}
@@ -179,8 +236,15 @@ export default function HomeTab({
       {showSessionModal && (
         <AddSessionModal
           initialTitle={completedItemName}
-          onClose={() => { setShowSessionModal(false); setCompletedItemName('') }}
-          onSaved={() => { setShowSessionModal(false); setCompletedItemName(''); onRefresh() }}
+          onClose={() => {
+            setShowSessionModal(false)
+            setCompletedItemName('')
+          }}
+          onSaved={() => {
+            setShowSessionModal(false)
+            setCompletedItemName('')
+            onRefresh()
+          }}
         />
       )}
     </div>
