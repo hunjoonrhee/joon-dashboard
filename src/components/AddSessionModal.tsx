@@ -1,12 +1,13 @@
 'use client'
 
+import { useToast } from '@/components/Toast'
 import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
-import { CareerData } from '@/types'
+import type { CareerData } from '@/types'
 import { de, enUS, ko } from 'date-fns/locale'
 import { X } from 'lucide-react'
-import { useLocale } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
+import { useEffect, useRef, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 
@@ -22,6 +23,11 @@ export default function AddSessionModal({
   initialTitle,
 }: Props) {
   const locale = useLocale()
+  const { show } = useToast()
+  const t = useTranslations('common')
+  const tStudy = useTranslations('study')
+  const tToast = useTranslations('toast')
+
   const [title, setTitle] = useState(initialTitle ?? '')
   const [til, setTil] = useState('')
   const [selectedDate, setSelectedDate] = useState<
@@ -34,7 +40,10 @@ export default function AddSessionModal({
   const [customDuration, setCustomDuration] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [tagPool, setTagPool] = useState<string[]>([])
+  const [tagSearch, setTagSearch] = useState('')
+  const [tagDropdownOpen, setTagDropdownOpen] = useState(false)
   const [saving, setSaving] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const dateFnsLocale = locale === 'ko' ? ko : locale === 'de' ? de : enUS
   const dateFormat =
@@ -70,32 +79,59 @@ export default function AddSessionModal({
     return customDate.toISOString().split('T')[0]
   }
 
-  const getDurationValue = () => {
-    if (selectedDuration !== 'custom') return selectedDuration
-    return customDuration
+  const getDurationValue = () =>
+    selectedDuration !== 'custom' ? selectedDuration : customDuration
+
+  const filteredTags = tagSearch.trim()
+    ? tagPool.filter(
+        (tag) =>
+          tag.toLowerCase().includes(tagSearch.toLowerCase()) &&
+          !selectedTags.includes(tag)
+      )
+    : []
+
+  const addTag = (tag: string) => {
+    const trimmed = tag.trim()
+    if (!trimmed || selectedTags.includes(trimmed)) return
+    setSelectedTags((prev) => [...prev, trimmed])
+    setTagSearch('')
+    setTagDropdownOpen(false)
   }
 
-  const toggleTag = (tag: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    )
-  }
+  const removeTag = (tag: string) =>
+    setSelectedTags((prev) => prev.filter((t) => t !== tag))
 
   const save = async () => {
     if (!title.trim()) return
     setSaving(true)
-    await supabase.from('sessions').insert({
-      date: getDateValue(),
-      title: title.trim(),
-      duration_minutes: getDurationValue()
-        ? parseInt(getDurationValue()!)
-        : null,
-      tags: selectedTags,
-      til: til.trim() || null,
-    })
-    setSaving(false)
-    onSaved()
-    onClose()
+    try {
+      await supabase.from('sessions').insert({
+        date: getDateValue(),
+        title: title.trim(),
+        duration_minutes: getDurationValue()
+          ? parseInt(getDurationValue()!)
+          : null,
+        tags: selectedTags,
+        til: til.trim() || null,
+      })
+      const matchedTags = selectedTags.filter((tag) => tagPool.includes(tag))
+      if (matchedTags.length > 0) {
+        show(tToast('studySaved'), {
+          type: 'success',
+          sub: tToast('studySavedGap', {
+            tags: matchedTags.slice(0, 2).join(', '),
+          }),
+        })
+      } else {
+        show(tToast('studySaved'), { type: 'success' })
+      }
+      onSaved()
+      onClose()
+    } catch {
+      show(tToast('saveFailed'), { type: 'error' })
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -107,9 +143,10 @@ export default function AddSessionModal({
         className="bg-white rounded-2xl w-full max-w-lg p-5 flex flex-col gap-3 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 헤더 */}
         <div className="flex items-center justify-between">
-          <p className="text-base font-bold text-gray-800">📝 공부 기록 추가</p>
+          <p className="text-base font-bold text-gray-800">
+            📝 {tStudy('addModal')}
+          </p>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -118,24 +155,22 @@ export default function AddSessionModal({
           </button>
         </div>
 
-        {/* 완료 항목 뱃지 */}
         {initialTitle && (
           <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-lg">
             <span className="text-xs text-indigo-500">✓</span>
             <p className="text-xs text-indigo-700 font-medium">
-              &ldquo;{initialTitle}&rdquo; 완료 기록
+              &ldquo;{initialTitle}&rdquo; {t('completedBadge')}
             </p>
           </div>
         )}
 
-        {/* 제목 */}
         <div>
-          <label className={labelCls}>오늘 뭐 했어?</label>
+          <label className={labelCls}>{tStudy('placeholder')}</label>
           <input
             autoFocus
             type="text"
             className={inputCls}
-            placeholder="예: async pipe 공부"
+            placeholder={tStudy('placeholder')}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={(e) => {
@@ -144,21 +179,20 @@ export default function AddSessionModal({
           />
         </div>
 
-        {/* 날짜 */}
         <div>
-          <label className={labelCls}>날짜</label>
+          <label className={labelCls}>{tStudy('date')}</label>
           <div className="flex gap-2 mb-2">
             {(['today', 'yesterday', 'custom'] as const).map((d) => (
               <button
                 key={d}
                 onClick={() => setSelectedDate(d)}
-                className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${
-                  selectedDate === d
-                    ? 'border-indigo-500 bg-indigo-50 text-indigo-600'
-                    : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                }`}
+                className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedDate === d ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
               >
-                {d === 'today' ? '오늘' : d === 'yesterday' ? '어제' : '직접'}
+                {d === 'today'
+                  ? t('today')
+                  : d === 'yesterday'
+                    ? t('yesterday')
+                    : t('custom')}
               </button>
             ))}
           </div>
@@ -171,27 +205,27 @@ export default function AddSessionModal({
               locale={dateFnsLocale}
               dateFormat={dateFormat}
               className={inputCls}
-              placeholderText="날짜 선택"
               maxDate={new Date()}
             />
           )}
         </div>
 
-        {/* 시간 */}
         <div>
-          <label className={labelCls}>시간</label>
+          <label className={labelCls}>{tStudy('duration')}</label>
           <div className="flex gap-2">
             {(['30', '60', '90', 'custom'] as const).map((d) => (
               <button
                 key={d}
                 onClick={() => setSelectedDuration(d)}
-                className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${
-                  selectedDuration === d
-                    ? 'border-indigo-500 bg-indigo-50 text-indigo-600'
-                    : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                }`}
+                className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedDuration === d ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
               >
-                {d === 'custom' ? '직접' : `${d}분`}
+                {d === '30'
+                  ? t('min30')
+                  : d === '60'
+                    ? t('min60')
+                    : d === '90'
+                      ? t('min90')
+                      : t('minCustom')}
               </button>
             ))}
           </div>
@@ -199,65 +233,113 @@ export default function AddSessionModal({
             <input
               type="number"
               className={`${inputCls} mt-2`}
-              placeholder="분"
               value={customDuration}
               onChange={(e) => setCustomDuration(e.target.value)}
             />
           )}
         </div>
 
-        {/* 태그 선택 */}
         <div>
-          <label className={labelCls}>태그</label>
-          <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 bg-gray-50 rounded-xl border border-gray-200">
-            {tagPool.length === 0 ? (
-              <p className="text-xs text-gray-400">불러오는 중...</p>
-            ) : (
-              tagPool.map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => toggleTag(tag)}
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
-                    selectedTags.includes(tag)
-                      ? 'bg-indigo-500 text-white border-indigo-500'
-                      : 'bg-white text-gray-500 border-gray-200 hover:border-indigo-300'
-                  }`}
-                >
-                  {tag}
-                </button>
-              ))
+          <label className={labelCls}>{tStudy('tags')}</label>
+          {selectedTags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {selectedTags.map((tag) => {
+                const isCustom = !tagPool.includes(tag)
+                return (
+                  <span
+                    key={tag}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${isCustom ? 'bg-gray-100 text-gray-600 border border-gray-200' : 'bg-indigo-500 text-white'}`}
+                  >
+                    {tag}
+                    {isCustom && (
+                      <span className="text-gray-400 text-xs">*</span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeTag(tag)}
+                      className="hover:opacity-70"
+                    >
+                      <X size={10} />
+                    </button>
+                  </span>
+                )
+              })}
+            </div>
+          )}
+          <div className="relative" ref={dropdownRef}>
+            <input
+              type="text"
+              className={inputCls}
+              placeholder={t('tagSearchPlaceholder')}
+              value={tagSearch}
+              onChange={(e) => {
+                setTagSearch(e.target.value)
+                setTagDropdownOpen(true)
+              }}
+              onFocus={() => setTagDropdownOpen(true)}
+              onBlur={() => setTimeout(() => setTagDropdownOpen(false), 150)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && tagSearch.trim()) {
+                  e.preventDefault()
+                  addTag(tagSearch)
+                }
+              }}
+            />
+            {tagDropdownOpen && (
+              <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                {filteredTags.length > 0 ? (
+                  <div className="max-h-44 overflow-y-auto">
+                    {filteredTags.slice(0, 20).map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onMouseDown={() => addTag(tag)}
+                        className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                ) : tagSearch.trim() &&
+                  !selectedTags.includes(tagSearch.trim()) ? (
+                  <button
+                    type="button"
+                    onMouseDown={() => addTag(tagSearch)}
+                    className="w-full text-left px-3 py-2.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="text-gray-400">{t('tagCustomAdd')}: </span>
+                    <span className="font-medium text-gray-700">
+                      {tagSearch.trim()}
+                    </span>
+                    <span className="text-xs text-gray-400 ml-1">
+                      {t('tagGapNote')}
+                    </span>
+                  </button>
+                ) : null}
+              </div>
             )}
           </div>
-          {selectedTags.length > 0 && (
-            <p className="text-xs text-gray-400 mt-1.5">
-              선택됨: {selectedTags.join(', ')}
-            </p>
-          )}
         </div>
 
-        {/* TIL */}
         <div>
-          <label className={labelCls}>💡 TIL — 오늘 배운 것 (선택)</label>
+          <label className={labelCls}>💡 TIL</label>
           <textarea
             className={`${inputCls} min-h-[100px] resize-none`}
-            placeholder="짧게라도 괜찮아. 오늘 기억하고 싶은 것..."
             value={til}
             onChange={(e) => setTil(e.target.value)}
           />
         </div>
 
-        {/* 버튼 */}
         <div className="flex gap-2 pt-1">
           <button onClick={onClose} className={cancelBtnCls}>
-            취소
+            {t('cancel')}
           </button>
           <button
             onClick={save}
             disabled={saving || !title.trim()}
             className={`${saveBtnCls} flex-1`}
           >
-            {saving ? '저장 중...' : '저장 💾'}
+            {saving ? t('saving') : t('save')} 💾
           </button>
         </div>
       </div>

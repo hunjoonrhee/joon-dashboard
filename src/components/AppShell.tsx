@@ -4,37 +4,52 @@ import AddSessionModal from '@/components/AddSessionModal'
 import NavBar from '@/components/NavBar'
 import Onboarding from '@/components/Onboarding'
 import Sidebar from '@/components/Sidebar'
+import GoalModal from '@/components/tabs/roadmap/GoalModal'
+import { ToastProvider } from '@/components/Toast'
 import { supabase } from '@/lib/supabase'
+import { useTranslations } from 'next-intl'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-const pageTitles: Record<string, string> = {
-  '': '홈',
-  study: '공부 기록',
-  notes: '노트',
-  roadmap: '로드맵',
-  projects: '프로젝트',
-  settings: '설정',
-}
-
-const headerButtonConfig: Record<string, { label: string; modal: boolean }> = {
-  study: { label: '+ 공부기록 추가', modal: true },
-  settings: { label: '+ 공부기록 추가', modal: true },
-}
-
 export default function AppShell({ children }: { children: React.ReactNode }) {
+  const tNav = useTranslations('nav')
+  const tCommon = useTranslations('common')
+  const pageTitles: Record<string, string> = {
+    '': tNav('home'),
+    study: tNav('study'),
+    notes: tNav('notes'),
+    roadmap: tNav('roadmap'),
+    projects: tNav('projects'),
+    settings: tNav('settings'),
+  }
   const [onboarding, setOnboarding] = useState<boolean | null>(null)
-  const [showAddModal, setShowAddModal] = useState(false)
+  const [showStudyModal, setShowStudyModal] = useState(false)
+  const [showGoalModal, setShowGoalModal] = useState(false)
   const pathname = usePathname()
 
   const locale = pathname.split('/')[1] ?? 'ko'
   const segment = pathname.split('/')[2] ?? ''
   const pageTitle = pageTitles[segment] ?? ''
 
-  const today = new Date().toLocaleDateString(
-    locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
-    { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }
-  )
+  const today =
+    typeof window !== 'undefined'
+      ? new Date().toLocaleDateString(
+          locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
+          { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }
+        )
+      : ''
+
+  const headerButtonConfig: Record<
+    string,
+    { label: string; modal: 'study' | 'goal' | false }
+  > = {
+    '': { label: `+ ${tNav('study')}`, modal: 'study' },
+    study: { label: `+ ${tNav('study')}`, modal: 'study' },
+    notes: { label: `+ ${tCommon('add')} ${tNav('notes')}`, modal: false },
+    roadmap: { label: `+ ${tNav('goals')}`, modal: 'goal' },
+    projects: { label: `+ ${tNav('projects')}`, modal: false },
+    settings: { label: `+ ${tNav('study')}`, modal: 'study' },
+  }
 
   useEffect(() => {
     supabase
@@ -50,52 +65,58 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const btnConfig = headerButtonConfig[segment] ?? headerButtonConfig['']
 
   const handleHeaderBtn = () => {
-    if (btnConfig.modal) {
-      setShowAddModal(true)
-    } else if (segment === 'notes') {
-      // 노트 탭 — 해당 페이지에서 새 노트 버튼 트리거는 각 탭이 담당
-      // 여기선 notes 페이지로 이동만 (이미 있으면 무시)
-    }
-    // roadmap, projects는 각 탭의 + 버튼 사용
+    if (btnConfig.modal === 'study') setShowStudyModal(true)
+    else if (btnConfig.modal === 'goal') setShowGoalModal(true)
   }
 
+  if (onboarding === null) return null
+
   if (onboarding) {
-    return <Onboarding onComplete={() => setOnboarding(false)} />
+    return (
+      <ToastProvider>
+        <Onboarding onComplete={() => setOnboarding(false)} />
+      </ToastProvider>
+    )
   }
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex-1 lg:ml-56 flex flex-col min-h-screen">
-        <NavBar />
-
-        {/* 데스크탑 헤더 */}
-        <div className="hidden lg:flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100 sticky top-0 z-10">
-          <h1 className="text-base font-bold text-gray-800">{pageTitle}</h1>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-400" suppressHydrationWarning>
-              {today}
-            </span>
-            {btnConfig && (
+    <ToastProvider>
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <div className="flex-1 lg:ml-56 flex flex-col min-h-screen">
+          <NavBar />
+          <div className="hidden lg:flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100 sticky top-0 z-10">
+            <h1 className="text-base font-bold text-gray-800">{pageTitle}</h1>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-400" suppressHydrationWarning>
+                {today}
+              </span>
               <button
                 onClick={handleHeaderBtn}
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-600 transition-colors"
               >
                 {btnConfig.label}
               </button>
-            )}
+            </div>
           </div>
+          <main className="flex-1 bg-gray-50">{children}</main>
         </div>
 
-        <main className="flex-1 bg-gray-50">{children}</main>
-      </div>
+        {showStudyModal && (
+          <AddSessionModal
+            onClose={() => setShowStudyModal(false)}
+            onSaved={() => setShowStudyModal(false)}
+          />
+        )}
 
-      {showAddModal && (
-        <AddSessionModal
-          onClose={() => setShowAddModal(false)}
-          onSaved={() => setShowAddModal(false)}
-        />
-      )}
-    </div>
+        {showGoalModal && (
+          <GoalModal
+            mode="add"
+            onClose={() => setShowGoalModal(false)}
+            onSaved={() => setShowGoalModal(false)}
+          />
+        )}
+      </div>
+    </ToastProvider>
   )
 }

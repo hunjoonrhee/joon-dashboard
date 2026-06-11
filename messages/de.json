@@ -5,7 +5,14 @@
     "goals": "Ziele",
     "projects": "Projekte",
     "roadmap": "Roadmap",
-    "notes": "Notizen"
+    "notes": "Notizen",
+    "mainSection": "Haupt",
+    "planSection": "Planung",
+    "settings": "Einstellungen",
+    "addStudy": "+ Lerneintrag hinzufügen",
+    "addNote": "+ Neue Notiz",
+    "addGoal": "+ Ziel hinzufügen",
+    "addProject": "+ Projekt hinzufügen"
   },
   "home": {
     "location": "Hier bin ich gerade",
@@ -29,6 +36,7 @@
     "streakActive": "Du bist im Flow 🔥",
     "streakNone": "Noch kein Streak",
     "streakStart": "Lerne heute und starte durch!",
+    "streakBest": "Bestleistung",
     "suggested": "Vorgeschlagen",
     "selected": "Ausgewählt",
     "tilEmpty": "Noch kein TIL",
@@ -59,7 +67,8 @@
     "status": "Status",
     "focus": "Als aktuelles Fokusziel festlegen",
     "finalGoalSub": "Endziel",
-    "completedGoals": "Abgeschlossene Ziele"
+    "completedGoals": "Abgeschlossene Ziele",
+    "tags": "Zugehörige Tags"
   },
   "status": {
     "in_progress": "In Bearbeitung",
@@ -78,7 +87,19 @@
     "cancel": "Abbrechen",
     "delete": "Löschen",
     "add": "Hinzufügen",
-    "edit": "Bearbeiten"
+    "edit": "Bearbeiten",
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "custom": "Manuell",
+    "min30": "30 Min",
+    "min60": "60 Min",
+    "min90": "90 Min",
+    "minCustom": "Manuell",
+    "tagSearchPlaceholder": "Tag suchen oder eingeben + Enter",
+    "tagCustomAdd": "Direkt hinzufügen",
+    "tagGapNote": "(nicht in Gap-Analyse)",
+    "completedBadge": "Abschlusseintrag",
+    "loadingDots": "Wird geladen..."
   },
   "study": {
     "title": "Lernprotokoll",
@@ -94,6 +115,21 @@
     "tilEmpty": "Noch kein TIL",
     "tilEmptySub": "Füge beim Lernen auch ein TIL hinzu."
   },
+  "notes": {
+    "title": "Notizen",
+    "empty": "Noch keine Notizen",
+    "emptySub": "Schreib Gedanken zu deinem Ziel\noder was du heute gefühlt hast",
+    "firstNote": "Erste Notiz schreiben",
+    "newNote": "+ Neue Notiz",
+    "untitled": "Kein Titel",
+    "editorPlaceholder": "Titel eingeben...",
+    "bodyPlaceholder": "Gedanken zu deinem Ziel, was du heute gefühlt hast, alles ist erlaubt.\n\nMarkdown wird unterstützt — **fett**, *kursiv*, - Liste",
+    "save": "Speichern",
+    "saving": "Wird gespeichert...",
+    "edited": "bearbeitet",
+    "backToList": "← Zurück zur Liste",
+    "selectOrNew": "Neue Notiz schreiben oder\nlinks eine Notiz auswählen"
+  },
   "projects": {
     "title": "Projekte",
     "tasks": "Aufgaben",
@@ -105,5 +141,40 @@
     "description": "Beschreibung",
     "status": "Status",
     "taskName": "Aufgabenname"
+  },
+  "roadmap": {
+    "myGoals": "Meine Ziele",
+    "careerPath": "Karrierepfad",
+    "gapAnalysis": "Lückenanalyse",
+    "selectPath": "Wähle deinen Karrierepfad",
+    "selectPathSub": "Nach der Auswahl werden Lernrichtung und Lückenanalyse automatisch vorgeschlagen.",
+    "currentStage": "Aktuelle Stufe",
+    "finalStage": "Endstufe",
+    "backToList": "Zurück zur Liste",
+    "changeBtn": "Ändern",
+    "loading": "Wird geladen...",
+    "gapTitle": "Übereinstimmung mit Lernrichtung",
+    "gapSummary": "{studied}/{total} Kompetenzen mit Lerneinträgen",
+    "gapSelectFirst": "Bitte zuerst einen Karrierepfad auswählen",
+    "gapSelectBtn": "Karrierepfad auswählen",
+    "requiredTags": "Benötigte Tags"
+  },
+  "toast": {
+    "goalAdded": "Ziel wurde hinzugefügt 🎯",
+    "goalEdited": "Ziel wurde aktualisiert",
+    "goalDeleted": "Ziel wurde gelöscht",
+    "studySaved": "Lerneintrag gespeichert 💾",
+    "studySavedGap": "{tags} → in Lückenanalyse berücksichtigt",
+    "careerSaved": "Karrierepfad gespeichert ✓",
+    "noteSaved": "Notiz gespeichert ✓",
+    "noteDeleted": "Notiz gelöscht",
+    "projectAdded": "Projekt wurde hinzugefügt",
+    "projectEdited": "Projekt wurde aktualisiert",
+    "projectDeleted": "Projekt wurde gelöscht",
+    "taskAdded": "Aufgabe wurde hinzugefügt",
+    "taskEdited": "Aufgabe wurde aktualisiert",
+    "taskDeleted": "Aufgabe wurde gelöscht",
+    "saveFailed": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "deleteFailed": "Löschen fehlgeschlagen"
   }
 }

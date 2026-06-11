@@ -2,12 +2,10 @@
 
 import type { Note } from '@/types'
 import { Pencil, Trash2 } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import ReactMarkdown from 'react-markdown'
 
 const moods = ['🎯', '🤔', '💪', '😴', '🔥', '😊', '😤']
-
-const dateLabel = (d: string) =>
-  new Date(d).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })
 
 interface EditorProps {
   title: string
@@ -25,9 +23,21 @@ interface EditorProps {
 }
 
 export function NoteEditorPanel({
-  title, content, mood, saving, isNew, selectedNote,
-  onTitleChange, onContentChange, onMoodChange, onSave, onCancel, onDelete,
+  title,
+  content,
+  mood,
+  saving,
+  isNew,
+  onTitleChange,
+  onContentChange,
+  onMoodChange,
+  onSave,
+  onCancel,
+  onDelete,
 }: EditorProps) {
+  const t = useTranslations('notes')
+  const tCommon = useTranslations('common')
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col min-h-[500px]">
       <div className="p-4 border-b border-gray-100">
@@ -45,7 +55,7 @@ export function NoteEditorPanel({
         <input
           type="text"
           className="w-full text-lg font-bold text-gray-800 outline-none placeholder:text-gray-300"
-          placeholder="제목을 입력해봐..."
+          placeholder={t('editorPlaceholder')}
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
         />
@@ -53,19 +63,25 @@ export function NoteEditorPanel({
       <textarea
         autoFocus
         className="flex-1 w-full p-4 text-sm text-gray-700 outline-none resize-none placeholder:text-gray-300 leading-relaxed min-h-[350px]"
-        placeholder={'최종 목표를 향한 고민, 오늘 느낀 것, 뭐든 써봐.\n\n마크다운도 돼 — **볼드**, *이탤릭*, - 리스트'}
+        placeholder={t('bodyPlaceholder')}
         value={content}
         onChange={(e) => onContentChange(e.target.value)}
       />
       <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {!isNew && onDelete && (
-            <button onClick={onDelete} className="text-gray-300 hover:text-red-400 transition-colors">
+            <button
+              onClick={onDelete}
+              className="text-gray-300 hover:text-red-400 transition-colors"
+            >
               <Trash2 size={15} />
             </button>
           )}
-          <button onClick={onCancel} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-            취소
+          <button
+            onClick={onCancel}
+            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            {tCommon('cancel')}
           </button>
         </div>
         <button
@@ -73,7 +89,7 @@ export function NoteEditorPanel({
           disabled={saving}
           className="px-4 py-1.5 rounded-lg bg-indigo-500 text-white text-xs font-bold hover:bg-indigo-600 transition-colors disabled:opacity-50"
         >
-          {saving ? '저장 중...' : '저장'}
+          {saving ? t('saving') : t('save')}
         </button>
       </div>
     </div>
@@ -87,21 +103,40 @@ interface ViewProps {
 }
 
 export function NoteViewPanel({ note, onEdit, onDelete }: ViewProps) {
+  const t = useTranslations('notes')
+  const locale = useLocale()
+
+  const dateLabel = (d: string) =>
+    new Date(d).toLocaleDateString(
+      locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
+      { month: 'long', day: 'numeric' }
+    )
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col min-h-[500px]">
       <div className="p-4 border-b border-gray-100 flex items-start justify-between">
         <div>
           <div className="flex items-center gap-1.5 mb-1">
             {note.mood && <span className="text-lg">{note.mood}</span>}
-            <h2 className="text-lg font-bold text-gray-800">{note.title || '제목 없음'}</h2>
+            <h2 className="text-lg font-bold text-gray-800">
+              {note.title || t('untitled')}
+            </h2>
           </div>
-          <p className="text-xs text-gray-400">{dateLabel(note.updated_at)} 수정</p>
+          <p className="text-xs text-gray-400">
+            {dateLabel(note.updated_at)} {t('edited')}
+          </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={onEdit} className="text-gray-400 hover:text-indigo-500 transition-colors">
+          <button
+            onClick={onEdit}
+            className="text-gray-400 hover:text-indigo-500 transition-colors"
+          >
             <Pencil size={15} />
           </button>
-          <button onClick={onDelete} className="text-gray-300 hover:text-red-400 transition-colors">
+          <button
+            onClick={onDelete}
+            className="text-gray-300 hover:text-red-400 transition-colors"
+          >
             <Trash2 size={15} />
           </button>
         </div>
@@ -114,6 +149,7 @@ export function NoteViewPanel({ note, onEdit, onDelete }: ViewProps) {
 }
 
 export function NoteEmptyPanel({ onNew }: { onNew: () => void }) {
+  const t = useTranslations('notes')
   return (
     <div
       className="bg-white rounded-xl border border-dashed border-gray-200 flex items-center justify-center min-h-[500px] cursor-pointer hover:border-indigo-300 transition-colors"
@@ -121,7 +157,9 @@ export function NoteEmptyPanel({ onNew }: { onNew: () => void }) {
     >
       <div className="text-center">
         <div className="text-3xl mb-2">✍️</div>
-        <p className="text-sm text-gray-400">새 노트를 쓰거나<br />왼쪽에서 노트를 선택해봐</p>
+        <p className="text-sm text-gray-400 whitespace-pre-line">
+          {t('selectOrNew')}
+        </p>
       </div>
     </div>
   )

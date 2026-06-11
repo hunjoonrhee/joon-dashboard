@@ -5,7 +5,14 @@
     "goals": "Goals",
     "projects": "Projects",
     "roadmap": "Roadmap",
-    "notes": "Notes"
+    "notes": "Notes",
+    "mainSection": "Main",
+    "planSection": "Planning",
+    "settings": "Settings",
+    "addStudy": "+ Add study entry",
+    "addNote": "+ New Note",
+    "addGoal": "+ Add Goal",
+    "addProject": "+ Add Project"
   },
   "home": {
     "location": "Here's where I am",
@@ -29,6 +36,7 @@
     "streakActive": "You're on fire 🔥",
     "streakNone": "No streak yet",
     "streakStart": "Study today to get started!",
+    "streakBest": "Best streak",
     "suggested": "Suggested",
     "selected": "Selected",
     "tilEmpty": "No TIL yet",
@@ -59,7 +67,8 @@
     "status": "Status",
     "focus": "Set as current focus goal",
     "finalGoalSub": "Final goal",
-    "completedGoals": "Completed goals"
+    "completedGoals": "Completed goals",
+    "tags": "Related tags"
   },
   "status": {
     "in_progress": "In Progress",
@@ -78,7 +87,19 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "add": "Add",
-    "edit": "Edit"
+    "edit": "Edit",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "custom": "Custom",
+    "min30": "30 min",
+    "min60": "60 min",
+    "min90": "90 min",
+    "minCustom": "Custom",
+    "tagSearchPlaceholder": "Search tags or type + Enter",
+    "tagCustomAdd": "Add custom",
+    "tagGapNote": "(not in gap analysis)",
+    "completedBadge": "Completion log",
+    "loadingDots": "Loading..."
   },
   "study": {
     "title": "Study Log",
@@ -94,6 +115,21 @@
     "tilEmpty": "No TIL yet",
     "tilEmptySub": "Add a TIL when logging your study session."
   },
+  "notes": {
+    "title": "Notes",
+    "empty": "No notes yet",
+    "emptySub": "Write down thoughts about your goal\nor how you're feeling today",
+    "firstNote": "Write first note",
+    "newNote": "+ New Note",
+    "untitled": "Untitled",
+    "editorPlaceholder": "Enter a title...",
+    "bodyPlaceholder": "Thoughts about your goal, how you feel today — anything goes.\n\nMarkdown supported — **bold**, *italic*, - list",
+    "save": "Save",
+    "saving": "Saving...",
+    "edited": "edited",
+    "backToList": "← Back to list",
+    "selectOrNew": "Write a new note or\nselect one from the left"
+  },
   "projects": {
     "title": "Projects",
     "tasks": "Tasks",
@@ -105,5 +141,40 @@
     "description": "Description",
     "status": "Status",
     "taskName": "Task name"
+  },
+  "roadmap": {
+    "myGoals": "My Goals",
+    "careerPath": "Career Path",
+    "gapAnalysis": "Gap Analysis",
+    "selectPath": "Choose your career path",
+    "selectPathSub": "Once selected, learning direction and gap analysis will be suggested automatically.",
+    "currentStage": "Current stage",
+    "finalStage": "Final stage",
+    "backToList": "Back to list",
+    "changeBtn": "Change",
+    "loading": "Loading...",
+    "gapTitle": "Learning direction match",
+    "gapSummary": "{studied}/{total} skills with study records",
+    "gapSelectFirst": "Please select a career path first",
+    "gapSelectBtn": "Go select a career path",
+    "requiredTags": "Required tags"
+  },
+  "toast": {
+    "goalAdded": "Goal added 🎯",
+    "goalEdited": "Goal updated",
+    "goalDeleted": "Goal deleted",
+    "studySaved": "Study entry saved 💾",
+    "studySavedGap": "{tags} → reflected in gap analysis",
+    "careerSaved": "Career path saved ✓",
+    "noteSaved": "Note saved ✓",
+    "noteDeleted": "Note deleted",
+    "projectAdded": "Project added",
+    "projectEdited": "Project updated",
+    "projectDeleted": "Project deleted",
+    "taskAdded": "Task added",
+    "taskEdited": "Task updated",
+    "taskDeleted": "Task deleted",
+    "saveFailed": "Save failed. Please try again.",
+    "deleteFailed": "Delete failed"
   }
 }

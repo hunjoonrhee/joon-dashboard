@@ -1,44 +1,38 @@
 'use client'
 
 import Modal from '@/components/Modal'
+import { useToast } from '@/components/Toast'
 import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
+import { supabase } from '@/lib/supabase'
 import type { CareerData, Goal } from '@/types'
 import { Trash2, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
-interface GoalForm {
-  name: string
-  description: string
-  status: Goal['status']
-  priority: Goal['priority']
-  is_focus: boolean
-  tags: string[]
-}
-
 interface Props {
   mode: 'add' | 'edit'
-  form: GoalForm
-  saving: boolean
-  onChange: (form: GoalForm) => void
-  onSave: () => void
-  onDelete?: () => void
+  goal?: Goal
   onClose: () => void
+  onSaved: () => void
 }
 
-export default function GoalModal({
-  mode,
-  form,
-  saving,
-  onChange,
-  onSave,
-  onDelete,
-  onClose,
-}: Props) {
+export default function GoalModal({ mode, goal, onClose, onSaved }: Props) {
   const t = useTranslations('goals')
   const tCommon = useTranslations('common')
   const tStatus = useTranslations('status')
   const tPriority = useTranslations('priority')
+  const tToast = useTranslations('toast')
+  const { show } = useToast()
+
+  const [form, setForm] = useState({
+    name: goal?.name ?? '',
+    description: goal?.description ?? '',
+    status: (goal?.status ?? 'in_progress') as Goal['status'],
+    priority: (goal?.priority ?? 'medium') as Goal['priority'],
+    is_focus: goal?.is_focus ?? false,
+    tags: goal?.tags ?? ([] as string[]),
+  })
+  const [saving, setSaving] = useState(false)
   const [tagPool, setTagPool] = useState<string[]>([])
   const [tagSearch, setTagSearch] = useState('')
   const [tagDropdownOpen, setTagDropdownOpen] = useState(false)
@@ -67,6 +61,58 @@ export default function GoalModal({
       )
     : []
 
+  const addTag = (tag: string) => {
+    const trimmed = tag.trim()
+    if (!trimmed || form.tags.includes(trimmed)) return
+    setForm({ ...form, tags: [...form.tags, trimmed] })
+    setTagSearch('')
+    setTagDropdownOpen(false)
+  }
+
+  const save = async () => {
+    if (!form.name.trim()) return
+    setSaving(true)
+    const payload = {
+      name: form.name.trim(),
+      description: form.description || null,
+      status: form.status,
+      priority: form.priority,
+      is_focus: form.is_focus,
+      tags: form.tags,
+    }
+    try {
+      if (form.is_focus)
+        await supabase
+          .from('goals')
+          .update({ is_focus: false })
+          .neq('id', goal?.id ?? '')
+      if (mode === 'add') await supabase.from('goals').insert(payload)
+      else if (goal)
+        await supabase.from('goals').update(payload).eq('id', goal.id)
+      show(mode === 'add' ? tToast('goalAdded') : tToast('goalEdited'), {
+        type: 'success',
+      })
+      onSaved()
+      onClose()
+    } catch {
+      show(tToast('saveFailed'), { type: 'error' })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const remove = async () => {
+    if (!goal) return
+    try {
+      await supabase.from('goals').delete().eq('id', goal.id)
+      show(tToast('goalDeleted'), { type: 'info' })
+      onSaved()
+      onClose()
+    } catch {
+      show(tToast('deleteFailed'), { type: 'error' })
+    }
+  }
+
   return (
     <Modal
       title={mode === 'add' ? t('addModal') : t('editModal')}
@@ -76,11 +122,14 @@ export default function GoalModal({
         <div>
           <label className={labelCls}>{t('name')}</label>
           <input
+            autoFocus
             type="text"
             className={inputCls}
-            placeholder="예: Angular Level 3"
             value={form.name}
-            onChange={(e) => onChange({ ...form, name: e.target.value })}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') save()
+            }}
           />
         </div>
         <div>
@@ -88,9 +137,8 @@ export default function GoalModal({
           <input
             type="text"
             className={inputCls}
-            placeholder="예: 6월 재시험"
             value={form.description}
-            onChange={(e) => onChange({ ...form, description: e.target.value })}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
         </div>
         <div className="flex gap-3">
@@ -100,7 +148,7 @@ export default function GoalModal({
               className={inputCls}
               value={form.priority}
               onChange={(e) =>
-                onChange({
+                setForm({
                   ...form,
                   priority: e.target.value as Goal['priority'],
                 })
@@ -118,7 +166,7 @@ export default function GoalModal({
               className={inputCls}
               value={form.status}
               onChange={(e) =>
-                onChange({ ...form, status: e.target.value as Goal['status'] })
+                setForm({ ...form, status: e.target.value as Goal['status'] })
               }
             >
               <option value="in_progress">{tStatus('in_progress')}</option>
@@ -128,38 +176,43 @@ export default function GoalModal({
           </div>
         </div>
 
-        {/* 태그 */}
         <div>
           <label className={labelCls}>{t('tags')}</label>
           {form.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-2">
-              {form.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500 text-white"
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onChange({
-                        ...form,
-                        tags: form.tags.filter((t) => t !== tag),
-                      })
-                    }
-                    className="hover:opacity-70"
+              {form.tags.map((tag) => {
+                const isCustom = !tagPool.includes(tag)
+                return (
+                  <span
+                    key={tag}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${isCustom ? 'bg-gray-100 text-gray-600 border border-gray-200' : 'bg-indigo-500 text-white'}`}
                   >
-                    <X size={10} />
-                  </button>
-                </span>
-              ))}
+                    {tag}
+                    {isCustom && (
+                      <span className="text-gray-400 text-xs">*</span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm({
+                          ...form,
+                          tags: form.tags.filter((t) => t !== tag),
+                        })
+                      }
+                      className="hover:opacity-70"
+                    >
+                      <X size={10} />
+                    </button>
+                  </span>
+                )
+              })}
             </div>
           )}
           <div className="relative">
             <input
               type="text"
               className={inputCls}
-              placeholder="태그 검색... (예: Angular, System Design)"
+              placeholder={tCommon('tagSearchPlaceholder')}
               value={tagSearch}
               onChange={(e) => {
                 setTagSearch(e.target.value)
@@ -167,23 +220,46 @@ export default function GoalModal({
               }}
               onFocus={() => setTagDropdownOpen(true)}
               onBlur={() => setTimeout(() => setTagDropdownOpen(false), 150)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && tagSearch.trim()) {
+                  e.preventDefault()
+                  addTag(tagSearch)
+                }
+              }}
             />
-            {tagDropdownOpen && filteredTags.length > 0 && (
-              <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-44 overflow-y-auto">
-                {filteredTags.slice(0, 20).map((tag) => (
+            {tagDropdownOpen && (
+              <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                {filteredTags.length > 0 ? (
+                  <div className="max-h-44 overflow-y-auto">
+                    {filteredTags.slice(0, 20).map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onMouseDown={() => addTag(tag)}
+                        className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                ) : tagSearch.trim() &&
+                  !form.tags.includes(tagSearch.trim()) ? (
                   <button
-                    key={tag}
                     type="button"
-                    onMouseDown={() => {
-                      onChange({ ...form, tags: [...form.tags, tag] })
-                      setTagSearch('')
-                      setTagDropdownOpen(false)
-                    }}
-                    className="w-full text-left px-3 py-2 text-xs hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                    onMouseDown={() => addTag(tagSearch)}
+                    className="w-full text-left px-3 py-2.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
                   >
-                    {tag}
+                    <span className="text-gray-400">
+                      {tCommon('tagCustomAdd')}:{' '}
+                    </span>
+                    <span className="font-medium text-gray-700">
+                      {tagSearch.trim()}
+                    </span>
+                    <span className="text-xs text-gray-400 ml-1">
+                      {tCommon('tagGapNote')}
+                    </span>
                   </button>
-                ))}
+                ) : null}
               </div>
             )}
           </div>
@@ -194,17 +270,18 @@ export default function GoalModal({
             type="checkbox"
             id="is_focus"
             checked={form.is_focus}
-            onChange={(e) => onChange({ ...form, is_focus: e.target.checked })}
+            onChange={(e) => setForm({ ...form, is_focus: e.target.checked })}
           />
           <label htmlFor="is_focus" className="text-sm text-gray-600">
             {t('focus')}
           </label>
         </div>
       </div>
+
       <div className="flex justify-between pt-1">
-        {mode === 'edit' && onDelete ? (
+        {mode === 'edit' ? (
           <button
-            onClick={onDelete}
+            onClick={remove}
             className="text-red-400 hover:text-red-600 transition-colors"
           >
             <Trash2 size={16} />
@@ -216,7 +293,7 @@ export default function GoalModal({
           <button onClick={onClose} className={cancelBtnCls}>
             {tCommon('cancel')}
           </button>
-          <button onClick={onSave} disabled={saving} className={saveBtnCls}>
+          <button onClick={save} disabled={saving} className={saveBtnCls}>
             {saving ? tCommon('saving') : tCommon('save')}
           </button>
         </div>

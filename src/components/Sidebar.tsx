@@ -52,14 +52,15 @@ export default function Sidebar() {
     return pathname === fullPath || (path === '' && pathname === `/${locale}`)
   }
 
-  const navigate = (path: string) => {
-    router.push(`/${locale}${path}`)
-  }
+  const navigate = (path: string) => router.push(`/${locale}${path}`)
 
   return (
     <aside className="w-56 bg-white border-r border-gray-100 fixed top-0 left-0 h-screen flex flex-col z-20 hidden lg:flex">
-      {/* 로고 */}
-      <div className="flex items-center gap-2.5 px-5 py-4 border-b border-gray-100">
+      {/* 로고 — 클릭하면 홈으로 */}
+      <div
+        className="flex items-center gap-2.5 px-5 py-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+        onClick={() => navigate('')}
+      >
         <div className="w-7 h-7 bg-indigo-500 rounded-lg flex items-center justify-center text-sm">
           🎯
         </div>
@@ -69,7 +70,7 @@ export default function Sidebar() {
       {/* 네비게이션 */}
       <nav className="flex-1 px-3 py-3 flex flex-col gap-0.5">
         <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 py-2 mt-1">
-          메인
+          {t('mainSection')}
         </div>
         {navItems.map((item) => (
           <button
@@ -91,7 +92,7 @@ export default function Sidebar() {
         ))}
 
         <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 py-2 mt-3">
-          계획
+          {t('planSection')}
         </div>
         {planItems.map((item) => (
           <button
@@ -115,7 +116,6 @@ export default function Sidebar() {
 
       {/* 하단 */}
       <div className="px-3 py-3 border-t border-gray-100">
-        {/* 유저 */}
         <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-gray-50 cursor-pointer mb-1">
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-violet-400 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
             {name.charAt(0)}
@@ -128,30 +128,12 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {/* 언어 */}
-        <div className="flex gap-1 bg-gray-100 rounded-lg p-1 mb-1">
-          {(['ko', 'de', 'en'] as const).map((l) => (
-            <button
-              key={l}
-              onClick={() => switchLocale(l)}
-              className={`flex-1 text-xs py-1 rounded-md transition-colors ${
-                locale === l
-                  ? 'bg-white text-gray-800 font-semibold shadow-sm'
-                  : 'text-gray-400'
-              }`}
-            >
-              {l === 'ko' ? '한' : l === 'de' ? 'DE' : 'EN'}
-            </button>
-          ))}
-        </div>
-
-        {/* 설정 */}
         <button
           onClick={() => navigate('/settings')}
           className="flex items-center gap-2 px-3 py-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-50 w-full transition-colors"
         >
           <Settings size={15} />
-          <span className="text-sm">설정</span>
+          <span className="text-sm">{t('settings')}</span>
         </button>
       </div>
     </aside>
