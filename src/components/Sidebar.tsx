@@ -10,9 +10,6 @@ const navItems = [
   { key: 'home', path: '', icon: '🏠' },
   { key: 'study', path: '/study', icon: '📖' },
   { key: 'notes', path: '/notes', icon: '✍️' },
-]
-
-const planItems = [
   { key: 'roadmap', path: '/roadmap', icon: '🗺' },
   { key: 'projects', path: '/projects', icon: '🚀' },
 ]
@@ -69,32 +66,7 @@ export default function Sidebar() {
 
       {/* 네비게이션 */}
       <nav className="flex-1 px-3 py-3 flex flex-col gap-0.5">
-        <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 py-2 mt-1">
-          {t('mainSection')}
-        </div>
         {navItems.map((item) => (
-          <button
-            key={item.key}
-            onClick={() => navigate(item.path)}
-            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left w-full transition-colors ${
-              isActive(item.path)
-                ? 'bg-indigo-50 text-indigo-600'
-                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
-            }`}
-          >
-            <span className="text-base w-5 text-center">{item.icon}</span>
-            <span
-              className={`text-sm font-medium ${isActive(item.path) ? 'font-semibold' : ''}`}
-            >
-              {t(item.key)}
-            </span>
-          </button>
-        ))}
-
-        <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 py-2 mt-3">
-          {t('planSection')}
-        </div>
-        {planItems.map((item) => (
           <button
             key={item.key}
             onClick={() => navigate(item.path)}

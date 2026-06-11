@@ -2,11 +2,11 @@
 
 import { useToast } from '@/components/Toast'
 import { supabase } from '@/lib/supabase'
-import type { CareerData, Goal, Session, Topic } from '@/types'
-import { BarChart2, Map, Star } from 'lucide-react'
+import type { AiRoadmap, Goal, Session, Topic } from '@/types'
+import { BarChart2, Route, Star } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
-import CareerPathView from './roadmap/CareerPathView'
+import AiRoadmapView from './roadmap/AiRoadmapView'
 import GapAnalysisView from './roadmap/GapAnalysisView'
 import GoalModal from './roadmap/GoalModal'
 import MyGoalsView from './roadmap/MyGoalsView'
@@ -19,7 +19,7 @@ interface Props {
   settings?: Record<string, string>
 }
 
-type RoadmapView = 'my' | 'career' | 'gap'
+type RoadmapView = 'my' | 'ai' | 'gap'
 
 export default function RoadmapTab({
   goals,
@@ -37,29 +37,35 @@ export default function RoadmapTab({
   const [openGoals, setOpenGoals] = useState<Record<string, boolean>>({})
   const [showCompleted, setShowCompleted] = useState(false)
   const [view, setView] = useState<RoadmapView>('my')
-  const [careerData, setCareerData] = useState<CareerData | null>(null)
-  const [localPath, setLocalPath] = useState<string | null>(null)
-  const [localStageLevel, setLocalStageLevel] = useState<number | null>(null)
-  const [settingsLoaded, setSettingsLoaded] = useState(false)
+  const [adoptedRoadmap, setAdoptedRoadmap] = useState<AiRoadmap | null>(null)
 
   useEffect(() => {
-    fetch('/career-paths.json')
-      .then((r) => r.json())
-      .then((d: CareerData) => setCareerData(d))
-  }, [])
+    const adoptedId = settings.adopted_roadmap_id
+    if (!adoptedId) return
+    supabase
+      .from('ai_roadmaps')
+      .select('*')
+      .eq('id', adoptedId)
+      .single()
+      .then(({ data }) => {
+        if (data) setAdoptedRoadmap(data as AiRoadmap)
+      })
+  }, [settings.adopted_roadmap_id])
 
-  useEffect(() => {
-    if (!settingsLoaded && (settings.career_path || settings.career_stage)) {
-      setLocalPath(settings.career_path ?? null)
-      setLocalStageLevel(parseInt(settings.career_stage ?? '1'))
-      setSettingsLoaded(true)
-    }
-  }, [settings.career_path, settings.career_stage, settingsLoaded])
-
-  const selectedPath = localPath === '' ? null : localPath
-  const selectedStageLevel = localStageLevel ?? 1
-  const studiedTags = new Set(sessions.flatMap((s) => s.tags))
+  const studiedTags = new Set([
+    ...sessions.flatMap((s) => s.tags),
+    ...goals.flatMap((g) => g.tags ?? []),
+  ])
   const finalGoal = settings.big_goal ?? '리드 아키텍트'
+  const adoptedRoadmapTags = adoptedRoadmap
+    ? [
+        ...new Set(
+          adoptedRoadmap.stages.flatMap((s) =>
+            s.skills.flatMap((sk) => sk.tags)
+          )
+        ),
+      ]
+    : []
 
   const sortedGoals = [...goals].sort((a, b) => {
     const so = { in_progress: 0, planned: 1, completed: 2 }
@@ -92,26 +98,18 @@ export default function RoadmapTab({
     onRefresh()
   }
 
-  const saveCareerPath = async (pathId: string, stageLevel: number) => {
+  const handleAdopt = async (roadmap: AiRoadmap) => {
     try {
-      await Promise.all([
-        supabase
-          .from('settings')
-          .upsert({ key: 'career_path', value: pathId }, { onConflict: 'key' }),
-        supabase
-          .from('settings')
-          .upsert(
-            { key: 'career_stage', value: String(stageLevel) },
-            { onConflict: 'key' }
-          ),
-      ])
-      setLocalPath(pathId)
-      setLocalStageLevel(stageLevel)
-      const path = careerData?.paths.find((p) => p.id === pathId)
-      const stage = path?.stages.find((s) => s.level === stageLevel)
-      show(t('careerSaved') ?? '저장됐어 ✓', {
+      await supabase
+        .from('settings')
+        .upsert(
+          { key: 'adopted_roadmap_id', value: roadmap.id },
+          { onConflict: 'key' }
+        )
+      setAdoptedRoadmap(roadmap)
+      show(t('roadmapAdopted') ?? '로드맵이 채택됐어 ✓', {
         type: 'success',
-        sub: `${path?.title} · ${stage?.title}`,
+        sub: `${roadmap.goal} · ${roadmap.career_level}`,
       })
       onRefresh()
     } catch {
@@ -125,9 +123,9 @@ export default function RoadmapTab({
   const tabs = [
     { key: 'my' as RoadmapView, icon: <Star size={13} />, label: t('myGoals') },
     {
-      key: 'career' as RoadmapView,
-      icon: <Map size={13} />,
-      label: t('careerPath'),
+      key: 'ai' as RoadmapView,
+      icon: <Route size={13} />,
+      label: t('aiRoadmap'),
     },
     {
       key: 'gap' as RoadmapView,
@@ -157,6 +155,7 @@ export default function RoadmapTab({
           finalGoal={finalGoal}
           openGoals={openGoals}
           showCompleted={showCompleted}
+          adoptedRoadmap={adoptedRoadmap}
           getTopics={getTopics}
           getCategories={getCategories}
           getPct={getPct}
@@ -170,31 +169,26 @@ export default function RoadmapTab({
           onToggleCompleted={() => setShowCompleted((v) => !v)}
         />
       )}
-      {view === 'career' && (
-        <CareerPathView
-          careerData={careerData}
-          selectedPath={selectedPath}
-          selectedStageLevel={selectedStageLevel}
-          studiedTags={studiedTags}
-          finalGoal={finalGoal}
-          onSelectPath={saveCareerPath}
-          onSelectStage={(level) => saveCareerPath(selectedPath!, level)}
-          onBack={() => setLocalPath('')}
+      {view === 'ai' && (
+        <AiRoadmapView
+          adoptedRoadmap={adoptedRoadmap}
+          settings={settings}
+          onAdopt={handleAdopt}
+          onRefresh={onRefresh}
         />
       )}
       {view === 'gap' && (
         <GapAnalysisView
-          careerData={careerData}
-          selectedPath={selectedPath}
-          selectedStageLevel={selectedStageLevel}
+          adoptedRoadmap={adoptedRoadmap}
           studiedTags={studiedTags}
-          onGoToCareer={() => setView('career')}
+          onGoToAi={() => setView('ai')}
         />
       )}
       {modal && (
         <GoalModal
           mode={modal.mode}
           goal={modal.goal}
+          tagPool={adoptedRoadmapTags}
           onClose={() => setModal(null)}
           onSaved={() => {
             setModal(null)

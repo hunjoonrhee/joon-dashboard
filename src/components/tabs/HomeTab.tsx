@@ -3,7 +3,15 @@
 import AddSessionModal from '@/components/AddSessionModal'
 import { calcMaxStreak, calcStreak } from '@/lib/streak'
 import { supabase } from '@/lib/supabase'
-import type { CareerData, Goal, Note, ProjectTask, Session, TodayItem, Topic } from '@/types'
+import type {
+  AiRoadmap,
+  Goal,
+  Note,
+  ProjectTask,
+  Session,
+  TodayItem,
+  Topic,
+} from '@/types'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import HeroCard from './home/HeroCard'
@@ -37,21 +45,28 @@ export default function HomeTab({
   const locale = useLocale()
   const [showSessionModal, setShowSessionModal] = useState(false)
   const [completedItemName, setCompletedItemName] = useState('')
-  const [careerData, setCareerData] = useState<CareerData | null>(null)
+  const [adoptedRoadmap, setAdoptedRoadmap] = useState<AiRoadmap | null>(null)
 
-  // career-paths.json 로드
   useEffect(() => {
-    fetch('/career-paths.json')
-      .then((r) => r.json())
-      .then((d: CareerData) => setCareerData(d))
-      .catch(() => {})
-  }, [])
+    const adoptedId = settings.adopted_roadmap_id
+    if (!adoptedId) return
+    supabase
+      .from('ai_roadmaps')
+      .select('*')
+      .eq('id', adoptedId)
+      .single()
+      .then(({ data }) => {
+        if (data) setAdoptedRoadmap(data as AiRoadmap)
+      })
+  }, [settings.adopted_roadmap_id])
 
   const streak = calcStreak(sessions)
   const maxStreak = calcMaxStreak(sessions)
 
   const focusGoals = goals.filter((g) => g.is_focus)
-  const totalTopics = topics.filter((t) => focusGoals.some((g) => g.id === t.goal_id))
+  const totalTopics = topics.filter((t) =>
+    focusGoals.some((g) => g.id === t.goal_id)
+  )
   const completedTopics = totalTopics.filter((t) => t.completed)
   const overallPct =
     totalTopics.length === 0
@@ -59,37 +74,23 @@ export default function HomeTab({
       : Math.round((completedTopics.length / totalTopics.length) * 100)
 
   const thisMonth = new Date().getMonth()
-  const monthCount = sessions.filter((s) => new Date(s.date).getMonth() === thisMonth).length
+  const monthCount = sessions.filter(
+    (s) => new Date(s.date).getMonth() === thisMonth
+  ).length
 
-  // 갭 분석 계산
-  const selectedPath = settings.career_path ?? null
-  const selectedStageLevel = parseInt(settings.career_stage ?? '1')
-  const studiedTags = new Set(sessions.flatMap((s) => s.tags))
-
-  const { gapPct, careerPathTitle, careerStageTitle } = (() => {
-    if (!selectedPath || !careerData) return { gapPct: null, careerPathTitle: null, careerStageTitle: null }
-
-    const currentPath = careerData.paths.find((p) => p.id === selectedPath)
-    if (!currentPath) return { gapPct: null, careerPathTitle: null, careerStageTitle: null }
-
-    const currentStage = currentPath.stages.find((s) => s.level === selectedStageLevel)
-
-    const relevantSkills = currentPath.stages
-      .filter((s) => s.level <= selectedStageLevel + 1)
-      .flatMap((s) => s.skills)
-
-    const totalSkills = relevantSkills.length
-    const studiedSkills = relevantSkills.filter((skill) =>
-      skill.tags.some((tag) => studiedTags.has(tag))
+  // 갭 분석 계산 — 채택된 로드맵 기준 (공부기록 태그 + 목표 태그)
+  const studiedTags = new Set([
+    ...sessions.flatMap((s) => s.tags),
+    ...goals.flatMap((g) => g.tags ?? []),
+  ])
+  const gapPct = (() => {
+    if (!adoptedRoadmap) return null
+    const allSkills = adoptedRoadmap.stages.flatMap((s) => s.skills)
+    if (allSkills.length === 0) return null
+    const studied = allSkills.filter((sk) =>
+      sk.tags.some((tag) => studiedTags.has(tag))
     ).length
-
-    const pct = totalSkills === 0 ? 0 : Math.round((studiedSkills / totalSkills) * 100)
-
-    return {
-      gapPct: pct,
-      careerPathTitle: currentPath.title,
-      careerStageTitle: currentStage?.title ?? null,
-    }
+    return Math.round((studied / allSkills.length) * 100)
   })()
 
   const suggestedTopics = totalTopics
@@ -105,7 +106,6 @@ export default function HomeTab({
   const getTopicGoalName = (topic: Topic) =>
     focusGoals.find((g) => g.id === topic.goal_id)?.name ?? ''
 
-  // 이번 주 통계
   const weeklyStats = (() => {
     const today = new Date()
     const dayOfWeek = today.getDay()
@@ -117,12 +117,19 @@ export default function HomeTab({
       return sd >= monday && sd <= today
     })
     return {
-      hours: Math.round((weeklySessions.reduce((sum, s) => sum + (s.duration_minutes ?? 0), 0) / 60) * 10) / 10,
+      hours:
+        Math.round(
+          (weeklySessions.reduce(
+            (sum, s) => sum + (s.duration_minutes ?? 0),
+            0
+          ) /
+            60) *
+            10
+        ) / 10,
       tilCount: weeklySessions.filter((s) => s.til).length,
     }
   })()
 
-  // 이번 주 요일 배열
   const week = (() => {
     const today = new Date()
     const dayOfWeek = today.getDay()
@@ -147,9 +154,15 @@ export default function HomeTab({
 
   const toggleToday = async (item: TodayItem) => {
     const nowCompleted = !item.completed
-    await supabase.from('today_items').update({ completed: nowCompleted }).eq('id', item.id)
+    await supabase
+      .from('today_items')
+      .update({ completed: nowCompleted })
+      .eq('id', item.id)
     if (nowCompleted && item.source_type === 'topic' && item.source_id) {
-      await supabase.from('topics').update({ completed: true }).eq('id', item.source_id)
+      await supabase
+        .from('topics')
+        .update({ completed: true })
+        .eq('id', item.source_id)
     }
     if (nowCompleted) {
       setCompletedItemName(item.name)
@@ -160,7 +173,9 @@ export default function HomeTab({
 
   const achievements: string[] = []
   if (completedTopics.length > 0)
-    achievements.push(`🎉 ${focusGoals[0]?.name ?? ''} ${t('achievementTopics', { count: completedTopics.length })}`)
+    achievements.push(
+      `🎉 ${focusGoals[0]?.name ?? ''} ${t('achievementTopics', { count: completedTopics.length })}`
+    )
   if (streak >= 3)
     achievements.push(`🔥 ${t('achievementStreak', { count: streak })}`)
   if (monthCount >= 5)
@@ -168,7 +183,6 @@ export default function HomeTab({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* 상단: 히어로 + streak */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <HeroCard
           settings={settings}
@@ -176,9 +190,8 @@ export default function HomeTab({
           streak={streak}
           monthCount={monthCount}
           completedTopicsCount={completedTopics.length}
+          adoptedRoadmap={adoptedRoadmap}
           gapPct={gapPct}
-          careerPathTitle={careerPathTitle}
-          careerStageTitle={careerStageTitle}
         />
         <WeeklyActivityCard
           streak={streak}
@@ -189,7 +202,6 @@ export default function HomeTab({
         />
       </div>
 
-      {/* 중단: 오늘할것 + TIL + 노트 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <TodayCard
           todayItems={todayItems}
@@ -199,11 +211,13 @@ export default function HomeTab({
           onToggle={toggleToday}
           onRefresh={onRefresh}
         />
-        <TilPreviewCard sessions={sessions} onAddStudy={() => setShowSessionModal(true)} />
+        <TilPreviewCard
+          sessions={sessions}
+          onAddStudy={() => setShowSessionModal(true)}
+        />
         <NotesPreviewCard notes={notes} />
       </div>
 
-      {/* 하단: 성취 메시지 */}
       {achievements.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {achievements.map((msg, i) => (
@@ -223,8 +237,7 @@ export default function HomeTab({
                     : i === 1
                       ? 'rgba(249,115,22,0.2)'
                       : 'rgba(99,102,241,0.2)',
-                color:
-                  i === 0 ? '#065f46' : i === 1 ? '#9a3412' : '#312e81',
+                color: i === 0 ? '#065f46' : i === 1 ? '#9a3412' : '#312e81',
               }}
             >
               {msg}

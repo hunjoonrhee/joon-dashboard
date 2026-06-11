@@ -4,19 +4,34 @@ import Modal from '@/components/Modal'
 import { useToast } from '@/components/Toast'
 import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
-import type { CareerData, Goal } from '@/types'
+import type { Goal } from '@/types'
 import { Trash2, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+
+interface Preset {
+  name?: string
+  description?: string
+  tags?: string[]
+}
 
 interface Props {
   mode: 'add' | 'edit'
   goal?: Goal
+  preset?: Preset
+  tagPool?: string[]
   onClose: () => void
   onSaved: () => void
 }
 
-export default function GoalModal({ mode, goal, onClose, onSaved }: Props) {
+export default function GoalModal({
+  mode,
+  goal,
+  preset,
+  tagPool: tagPoolProp,
+  onClose,
+  onSaved,
+}: Props) {
   const t = useTranslations('goals')
   const tCommon = useTranslations('common')
   const tStatus = useTranslations('status')
@@ -25,33 +40,19 @@ export default function GoalModal({ mode, goal, onClose, onSaved }: Props) {
   const { show } = useToast()
 
   const [form, setForm] = useState({
-    name: goal?.name ?? '',
-    description: goal?.description ?? '',
+    name: goal?.name ?? preset?.name ?? '',
+    description: goal?.description ?? preset?.description ?? '',
     status: (goal?.status ?? 'in_progress') as Goal['status'],
     priority: (goal?.priority ?? 'medium') as Goal['priority'],
     is_focus: goal?.is_focus ?? false,
-    tags: goal?.tags ?? ([] as string[]),
+    tags: goal?.tags ?? preset?.tags ?? ([] as string[]),
   })
   const [saving, setSaving] = useState(false)
-  const [tagPool, setTagPool] = useState<string[]>([])
   const [tagSearch, setTagSearch] = useState('')
   const [tagDropdownOpen, setTagDropdownOpen] = useState(false)
 
-  useEffect(() => {
-    fetch('/career-paths.json')
-      .then((r) => r.json())
-      .then((d: CareerData) => {
-        const allTags = [
-          ...new Set(
-            d.paths.flatMap((p) =>
-              p.stages.flatMap((s) => s.skills.flatMap((sk) => sk.tags))
-            )
-          ),
-        ]
-        setTagPool(allTags.sort())
-      })
-      .catch(() => {})
-  }, [])
+  // tagPool — prop 우선, 없으면 preset.tags
+  const tagPool = tagPoolProp ?? preset?.tags ?? []
 
   const filteredTags = tagSearch.trim()
     ? tagPool.filter(
@@ -185,7 +186,11 @@ export default function GoalModal({ mode, goal, onClose, onSaved }: Props) {
                 return (
                   <span
                     key={tag}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${isCustom ? 'bg-gray-100 text-gray-600 border border-gray-200' : 'bg-indigo-500 text-white'}`}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
+                      isCustom
+                        ? 'bg-gray-100 text-gray-600 border border-gray-200'
+                        : 'bg-indigo-500 text-white'
+                    }`}
                   >
                     {tag}
                     {isCustom && (

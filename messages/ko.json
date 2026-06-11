@@ -55,7 +55,8 @@
     "weeklyHours": "이번 주 시간",
     "weeklyTil": "TIL",
     "weeklyTopics": "완료 토픽",
-    "gapLabel": "공부 방향 일치도"
+    "gapLabel": "공부 방향 일치도",
+    "noRoadmap": "AI 로드맵 미채택 — 로드맵 탭에서 생성해봐"
   },
   "goals": {
     "title": "목표",
@@ -158,7 +159,23 @@
     "gapSummary": "{studied}/{total}개 역량 공부 기록 있음",
     "gapSelectFirst": "커리어 경로를 먼저 선택해야 해",
     "gapSelectBtn": "커리어 경로 선택하러 가기",
-    "requiredTags": "필요 태그"
+    "requiredTags": "필요 태그",
+    "aiRoadmap": "AI 로드맵",
+    "roadmapAdopted": "로드맵이 채택됐어 ✓",
+    "generateBtn": "로드맵 생성하기",
+    "regenerateBtn": "재생성",
+    "adoptBtn": "이 로드맵 채택하기",
+    "adopted": "채택됨",
+    "generating": "경로 분석 중...",
+    "generateFirst": "AI 로드맵을 먼저 생성해봐",
+    "noAdoptedRoadmap": "채택된 로드맵이 없어",
+    "adoptedBanner": "이 로드맵이 채택됐어. 홈 카드에 반영됐어.",
+    "stagesLabel": "단계 경로",
+    "collapseBtn": "접기",
+    "expandBtn": "펼치기",
+    "generationFailed": "생성에 실패했어. 다시 시도해봐.",
+    "stageUnit": "단계",
+    "addToGoals": "내 목표에 추가하기"
   },
   "toast": {
     "goalAdded": "목표가 추가됐어 🎯",

@@ -55,7 +55,8 @@
     "weeklyHours": "Hours this week",
     "weeklyTil": "TIL",
     "weeklyTopics": "Topics done",
-    "gapLabel": "Learning match"
+    "gapLabel": "Learning match",
+    "noRoadmap": "No AI roadmap adopted — generate one in the Roadmap tab"
   },
   "goals": {
     "title": "Goals",
@@ -158,7 +159,23 @@
     "gapSummary": "{studied}/{total} skills with study records",
     "gapSelectFirst": "Please select a career path first",
     "gapSelectBtn": "Go select a career path",
-    "requiredTags": "Required tags"
+    "requiredTags": "Required tags",
+    "aiRoadmap": "AI Roadmap",
+    "roadmapAdopted": "Roadmap adopted ✓",
+    "generateBtn": "Generate roadmap",
+    "regenerateBtn": "Regenerate",
+    "adoptBtn": "Adopt this roadmap",
+    "adopted": "Adopted",
+    "generating": "Analysing path...",
+    "generateFirst": "Generate an AI roadmap first",
+    "noAdoptedRoadmap": "No roadmap adopted",
+    "adoptedBanner": "This roadmap has been adopted and is shown on your home card.",
+    "stagesLabel": "stage path",
+    "collapseBtn": "Collapse",
+    "expandBtn": "Expand",
+    "generationFailed": "Generation failed. Please try again.",
+    "stageUnit": "Stage",
+    "addToGoals": "Add to my goals"
   },
   "toast": {
     "goalAdded": "Goal added 🎯",

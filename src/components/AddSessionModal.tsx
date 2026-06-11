@@ -3,7 +3,6 @@
 import { useToast } from '@/components/Toast'
 import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
-import type { CareerData } from '@/types'
 import { de, enUS, ko } from 'date-fns/locale'
 import { X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
@@ -54,19 +53,29 @@ export default function AddSessionModal({
         : 'MM/dd/yyyy'
 
   useEffect(() => {
-    fetch('/career-paths.json')
-      .then((r) => r.json())
-      .then((d: CareerData) => {
-        const allTags = [
-          ...new Set(
-            d.paths.flatMap((p) =>
-              p.stages.flatMap((s) => s.skills.flatMap((sk) => sk.tags))
-            )
-          ),
-        ]
-        setTagPool(allTags.sort())
-      })
-      .catch(() => {})
+    const load = async () => {
+      const { data: setting } = await supabase
+        .from('settings')
+        .select('value')
+        .eq('key', 'adopted_roadmap_id')
+        .single()
+      if (!setting?.value) return
+      const { data: roadmap } = await supabase
+        .from('ai_roadmaps')
+        .select('stages')
+        .eq('id', setting.value)
+        .single()
+      if (!roadmap?.stages) return
+      const tags = [
+        ...new Set(
+          roadmap.stages.flatMap((s: { skills: { tags: string[] }[] }) =>
+            s.skills.flatMap((sk) => sk.tags)
+          )
+        ),
+      ] as string[]
+      setTagPool(tags.sort())
+    }
+    load()
   }, [])
 
   const getDateValue = () => {

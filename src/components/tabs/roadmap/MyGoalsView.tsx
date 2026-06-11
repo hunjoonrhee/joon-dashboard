@@ -1,7 +1,7 @@
 'use client'
 
 import { goalStatusStyle } from '@/lib/statusConfig'
-import type { Goal, Topic } from '@/types'
+import type { AiRoadmap, Goal, Topic } from '@/types'
 import { ChevronDown, ChevronRight, Pencil, Plus, Star } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
@@ -12,6 +12,7 @@ interface Props {
   finalGoal: string
   openGoals: Record<string, boolean>
   showCompleted: boolean
+  adoptedRoadmap: AiRoadmap | null
   getTopics: (goalId: string) => Topic[]
   getCategories: (goalId: string) => string[]
   getPct: (goalId: string) => number
@@ -29,6 +30,7 @@ export default function MyGoalsView({
   finalGoal,
   openGoals,
   showCompleted,
+  adoptedRoadmap,
   getTopics,
   getCategories,
   getPct,
@@ -43,11 +45,27 @@ export default function MyGoalsView({
   const tStatus = useTranslations('status')
   const router = useRouter()
 
+  // 목표 이름과 로드맵 단계 매칭 (단순 키워드 포함 여부)
+  const getRoadmapStageHint = (goal: Goal): string | null => {
+    if (!adoptedRoadmap) return null
+    const goalNameLower = goal.name.toLowerCase()
+    for (const stage of adoptedRoadmap.stages) {
+      const matched = stage.skills.some(
+        (sk) =>
+          goalNameLower.includes(sk.name.toLowerCase().split(' ')[0]) ||
+          sk.tags.some((tag) => goalNameLower.includes(tag.toLowerCase()))
+      )
+      if (matched) return stage.title
+    }
+    return null
+  }
+
   const renderGoalCard = (g: Goal, isDone = false) => {
     const goalTopics = getTopics(g.id)
     const categories = getCategories(g.id)
     const pct = getPct(g.id)
     const isOpen = openGoals[g.id] ?? false
+    const stageHint = getRoadmapStageHint(g)
 
     return (
       <div
@@ -99,6 +117,15 @@ export default function MyGoalsView({
                 <p className="text-xs text-gray-400 mt-0.5 truncate">
                   {g.description}
                 </p>
+              )}
+              {/* AI 로드맵 단계 힌트 */}
+              {stageHint && (
+                <p className="text-xs text-indigo-400 mt-0.5">
+                  AI 로드맵: {stageHint}
+                </p>
+              )}
+              {!stageHint && adoptedRoadmap && (
+                <p className="text-xs text-gray-300 mt-0.5">AI 로드맵 미연결</p>
               )}
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0">

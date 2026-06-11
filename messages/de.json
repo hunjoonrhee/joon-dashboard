@@ -55,7 +55,8 @@
     "weeklyHours": "Stunden diese Woche",
     "weeklyTil": "TIL",
     "weeklyTopics": "Themen fertig",
-    "gapLabel": "Lernrichtung"
+    "gapLabel": "Lernrichtung",
+    "noRoadmap": "Kein KI-Roadmap — erstelle einen im Roadmap-Tab"
   },
   "goals": {
     "title": "Ziele",
@@ -158,7 +159,23 @@
     "gapSummary": "{studied}/{total} Kompetenzen mit Lerneinträgen",
     "gapSelectFirst": "Bitte zuerst einen Karrierepfad auswählen",
     "gapSelectBtn": "Karrierepfad auswählen",
-    "requiredTags": "Benötigte Tags"
+    "requiredTags": "Benötigte Tags",
+    "aiRoadmap": "KI-Roadmap",
+    "roadmapAdopted": "Roadmap übernommen ✓",
+    "generateBtn": "Roadmap erstellen",
+    "regenerateBtn": "Neu erstellen",
+    "adoptBtn": "Diese Roadmap übernehmen",
+    "adopted": "Übernommen",
+    "generating": "Pfad wird analysiert...",
+    "generateFirst": "Erstelle zuerst einen KI-Roadmap",
+    "noAdoptedRoadmap": "Kein Roadmap übernommen",
+    "adoptedBanner": "Diese Roadmap wurde übernommen und im Home-Card angezeigt.",
+    "stagesLabel": "Stufen-Pfad",
+    "collapseBtn": "Einklappen",
+    "expandBtn": "Ausklappen",
+    "generationFailed": "Generierung fehlgeschlagen. Bitte erneut versuchen.",
+    "stageUnit": "Stufe",
+    "addToGoals": "Zu meinen Zielen hinzufügen"
   },
   "toast": {
     "goalAdded": "Ziel wurde hinzugefügt 🎯",

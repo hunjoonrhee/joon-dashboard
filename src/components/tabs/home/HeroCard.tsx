@@ -1,5 +1,6 @@
 'use client'
 
+import type { AiRoadmap } from '@/types'
 import { useTranslations } from 'next-intl'
 
 interface Props {
@@ -8,9 +9,8 @@ interface Props {
   streak: number
   monthCount: number
   completedTopicsCount: number
+  adoptedRoadmap: AiRoadmap | null
   gapPct: number | null
-  careerPathTitle: string | null
-  careerStageTitle: string | null
 }
 
 export default function HeroCard({
@@ -19,9 +19,8 @@ export default function HeroCard({
   streak,
   monthCount,
   completedTopicsCount,
+  adoptedRoadmap,
   gapPct,
-  careerPathTitle,
-  careerStageTitle,
 }: Props) {
   const t = useTranslations('home')
 
@@ -57,7 +56,6 @@ export default function HeroCard({
         {settings.big_goal_sub ?? '시니어 → 리드 → 아키텍트'}
       </p>
 
-      {/* 목표 진행도 바 */}
       <div className="h-1 bg-white/20 rounded-full overflow-hidden mb-1">
         <div
           className="h-full bg-white rounded-full"
@@ -65,7 +63,6 @@ export default function HeroCard({
         />
       </div>
 
-      {/* stats */}
       <div className="flex gap-6 mt-3">
         <div>
           <div className="text-base font-bold">{overallPct}%</div>
@@ -90,35 +87,35 @@ export default function HeroCard({
         </div>
       </div>
 
-      {/* 갭 분석 배너 */}
-      {(careerPathTitle || gapPct !== null) && (
-        <div className="mt-4 pt-3.5 border-t border-white/20">
-          {/* 커리어 경로 + 단계 */}
-          {careerPathTitle && (
-            <p className="text-xs opacity-70 mb-2">
-              <span className="font-semibold opacity-100">{careerPathTitle}</span>
-              {careerStageTitle && (
-                <span className="opacity-60"> · {careerStageTitle}</span>
-              )}
-            </p>
-          )}
-
-          {/* 갭 분석 바 */}
-          {gapPct !== null && (
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all ${gapColor}`}
-                  style={{ width: `${gapPct}%` }}
-                />
-              </div>
-              <span className={`text-xs font-bold shrink-0 ${gapTextColor}`}>
-                {t('gapLabel')} {gapPct}%
+      {/* 채택된 로드맵 배너 */}
+      <div className="mt-4 pt-3.5 border-t border-white/20">
+        {adoptedRoadmap ? (
+          <>
+            <p className="text-xs mb-2">
+              <span className="font-semibold">{adoptedRoadmap.goal}</span>
+              <span className="opacity-60">
+                {' '}
+                · {adoptedRoadmap.career_level}
               </span>
-            </div>
-          )}
-        </div>
-      )}
+            </p>
+            {gapPct !== null && (
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${gapColor}`}
+                    style={{ width: `${gapPct}%` }}
+                  />
+                </div>
+                <span className={`text-xs font-bold shrink-0 ${gapTextColor}`}>
+                  {t('gapLabel')} {gapPct}%
+                </span>
+              </div>
+            )}
+          </>
+        ) : (
+          <p className="text-xs opacity-50 italic">{t('noRoadmap')}</p>
+        )}
+      </div>
     </div>
   )
 }
