@@ -313,5 +313,11 @@
     "savedSuccess": "Saved! Want to write more in depth? →",
     "editTilFull": "Open TIL full editor",
     "close": "Close"
+  },
+  "login": {
+    "title": "AI-powered growth compass",
+    "google": "Continue with Google",
+    "github": "Continue with GitHub",
+    "loading": "Loading..."
   }
 }

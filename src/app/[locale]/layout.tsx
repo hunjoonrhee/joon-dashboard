@@ -1,4 +1,4 @@
-import AppShell from '@/components/AppShell'
+import AppShellWrapper from '@/components/AppShellWrapper'
 import QueryProvider from '@/components/QueryProvider'
 import { routing } from '@/i18n/routing'
 import { NextIntlClientProvider } from 'next-intl'
@@ -24,7 +24,9 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <QueryProvider><AppShell>{children}</AppShell></QueryProvider>
+      <QueryProvider>
+        <AppShellWrapper>{children}</AppShellWrapper>
+      </QueryProvider>
     </NextIntlClientProvider>
   )
 }

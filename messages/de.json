@@ -313,5 +313,11 @@
     "savedSuccess": "Gespeichert! Für eine ausführlichere TIL →",
     "editTilFull": "TIL im Vollbildmodus bearbeiten",
     "close": "Schließen"
+  },
+  "login": {
+    "title": "KI-basierter Wachstumskompass",
+    "google": "Mit Google starten",
+    "github": "Mit GitHub starten",
+    "loading": "Lädt..."
   }
 }

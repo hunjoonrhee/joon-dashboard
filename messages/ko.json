@@ -313,5 +313,11 @@
     "savedSuccess": "저장됐어! TIL을 더 자세히 작성하고 싶으면 →",
     "editTilFull": "TIL 전체 화면에서 작성",
     "close": "닫기"
-  }
+  },
+  "login": {
+  "title": "AI 기반 성장 나침반",
+  "google": "Google로 시작하기",
+  "github": "GitHub로 시작하기",
+  "loading": "로딩 중..."
+}
 }

@@ -7,8 +7,9 @@ import Sidebar from '@/components/Sidebar'
 import GoalModal from '@/components/tabs/roadmap/GoalModal'
 import { ToastProvider } from '@/components/Toast'
 import { supabase } from '@/lib/supabase'
-import { useTranslations } from 'next-intl'
+import { createSupabaseBrowserClient } from '@/lib/supabase-client'
 import { useModalStore } from '@/store/modalStore'
+import { useTranslations } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -72,6 +73,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     else if (btnConfig.modal === 'project') router.push(pathname + '?add=true')
   }
 
+  const handleSignOut = async () => {
+    const supabaseClient = createSupabaseBrowserClient()
+    await supabaseClient.auth.signOut()
+    router.push(`/${locale}/login`)
+  }
+
   if (onboarding === null) return null
 
   if (onboarding) {
@@ -99,6 +106,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-600 transition-colors"
               >
                 {btnConfig.label}
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-100 text-gray-500 text-sm font-medium hover:bg-gray-200 transition-colors"
+              >
+                로그아웃
               </button>
             </div>
           </div>
