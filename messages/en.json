@@ -129,7 +129,10 @@
     "tilKnowledgeTitle": "TIL Collection — Knowledge Base",
     "tilOptional": "💡 TIL (optional)",
     "sessionNoTil": "No TIL yet. Click the pencil icon to add one.",
-    "sessionListTitle": "Study log"
+    "sessionListTitle": "Study log",
+    "emptyTitle": "No study records yet",
+    "emptyDesc": "Add your first study session",
+    "addFirst": "Add record"
   },
   "notes": {
     "title": "Notes",

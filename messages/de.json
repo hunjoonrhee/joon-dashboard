@@ -129,7 +129,10 @@
     "tilKnowledgeTitle": "TIL Sammlung — Wissensschatz",
     "tilOptional": "💡 TIL (optional)",
     "sessionNoTil": "Noch keine TIL. Klicke auf das Stift-Symbol zum Hinzufügen.",
-    "sessionListTitle": "Lernprotokoll"
+    "sessionListTitle": "Lernprotokoll",
+    "emptyTitle": "Noch keine Einträge",
+    "emptyDesc": "Füge deinen ersten Lerneintrag hinzu",
+    "addFirst": "Eintrag hinzufügen"
   },
   "notes": {
     "title": "Notizen",
