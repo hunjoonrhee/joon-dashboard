@@ -5,10 +5,18 @@ import type { AiRoadmap, Goal, Session } from '@/types'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
+interface CoachResource {
+  type: 'docs' | 'youtube' | 'book' | 'course'
+  title: string
+  description: string
+  url: string
+}
+
 interface CoachSuggestion {
   insufficient?: boolean
   insufficientMessage?: string
   today: { skill: string; reason: string }
+  resources?: CoachResource[]
   pace: {
     currentMonths: number
     optimizedMonths: number
@@ -188,6 +196,49 @@ export default function CoachCard({
                     + {t('addStudy')}
                   </button>
                 </div>
+
+                {/* 학습 리소스 */}
+                {data.resources && data.resources.length > 0 && (
+                  <div className="bg-gray-50 border border-gray-100 rounded-xl p-3">
+                    <p className="text-xs font-semibold text-gray-500 mb-2">
+                      📚 {t('resources')}
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      {data.resources.map((r, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <span className="text-sm flex-shrink-0">
+                            {r.type === 'docs'
+                              ? '📄'
+                              : r.type === 'youtube'
+                                ? '▶'
+                                : r.type === 'book'
+                                  ? '📖'
+                                  : '🎓'}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            {r.url ? (
+                              <a
+                                href={r.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
+                              >
+                                {r.title}
+                              </a>
+                            ) : (
+                              <p className="text-xs font-medium text-gray-700">
+                                {r.title}
+                              </p>
+                            )}
+                            <p className="text-xs text-gray-400 mt-0.5">
+                              {r.description}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* 페이스 체크 */}
                 <div className="bg-gray-50 border border-gray-100 rounded-xl p-3">

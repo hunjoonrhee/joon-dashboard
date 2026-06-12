@@ -226,7 +226,12 @@
     "sourcePractical": "Practical use",
     "sourceStudy": "Study record",
     "sourceNone": "Not studied",
-    "gapNote": "Cert / Practical (1.0) > Study record (0.6). Projects not counted directly."
+    "gapNote": "Cert / Practical (1.0) > Study record (0.6). Projects not counted directly.",
+    "newRoadmap": "New roadmap",
+    "noRoadmapsYet": "No roadmaps yet. Create one!",
+    "cancel": "Cancel",
+    "goalLabel": "Final goal",
+    "careerLevelLabel": "Current level"
   },
   "toast": {
     "goalAdded": "Goal added 🎯",
@@ -290,7 +295,8 @@
     "alert": "Alert",
     "error": "Analysis failed. Please try again.",
     "addStudy": "Add study session",
-    "insufficientData": "Only {current} sessions logged. AI needs at least {min} to analyze."
+    "insufficientData": "Only {current} sessions logged. AI needs at least {min} to analyze.",
+    "resources": "Learning resources"
   },
   "til": {
     "write": "Write",

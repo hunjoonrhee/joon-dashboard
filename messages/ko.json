@@ -226,7 +226,12 @@
     "sourcePractical": "실전사용",
     "sourceStudy": "공부기록",
     "sourceNone": "미학습",
-    "gapNote": "인증 > 실전(1.0) > 공부기록(0.6) 가중치 적용. 프로젝트는 갭 분석에 포함 안 됨."
+    "gapNote": "인증 > 실전(1.0) > 공부기록(0.6) 가중치 적용. 프로젝트는 갭 분석에 포함 안 됨.",
+    "newRoadmap": "새 로드맵 생성",
+    "noRoadmapsYet": "AI 로드맵이 없어. 생성해봐!",
+    "cancel": "취소",
+    "goalLabel": "최종 목표",
+    "careerLevelLabel": "현재 수준"
   },
   "toast": {
     "goalAdded": "목표가 추가됐어 🎯",
@@ -290,7 +295,8 @@
     "alert": "주의",
     "error": "분석에 실패했어. 다시 시도해봐.",
     "addStudy": "공부 기록 추가",
-    "insufficientData": "공부 기록이 {current}개야. {min}개 이상 쌓이면 AI가 분석해줄게."
+    "insufficientData": "공부 기록이 {current}개야. {min}개 이상 쌓이면 AI가 분석해줄게.",
+    "resources": "학습 리소스"
   },
   "til": {
     "write": "쓰기",

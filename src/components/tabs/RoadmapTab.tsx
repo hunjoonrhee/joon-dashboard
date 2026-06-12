@@ -100,12 +100,26 @@ export default function RoadmapTab({
 
   const handleAdopt = async (roadmap: AiRoadmap) => {
     try {
-      await supabase
-        .from('settings')
-        .upsert(
-          { key: 'adopted_roadmap_id', value: roadmap.id },
-          { onConflict: 'key' }
-        )
+      await Promise.all([
+        supabase
+          .from('settings')
+          .upsert(
+            { key: 'adopted_roadmap_id', value: roadmap.id },
+            { onConflict: 'key' }
+          ),
+        supabase
+          .from('settings')
+          .upsert(
+            { key: 'big_goal', value: roadmap.goal },
+            { onConflict: 'key' }
+          ),
+        supabase
+          .from('settings')
+          .upsert(
+            { key: 'big_goal_sub', value: roadmap.career_level },
+            { onConflict: 'key' }
+          ),
+      ])
       setAdoptedRoadmap(roadmap)
       show(t('roadmapAdopted') ?? '로드맵이 채택됐어 ✓', {
         type: 'success',

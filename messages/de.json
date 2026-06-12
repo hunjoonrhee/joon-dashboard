@@ -226,7 +226,12 @@
     "sourcePractical": "Praxiserfahrung",
     "sourceStudy": "Lernprotokoll",
     "sourceNone": "Unbekannt",
-    "gapNote": "Zertifikat / Praxis (1.0) > Lernprotokoll (0.6). Projekte nicht direkt enthalten."
+    "gapNote": "Zertifikat / Praxis (1.0) > Lernprotokoll (0.6). Projekte nicht direkt enthalten.",
+    "newRoadmap": "Neue Roadmap erstellen",
+    "noRoadmapsYet": "Noch keine Roadmap. Erstelle eine!",
+    "cancel": "Abbrechen",
+    "goalLabel": "Endziel",
+    "careerLevelLabel": "Aktuelles Niveau"
   },
   "toast": {
     "goalAdded": "Ziel wurde hinzugefügt 🎯",
@@ -290,7 +295,8 @@
     "alert": "Hinweis",
     "error": "Analyse fehlgeschlagen. Bitte erneut versuchen.",
     "addStudy": "Lernsitzung hinzufügen",
-    "insufficientData": "Erst {current} Einträge. Ab {min} Einträgen analysiert die KI."
+    "insufficientData": "Erst {current} Einträge. Ab {min} Einträgen analysiert die KI.",
+    "resources": "Lernressourcen"
   },
   "til": {
     "write": "Schreiben",
