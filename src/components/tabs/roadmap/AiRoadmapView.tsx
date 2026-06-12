@@ -3,7 +3,7 @@
 import GoalModal from '@/components/tabs/roadmap/GoalModal'
 import type { AiRoadmap, RoadmapStage } from '@/types'
 import { Check, Plus, RefreshCw, Sparkles, Trophy } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 interface Props {
@@ -22,9 +22,10 @@ export default function AiRoadmapView({
   onRefresh,
 }: Props) {
   const t = useTranslations('roadmap')
+  const locale = useLocale()
   const [state, setState] = useState<State>(adoptedRoadmap ? 'done' : 'idle')
   const [goal, setGoal] = useState(settings.big_goal ?? '')
-  const [careerLevel, setCareerLevel] = useState('4년차 프론트엔드')
+  const [careerLevel, setCareerLevel] = useState(settings.career_level ?? '')
   const [generated, setGenerated] = useState<AiRoadmap | null>(adoptedRoadmap)
   const [adopted, setAdopted] = useState(!!adoptedRoadmap)
   const [loading, setLoading] = useState(false)
@@ -38,7 +39,7 @@ export default function AiRoadmapView({
       const res = await fetch('/api/roadmap/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ goal, careerLevel }),
+        body: JSON.stringify({ goal, careerLevel, locale }),
       })
       if (!res.ok) throw new Error()
       const data = await res.json()
@@ -68,24 +69,28 @@ export default function AiRoadmapView({
           {t('aiRoadmap')}
         </p>
         <div className="flex gap-2 mb-3">
-          <input
-            type="text"
-            value={goal}
-            onChange={(e) => setGoal(e.target.value)}
-            placeholder={t('selectPath')}
-            className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400 bg-white"
-          />
-          <select
-            value={careerLevel}
-            onChange={(e) => setCareerLevel(e.target.value)}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400 bg-white"
-          >
-            <option>3년차 프론트엔드</option>
-            <option>4년차 프론트엔드</option>
-            <option>5년차 이상 프론트엔드</option>
-            <option>3년차 풀스택</option>
-            <option>4년차 풀스택</option>
-          </select>
+          <div className="flex flex-col gap-1" style={{ flex: 2 }}>
+            <label className="text-xs text-gray-400">{t('goalLabel')}</label>
+            <input
+              type="text"
+              value={goal}
+              onChange={(e) => setGoal(e.target.value)}
+              placeholder={t('selectPath')}
+              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400 bg-white"
+            />
+          </div>
+          <div className="flex flex-col gap-1" style={{ flex: 1 }}>
+            <label className="text-xs text-gray-400">
+              {t('careerLevelLabel')}
+            </label>
+            <input
+              type="text"
+              value={careerLevel}
+              onChange={(e) => setCareerLevel(e.target.value)}
+              placeholder={t('careerLevelPlaceholder')}
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400 bg-white"
+            />
+          </div>
         </div>
 
         <div className="flex gap-2">
@@ -93,7 +98,7 @@ export default function AiRoadmapView({
           {state === 'idle' && (
             <button
               onClick={generate}
-              disabled={loading || !goal.trim()}
+              disabled={loading || !goal.trim() || !careerLevel.trim()}
               className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-600 disabled:opacity-50 transition-colors"
             >
               {loading ? (
@@ -184,6 +189,7 @@ function StageCard({
   onRefresh?: () => void
 }) {
   const t = useTranslations('roadmap')
+  const locale = useLocale()
   const [open, setOpen] = useState(stage.level === 2)
   const [goalModal, setGoalModal] = useState(false)
 
@@ -204,8 +210,7 @@ function StageCard({
             <p
               className={`text-sm font-semibold ${isLast ? 'text-indigo-800' : 'text-gray-700'}`}
             >
-              {stage.level}
-              {t('stageUnit')} · {stage.title}
+              {stage.level}. {t('stageUnit')} · {stage.title}
             </p>
             <p className="text-xs text-gray-400 mt-0.5">{stage.description}</p>
           </div>

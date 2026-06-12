@@ -152,7 +152,7 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
           onClick={() => setSubTab('til')}
           className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${subTab === 'til' ? 'bg-indigo-500 text-white' : 'text-gray-400 hover:text-gray-600'}`}
         >
-          💡 TIL 모음
+          {t('tilCollection')}
         </button>
       </div>
 
@@ -247,7 +247,7 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
               />
             </div>
             <div>
-              <label className={labelCls}>💡 TIL (선택)</label>
+              <label className={labelCls}>{t('tilOptional')}</label>
               <textarea
                 className={`${inputCls} min-h-[80px] resize-none`}
                 placeholder="오늘 기억하고 싶은 것..."

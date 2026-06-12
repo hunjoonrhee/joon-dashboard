@@ -1,12 +1,23 @@
 'use client'
 
+import { supabase } from '@/lib/supabase'
 import type { AiRoadmap } from '@/types'
 import { useTranslations } from 'next-intl'
+import { useEffect, useState } from 'react'
 
 interface Props {
   adoptedRoadmap: AiRoadmap | null
   studiedTags: Set<string>
   onGoToAi: () => void
+}
+
+type TrustSource = 'cert' | 'practical' | 'study' | 'none'
+
+interface SkillWithSource {
+  name: string
+  tags: string[]
+  source: TrustSource
+  matchedTags: string[]
 }
 
 export default function GapAnalysisView({
@@ -15,6 +26,32 @@ export default function GapAnalysisView({
   onGoToAi,
 }: Props) {
   const t = useTranslations('roadmap')
+  const [certTags, setCertTags] = useState<Set<string>>(new Set())
+  const [practicalTags, setPracticalTags] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    const load = async () => {
+      const [certsRes, projectSkillsRes] = await Promise.all([
+        supabase.from('certifications').select('tags'),
+        supabase.from('project_skills').select('tags'),
+      ])
+      if (certsRes.data) {
+        const tags = new Set<string>(
+          (certsRes.data as { tags: string[] }[]).flatMap((c) => c.tags)
+        )
+        setCertTags(tags)
+      }
+      if (projectSkillsRes.data) {
+        const tags = new Set<string>(
+          (projectSkillsRes.data as { tags: string[] }[]).flatMap(
+            (ps) => ps.tags
+          )
+        )
+        setPracticalTags(tags)
+      }
+    }
+    load()
+  }, [])
 
   if (!adoptedRoadmap) {
     return (
@@ -33,13 +70,64 @@ export default function GapAnalysisView({
     )
   }
 
-  const allSkills = adoptedRoadmap.stages.flatMap((s) => s.skills)
-  const totalSkills = allSkills.length
-  const studiedSkills = allSkills.filter((sk) =>
-    sk.tags.some((tag) => studiedTags.has(tag))
-  ).length
+  const getSource = (
+    tags: string[]
+  ): { source: TrustSource; matchedTags: string[] } => {
+    const certMatched = tags.filter((tag) => certTags.has(tag))
+    if (certMatched.length > 0)
+      return { source: 'cert', matchedTags: certMatched }
+    const practicalMatched = tags.filter((tag) => practicalTags.has(tag))
+    if (practicalMatched.length > 0)
+      return { source: 'practical', matchedTags: practicalMatched }
+    const studyMatched = tags.filter((tag) => studiedTags.has(tag))
+    if (studyMatched.length > 0)
+      return { source: 'study', matchedTags: studyMatched }
+    return { source: 'none', matchedTags: [] }
+  }
+
+  const getWeight = (source: TrustSource) => {
+    if (source === 'cert') return 1.0
+    if (source === 'practical') return 1.0
+    if (source === 'study') return 0.6
+    return 0
+  }
+
+  const allSkills = adoptedRoadmap.stages.flatMap((s) =>
+    s.skills.map((sk): SkillWithSource => {
+      const { source, matchedTags } = getSource(sk.tags)
+      return { name: sk.name, tags: sk.tags, source, matchedTags }
+    })
+  )
+
+  const totalWeight = allSkills.reduce(
+    (sum, sk) => sum + getWeight(sk.source),
+    0
+  )
+  const maxWeight = allSkills.length
   const gapPct =
-    totalSkills === 0 ? 0 : Math.round((studiedSkills / totalSkills) * 100)
+    maxWeight === 0 ? 0 : Math.round((totalWeight / maxWeight) * 100)
+
+  const sourceLabel = (source: TrustSource) => {
+    if (source === 'cert')
+      return {
+        label: t('sourceCert'),
+        color: 'bg-green-50 text-green-600 border-green-100',
+      }
+    if (source === 'practical')
+      return {
+        label: t('sourcePractical'),
+        color: 'bg-amber-50 text-amber-600 border-amber-100',
+      }
+    if (source === 'study')
+      return {
+        label: t('sourceStudy'),
+        color: 'bg-indigo-50 text-indigo-500 border-indigo-100',
+      }
+    return {
+      label: t('sourceNone'),
+      color: 'bg-gray-50 text-gray-400 border-gray-100',
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -72,21 +160,49 @@ export default function GapAnalysisView({
           />
         </div>
         <p className="text-xs text-gray-400">
-          {t('gapSummary', { studied: studiedSkills, total: totalSkills })}
+          {t('gapSummary', {
+            studied: Math.round(totalWeight * 10) / 10,
+            total: maxWeight,
+          })}
           {' · '}
-          {adoptedRoadmap.goal} · {adoptedRoadmap.career_level}
+          {adoptedRoadmap.goal}
         </p>
+        {/* 신뢰도 범례 */}
+        <div className="flex gap-3 flex-wrap mt-3 pt-3 border-t border-gray-100">
+          {[
+            { source: 'cert' as TrustSource, icon: '🏆' },
+            { source: 'practical' as TrustSource, icon: '⚡' },
+            { source: 'study' as TrustSource, icon: '📖' },
+            { source: 'none' as TrustSource, icon: '○' },
+          ].map(({ source, icon }) => {
+            const { label, color } = sourceLabel(source)
+            return (
+              <span
+                key={source}
+                className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border ${color}`}
+              >
+                <span>{icon}</span>
+                {label}
+              </span>
+            )
+          })}
+        </div>
       </div>
 
       {/* 단계별 갭 */}
       {adoptedRoadmap.stages.map((stage) => {
-        const stageDone = stage.skills.filter((sk) =>
-          sk.tags.some((tag) => studiedTags.has(tag))
-        ).length
+        const stageSkills = stage.skills.map((sk): SkillWithSource => {
+          const { source, matchedTags } = getSource(sk.tags)
+          return { name: sk.name, tags: sk.tags, source, matchedTags }
+        })
+        const stageWeight = stageSkills.reduce(
+          (sum, sk) => sum + getWeight(sk.source),
+          0
+        )
         const stagePct =
-          stage.skills.length === 0
+          stageSkills.length === 0
             ? 0
-            : Math.round((stageDone / stage.skills.length) * 100)
+            : Math.round((stageWeight / stageSkills.length) * 100)
 
         return (
           <div
@@ -97,7 +213,8 @@ export default function GapAnalysisView({
               <p className="text-xs font-bold text-gray-600">{stage.title}</p>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-400">
-                  {stageDone}/{stage.skills.length}
+                  {stageSkills.filter((s) => s.source !== 'none').length}/
+                  {stageSkills.length}
                 </span>
                 <span
                   className={`text-xs font-bold ${
@@ -112,47 +229,41 @@ export default function GapAnalysisView({
                 </span>
               </div>
             </div>
-            <div className="px-4 py-2 flex flex-col gap-2">
-              {stage.skills.map((skill, i) => {
-                const studied = skill.tags.some((tag) => studiedTags.has(tag))
-                const matchedTags = skill.tags.filter((tag) =>
-                  studiedTags.has(tag)
-                )
+            <div className="px-4 py-2 flex flex-col gap-0">
+              {stageSkills.map((skill, i) => {
+                const { label, color } = sourceLabel(skill.source)
                 return (
                   <div
                     key={i}
-                    className="flex items-start gap-2 py-1.5 border-b border-gray-50 last:border-0"
+                    className="flex items-start gap-2 py-2 border-b border-gray-50 last:border-0"
                   >
                     <div
                       className={`w-3.5 h-3.5 rounded-full flex-shrink-0 mt-0.5 ${
-                        studied ? 'bg-green-400' : 'bg-gray-200'
+                        skill.source === 'cert'
+                          ? 'bg-green-400'
+                          : skill.source === 'practical'
+                            ? 'bg-amber-400'
+                            : skill.source === 'study'
+                              ? 'bg-indigo-400'
+                              : 'bg-gray-200'
                       }`}
                     />
                     <div className="flex-1 min-w-0">
-                      <p
-                        className={`text-xs font-medium ${studied ? 'text-green-700' : 'text-gray-600'}`}
-                      >
+                      <p className="text-xs font-medium text-gray-700">
                         {skill.name}
                       </p>
-                      {!studied && (
+                      {skill.source === 'none' && (
                         <p className="text-xs text-gray-400 mt-0.5">
                           {t('requiredTags')}:{' '}
                           {skill.tags.slice(0, 3).join(', ')}
                         </p>
                       )}
-                      {studied && matchedTags.length > 0 && (
-                        <div className="flex gap-1 flex-wrap mt-1">
-                          {matchedTags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="text-xs px-1.5 py-0.5 rounded-full bg-green-50 text-green-600"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
                     </div>
+                    <span
+                      className={`text-xs px-1.5 py-0.5 rounded-full border flex-shrink-0 ${color}`}
+                    >
+                      {label}
+                    </span>
                   </div>
                 )
               })}
@@ -162,7 +273,7 @@ export default function GapAnalysisView({
       })}
 
       <div className="bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 text-xs text-gray-400">
-        공부기록 태그만 반영돼. 프로젝트 진행 여부는 갭 분석에 포함 안 됨.
+        {t('gapNote')}
       </div>
     </div>
   )

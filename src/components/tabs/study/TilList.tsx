@@ -2,7 +2,7 @@
 
 import { getTagColor } from '@/lib/tagColor'
 import type { Session } from '@/types'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 
 interface Props {
@@ -12,6 +12,7 @@ interface Props {
 export default function TilList({ sessions }: Props) {
   const router = useRouter()
   const locale = useLocale()
+  const t = useTranslations('study')
 
   const dateLabel = (d: string) =>
     new Date(d).toLocaleDateString(
@@ -21,12 +22,10 @@ export default function TilList({ sessions }: Props) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4">
       <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
-        TIL 모음 — 지식 자산
+        {t('tilKnowledgeTitle')}
       </p>
       {sessions.length === 0 ? (
-        <p className="text-sm text-gray-400">
-          아직 TIL이 없어. 공부 기록 추가할 때 TIL도 같이 써봐.
-        </p>
+        <p className="text-sm text-gray-400">{t('tilEmpty')}</p>
       ) : (
         <div className="flex flex-col divide-y divide-gray-100">
           {sessions.map((s) => (

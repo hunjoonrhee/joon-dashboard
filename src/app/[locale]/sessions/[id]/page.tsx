@@ -4,11 +4,13 @@ import { supabase } from '@/lib/supabase'
 import { getTagColor } from '@/lib/tagColor'
 import type { Session, StudyItem } from '@/types'
 import { ArrowLeft, Check, Pencil, Plus, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 
 export default function SessionDetail() {
+  const t = useTranslations('study')
   const { id } = useParams()
   const router = useRouter()
   const [session, setSession] = useState<Session | null>(null)
@@ -364,9 +366,7 @@ export default function SessionDetail() {
               <ReactMarkdown>{session.til}</ReactMarkdown>
             </div>
           ) : (
-            <p className="text-sm text-gray-400">
-              아직 TIL이 없어요. 연필 아이콘을 눌러 추가해봐.
-            </p>
+            <p className="text-sm text-gray-400">{t('sessionNoTil')}</p>
           )}
         </div>
       </div>

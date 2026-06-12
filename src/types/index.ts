@@ -112,3 +112,21 @@ export interface AiRoadmap {
   adopted: boolean
   created_at: string
 }
+
+// 프로젝트 실전 스킬
+export interface ProjectSkill {
+  id: string
+  project_id: string
+  tags: string[]
+  created_at: string
+}
+
+// 자격증
+export interface Certification {
+  id: string
+  name: string
+  issuer: string | null
+  tags: string[]
+  issued_at: string | null
+  created_at: string
+}

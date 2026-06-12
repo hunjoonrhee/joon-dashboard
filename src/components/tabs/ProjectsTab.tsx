@@ -5,15 +5,18 @@ import { supabase } from '@/lib/supabase'
 import type { Project, ProjectTask } from '@/types'
 import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ProjectItem from './projects/ProjectItem'
 import ProjectModal from './projects/ProjectModal'
 import TaskModal from './projects/TaskModal'
+import ProjectSkillModal from './projects/ProjectSkillModal'
 
 interface Props {
   projects: Project[]
   projectTasks: ProjectTask[]
   onRefresh: () => void
+  triggerAdd?: boolean
+  onTriggerAddDone?: () => void
 }
 
 const emptyProjectForm = {
@@ -27,6 +30,8 @@ export default function ProjectsTab({
   projects,
   projectTasks,
   onRefresh,
+  triggerAdd,
+  onTriggerAddDone,
 }: Props) {
   const t = useTranslations('projects')
   const tToast = useTranslations('toast')
@@ -49,6 +54,17 @@ export default function ProjectsTab({
   const [projectForm, setProjectForm] = useState(emptyProjectForm)
   const [taskForm, setTaskForm] = useState(emptyTaskForm)
   const [saving, setSaving] = useState(false)
+  const [skillModal, setSkillModal] = useState<{
+    projectId: string
+    projectName: string
+  } | null>(null)
+
+  useEffect(() => {
+    if (triggerAdd) {
+      openProjectModal('add')
+      onTriggerAddDone?.()
+    }
+  }, [triggerAdd])
 
   const getTasks = (projectId: string) =>
     projectTasks.filter((t) => t.project_id === projectId)
@@ -117,6 +133,20 @@ export default function ProjectsTab({
           .update(payload)
           .eq('id', selectedProject.id)
         show(tToast('projectEdited'), { type: 'success' })
+        // 완료로 바뀌면 스킬 태깅 모달 트리거
+        if (
+          payload.status === 'completed' &&
+          selectedProject.status !== 'completed'
+        ) {
+          closeProjectModal()
+          onRefresh()
+          setSkillModal({
+            projectId: selectedProject.id,
+            projectName: selectedProject.name,
+          })
+          setSaving(false)
+          return
+        }
       }
       closeProjectModal()
       onRefresh()
@@ -145,13 +175,11 @@ export default function ProjectsTab({
     const payload = { name: taskForm.name, status: taskForm.status }
     try {
       if (taskModal === 'add') {
-        await supabase
-          .from('project_tasks')
-          .insert({
-            ...payload,
-            project_id: selectedProjectId,
-            order_index: getTasks(selectedProjectId).length,
-          })
+        await supabase.from('project_tasks').insert({
+          ...payload,
+          project_id: selectedProjectId,
+          order_index: getTasks(selectedProjectId).length,
+        })
         show(tToast('taskAdded'), { type: 'success' })
       } else if (selectedTask) {
         await supabase
@@ -232,6 +260,17 @@ export default function ProjectsTab({
           onSave={saveTask}
           onDelete={taskModal === 'edit' ? removeTask : undefined}
           onClose={closeTaskModal}
+        />
+      )}
+      {skillModal && (
+        <ProjectSkillModal
+          projectId={skillModal.projectId}
+          projectName={skillModal.projectName}
+          onClose={() => setSkillModal(null)}
+          onSaved={() => {
+            setSkillModal(null)
+            onRefresh()
+          }}
         />
       )}
     </>

@@ -8,7 +8,7 @@ import GoalModal from '@/components/tabs/roadmap/GoalModal'
 import { ToastProvider } from '@/components/Toast'
 import { supabase } from '@/lib/supabase'
 import { useTranslations } from 'next-intl'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -26,6 +26,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [showStudyModal, setShowStudyModal] = useState(false)
   const [showGoalModal, setShowGoalModal] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
 
   const locale = pathname.split('/')[1] ?? 'ko'
   const segment = pathname.split('/')[2] ?? ''
@@ -41,13 +42,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   const headerButtonConfig: Record<
     string,
-    { label: string; modal: 'study' | 'goal' | false }
+    { label: string; modal: 'study' | 'goal' | 'project' | false }
   > = {
     '': { label: `+ ${tNav('study')}`, modal: 'study' },
     study: { label: `+ ${tNav('study')}`, modal: 'study' },
     notes: { label: `+ ${tCommon('add')} ${tNav('notes')}`, modal: false },
     roadmap: { label: `+ ${tNav('goals')}`, modal: 'goal' },
-    projects: { label: `+ ${tNav('projects')}`, modal: false },
+    projects: { label: `+ ${tNav('projects')}`, modal: 'project' },
     settings: { label: `+ ${tNav('study')}`, modal: 'study' },
   }
 
@@ -67,6 +68,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const handleHeaderBtn = () => {
     if (btnConfig.modal === 'study') setShowStudyModal(true)
     else if (btnConfig.modal === 'goal') setShowGoalModal(true)
+    else if (btnConfig.modal === 'project') router.push(pathname + '?add=true')
   }
 
   if (onboarding === null) return null

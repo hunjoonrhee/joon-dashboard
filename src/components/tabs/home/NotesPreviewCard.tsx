@@ -22,20 +22,26 @@ export default function NotesPreviewCard({ notes }: Props) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">✍️ 최근 노트</p>
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+          {t('recentNotes')}
+        </p>
         <button
           onClick={() => router.push('notes')}
           className="text-xs text-indigo-500 font-medium hover:text-indigo-700"
         >
-          전체 보기
+          {t('viewAll')}
         </button>
       </div>
 
       {notes.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-4 text-center">
           <span className="text-2xl opacity-40">🔥</span>
-          <p className="text-sm font-semibold text-gray-700">{t('notesEmpty')}</p>
-          <p className="text-xs text-gray-400 leading-relaxed">{t('notesEmptySub')}</p>
+          <p className="text-sm font-semibold text-gray-700">
+            {t('notesEmpty')}
+          </p>
+          <p className="text-xs text-gray-400 leading-relaxed">
+            {t('notesEmptySub')}
+          </p>
           <button
             onClick={() => router.push('notes')}
             className="mt-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-orange-600 bg-orange-50 border border-orange-100 hover:bg-orange-100 transition-colors"
@@ -46,13 +52,23 @@ export default function NotesPreviewCard({ notes }: Props) {
       ) : (
         <div className="flex flex-col divide-y divide-gray-100">
           {notes.map((note) => (
-            <div key={note.id} className="py-2.5 cursor-pointer" onClick={() => router.push('notes')}>
+            <div
+              key={note.id}
+              className="py-2.5 cursor-pointer"
+              onClick={() => router.push('notes')}
+            >
               <div className="flex items-center gap-1.5 mb-1">
                 {note.mood && <span className="text-sm">{note.mood}</span>}
-                <p className="text-sm font-semibold text-gray-800 truncate">{note.title || '제목 없음'}</p>
+                <p className="text-sm font-semibold text-gray-800 truncate">
+                  {note.title || t('untitled')}
+                </p>
               </div>
-              <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{note.content}</p>
-              <p className="text-xs text-gray-300 mt-1">{dateLabel(note.updated_at)}</p>
+              <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
+                {note.content}
+              </p>
+              <p className="text-xs text-gray-300 mt-1">
+                {dateLabel(note.updated_at)}
+              </p>
             </div>
           ))}
         </div>
