@@ -1,7 +1,7 @@
 'use client'
 
-import AddSessionModal from '@/components/AddSessionModal'
 import type { AiRoadmap, Goal, Session } from '@/types'
+import { useModalStore } from '@/store/modalStore'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
@@ -48,8 +48,7 @@ export default function CoachCard({
   const [status, setStatus] = useState<Status>('idle')
   const [data, setData] = useState<CoachSuggestion | null>(null)
   const [lastFetched, setLastFetched] = useState<string | null>(null)
-  const [showModal, setShowModal] = useState(false)
-  const [modalTitle, setModalTitle] = useState('')
+  const { openStudyModal } = useModalStore()
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -84,10 +83,7 @@ export default function CoachCard({
     }
   }
 
-  const openStudyModal = (skill: string) => {
-    setModalTitle(skill)
-    setShowModal(true)
-  }
+
 
   if (!adoptedRoadmap) return null
 
@@ -284,16 +280,6 @@ export default function CoachCard({
         )}
       </div>
 
-      {showModal && (
-        <AddSessionModal
-          initialTitle={modalTitle}
-          onClose={() => setShowModal(false)}
-          onSaved={() => {
-            setShowModal(false)
-            onRefresh?.()
-          }}
-        />
-      )}
     </>
   )
 }

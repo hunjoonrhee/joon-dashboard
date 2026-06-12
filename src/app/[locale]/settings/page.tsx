@@ -3,7 +3,7 @@
 import { useToast } from '@/components/Toast'
 import { supabase } from '@/lib/supabase'
 import type { Certification, Setting } from '@/types'
-import { ArrowLeft, Check, Trash2, X } from 'lucide-react'
+import { ArrowLeft, Check, Trash2 } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -125,7 +125,7 @@ export default function SettingsPage() {
   return (
     <main className="min-h-screen p-4 max-w-2xl mx-auto">
       <button
-        onClick={() => router.back()}
+        onClick={() => router.push(`/${currentLocale}`)}
         className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 mb-6 transition-colors"
       >
         <ArrowLeft size={16} />

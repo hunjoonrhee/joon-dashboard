@@ -8,6 +8,7 @@ import GoalModal from '@/components/tabs/roadmap/GoalModal'
 import { ToastProvider } from '@/components/Toast'
 import { supabase } from '@/lib/supabase'
 import { useTranslations } from 'next-intl'
+import { useModalStore } from '@/store/modalStore'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -23,7 +24,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     settings: tNav('settings'),
   }
   const [onboarding, setOnboarding] = useState<boolean | null>(null)
-  const [showStudyModal, setShowStudyModal] = useState(false)
+  const { studyModalOpen, openStudyModal, closeStudyModal } = useModalStore()
   const [showGoalModal, setShowGoalModal] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
@@ -66,7 +67,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const btnConfig = headerButtonConfig[segment] ?? headerButtonConfig['']
 
   const handleHeaderBtn = () => {
-    if (btnConfig.modal === 'study') setShowStudyModal(true)
+    if (btnConfig.modal === 'study') openStudyModal()
     else if (btnConfig.modal === 'goal') setShowGoalModal(true)
     else if (btnConfig.modal === 'project') router.push(pathname + '?add=true')
   }
@@ -104,10 +105,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <main className="flex-1 bg-gray-50">{children}</main>
         </div>
 
-        {showStudyModal && (
+        {studyModalOpen && (
           <AddSessionModal
-            onClose={() => setShowStudyModal(false)}
-            onSaved={() => setShowStudyModal(false)}
+            onClose={closeStudyModal}
+            onSaved={closeStudyModal}
           />
         )}
 

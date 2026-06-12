@@ -167,7 +167,7 @@ export default function GoalDetail() {
   return (
     <main className="mx-auto px-4 py-4">
       <button
-        onClick={() => router.back()}
+        onClick={() => router.push('/roadmap')}
         className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 mb-6 transition-colors"
       >
         <ArrowLeft size={16} />

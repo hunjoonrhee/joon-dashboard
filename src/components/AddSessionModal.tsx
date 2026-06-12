@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { de, enUS, ko } from 'date-fns/locale'
 import { X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -23,6 +24,7 @@ export default function AddSessionModal({
 }: Props) {
   const locale = useLocale()
   const { show } = useToast()
+  const queryClient = useQueryClient()
   const t = useTranslations('common')
   const tStudy = useTranslations('study')
   const tToast = useTranslations('toast')
@@ -134,6 +136,7 @@ export default function AddSessionModal({
       } else {
         show(tToast('studySaved'), { type: 'success' })
       }
+      queryClient.invalidateQueries({ queryKey: ['sessions'] })
       onSaved()
       onClose()
     } catch {

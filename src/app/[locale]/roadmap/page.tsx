@@ -1,36 +1,15 @@
 'use client'
 
 import RoadmapTab from '@/components/tabs/RoadmapTab'
-import { supabase } from '@/lib/supabase'
-import type { Goal, Session, Setting, Topic } from '@/types'
-import { useEffect, useState } from 'react'
+import { useGoals, useSessions, useSettings, useTopics } from '@/lib/queries'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function RoadmapPage() {
-  const [goals, setGoals] = useState<Goal[]>([])
-  const [topics, setTopics] = useState<Topic[]>([])
-  const [sessions, setSessions] = useState<Session[]>([])
-  const [settings, setSettings] = useState<Record<string, string>>({})
-  const [refreshKey, setRefreshKey] = useState(0)
-
-  useEffect(() => {
-    Promise.all([
-      supabase.from('goals').select('*'),
-      supabase.from('topics').select('*'),
-      supabase.from('sessions').select('*').order('date', { ascending: false }),
-      supabase.from('settings').select('*'),
-    ]).then(([g, t, s, st]) => {
-      if (g.data) setGoals(g.data)
-      if (t.data) setTopics(t.data)
-      if (s.data) setSessions(s.data)
-      if (st.data) {
-        const map: Record<string, string> = {}
-        st.data.forEach((s: Setting) => {
-          map[s.key] = s.value
-        })
-        setSettings(map)
-      }
-    })
-  }, [refreshKey])
+  const queryClient = useQueryClient()
+  const { data: goals = [] } = useGoals()
+  const { data: topics = [] } = useTopics()
+  const { data: sessions = [] } = useSessions()
+  const { data: settings = {} } = useSettings()
 
   return (
     <main className="mx-auto px-4 py-4">
@@ -39,7 +18,7 @@ export default function RoadmapPage() {
         topics={topics}
         sessions={sessions}
         settings={settings}
-        onRefresh={() => setRefreshKey((k) => k + 1)}
+        onRefresh={() => queryClient.invalidateQueries()}
       />
     </main>
   )
