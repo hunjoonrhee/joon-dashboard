@@ -109,7 +109,8 @@
     "tagCustomAdd": "Add custom",
     "tagGapNote": "(not in gap analysis)",
     "completedBadge": "Completion log",
-    "loadingDots": "Loading..."
+    "loadingDots": "Loading...",
+    "close": "Close"
   },
   "study": {
     "title": "Study Log",
@@ -127,7 +128,8 @@
     "tilCollection": "💡 TIL Collection",
     "tilKnowledgeTitle": "TIL Collection — Knowledge Base",
     "tilOptional": "💡 TIL (optional)",
-    "sessionNoTil": "No TIL yet. Click the pencil icon to add one."
+    "sessionNoTil": "No TIL yet. Click the pencil icon to add one.",
+    "sessionListTitle": "Study log"
   },
   "notes": {
     "title": "Notes",
@@ -221,9 +223,7 @@
     "sourcePractical": "Practical use",
     "sourceStudy": "Study record",
     "sourceNone": "Not studied",
-    "gapNote": "Cert / Practical (1.0) > Study record (0.6). Projects not counted directly.",
-    "goalLabel": "Final goal",
-    "careerLevelLabel": "Current level"
+    "gapNote": "Cert / Practical (1.0) > Study record (0.6). Projects not counted directly."
   },
   "toast": {
     "goalAdded": "Goal added 🎯",
@@ -273,5 +273,36 @@
     "save": "Save",
     "saving": "Saving...",
     "saved": "Saved!"
+  },
+  "coach": {
+    "title": "AI Coach",
+    "getAdvice": "Get advice",
+    "analyzing": "Analyzing...",
+    "refresh": "Re-analyze",
+    "idleMessage": "Let AI analyze your study direction for today",
+    "todaySkill": "Study today",
+    "pace": "Pace check",
+    "monthsCurrent": "Current pace",
+    "monthsOptimized": "Optimized",
+    "alert": "Alert",
+    "error": "Analysis failed. Please try again.",
+    "addStudy": "Add study session",
+    "insufficientData": "Only {current} sessions logged. AI needs at least {min} to analyze."
+  },
+  "til": {
+    "write": "Write",
+    "preview": "Preview",
+    "tilPlaceholder": "What did you learn today? Markdown supported.",
+    "previewEmpty": "Start writing to see a preview here",
+    "back": "Back",
+    "save": "Save",
+    "saving": "Saving...",
+    "saved": "Saved!",
+    "notFound": "Entry not found",
+    "minutes": " min",
+    "saveHint": "Press Ctrl+S to save",
+    "savedSuccess": "Saved! Want to write more in depth? →",
+    "editTilFull": "Open TIL full editor",
+    "close": "Close"
   }
 }

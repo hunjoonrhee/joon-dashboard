@@ -32,7 +32,7 @@ export default function TilList({ sessions }: Props) {
             <div
               key={s.id}
               className="py-3 cursor-pointer"
-              onClick={() => router.push(`sessions/${s.id}`)}
+              onClick={() => router.push(`/til/${s.id}`)}
             >
               <p className="text-xs text-gray-400 mb-1">{dateLabel(s.date)}</p>
               <p className="text-sm font-medium text-gray-800 mb-1">

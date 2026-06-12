@@ -14,6 +14,7 @@ import type {
 } from '@/types'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
+import CoachCard from '../CoachCard'
 import HeroCard from './home/HeroCard'
 import NotesPreviewCard from './home/NotesPreviewCard'
 import TilPreviewCard from './home/TilPreviewCard'
@@ -201,6 +202,11 @@ export default function HomeTab({
           completedTopicsCount={completedTopics.length}
         />
       </div>
+      <CoachCard
+        sessions={sessions}
+        goals={goals}
+        adoptedRoadmap={adoptedRoadmap}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <TodayCard

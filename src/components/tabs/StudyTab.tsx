@@ -81,10 +81,7 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
             ? '90'
             : 'custom'
     )
-    // 모바일에서만 모달
-    if (window.innerWidth < 1024) {
-      setModal('edit')
-    }
+    setModal('edit')
   }
   const close = () => {
     setModal(null)

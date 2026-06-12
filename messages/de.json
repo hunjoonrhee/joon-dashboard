@@ -109,7 +109,8 @@
     "tagCustomAdd": "Direkt hinzufügen",
     "tagGapNote": "(nicht in Gap-Analyse)",
     "completedBadge": "Abschlusseintrag",
-    "loadingDots": "Wird geladen..."
+    "loadingDots": "Wird geladen...",
+    "close": "Schließen"
   },
   "study": {
     "title": "Lernprotokoll",
@@ -127,7 +128,8 @@
     "tilCollection": "💡 TIL Sammlung",
     "tilKnowledgeTitle": "TIL Sammlung — Wissensschatz",
     "tilOptional": "💡 TIL (optional)",
-    "sessionNoTil": "Noch keine TIL. Klicke auf das Stift-Symbol zum Hinzufügen."
+    "sessionNoTil": "Noch keine TIL. Klicke auf das Stift-Symbol zum Hinzufügen.",
+    "sessionListTitle": "Lernprotokoll"
   },
   "notes": {
     "title": "Notizen",
@@ -221,9 +223,7 @@
     "sourcePractical": "Praxiserfahrung",
     "sourceStudy": "Lernprotokoll",
     "sourceNone": "Unbekannt",
-    "gapNote": "Zertifikat / Praxis (1.0) > Lernprotokoll (0.6). Projekte nicht direkt enthalten.",
-    "goalLabel": "Endziel",
-    "careerLevelLabel": "Aktuelles Niveau"
+    "gapNote": "Zertifikat / Praxis (1.0) > Lernprotokoll (0.6). Projekte nicht direkt enthalten."
   },
   "toast": {
     "goalAdded": "Ziel wurde hinzugefügt 🎯",
@@ -273,5 +273,36 @@
     "save": "Speichern",
     "saving": "Speichert...",
     "saved": "Gespeichert!"
+  },
+  "coach": {
+    "title": "KI-Coach",
+    "getAdvice": "Empfehlung holen",
+    "analyzing": "Analysiere...",
+    "refresh": "Neu analysieren",
+    "idleMessage": "Lass die KI deine Lernrichtung für heute analysieren",
+    "todaySkill": "Heute lernen",
+    "pace": "Tempo-Check",
+    "monthsCurrent": "Aktuell",
+    "monthsOptimized": "Optimiert",
+    "alert": "Hinweis",
+    "error": "Analyse fehlgeschlagen. Bitte erneut versuchen.",
+    "addStudy": "Lernsitzung hinzufügen",
+    "insufficientData": "Erst {current} Einträge. Ab {min} Einträgen analysiert die KI."
+  },
+  "til": {
+    "write": "Schreiben",
+    "preview": "Vorschau",
+    "tilPlaceholder": "Was hast du heute gelernt? Markdown wird unterstützt.",
+    "previewEmpty": "Gib etwas ein, um eine Vorschau zu sehen",
+    "back": "Zurück",
+    "save": "Speichern",
+    "saving": "Speichert...",
+    "saved": "Gespeichert!",
+    "notFound": "Eintrag nicht gefunden",
+    "minutes": " Min",
+    "saveHint": "Speichern mit Ctrl+S",
+    "savedSuccess": "Gespeichert! Für eine ausführlichere TIL →",
+    "editTilFull": "TIL im Vollbildmodus bearbeiten",
+    "close": "Schließen"
   }
 }

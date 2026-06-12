@@ -329,39 +329,14 @@ export default function SessionDetail() {
             <p className="text-sm font-medium text-gray-700">
               TIL — Today I Learned
             </p>
-            {!editingTil ? (
-              <button
-                onClick={() => setEditingTil(true)}
-                className="text-gray-400 hover:text-indigo-500 transition-colors"
-              >
-                <Pencil size={15} />
-              </button>
-            ) : (
-              <div className="flex gap-2">
-                <button
-                  onClick={cancelTil}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X size={15} />
-                </button>
-                <button
-                  onClick={saveTil}
-                  disabled={saving}
-                  className="text-indigo-500 hover:text-indigo-700 transition-colors disabled:opacity-50"
-                >
-                  <Check size={15} />
-                </button>
-              </div>
-            )}
+            <button
+              onClick={() => router.push(`/til/${id}`)}
+              className="text-gray-400 hover:text-indigo-500 transition-colors"
+            >
+              <Pencil size={15} />
+            </button>
           </div>
-          {editingTil ? (
-            <textarea
-              className="w-full flex-1 min-h-[calc(100vh-400px)] overflow-hidden resize-none border border-gray-200 rounded-xl p-4 text-sm font-mono outline-none focus:border-indigo-400 transition-colors"
-              placeholder="오늘 배운 것을 마크다운으로 작성해봐..."
-              value={tilDraft}
-              onChange={(e) => setTilDraft(e.target.value)}
-            />
-          ) : session.til ? (
+          {session.til ? (
             <div className="prose prose-sm max-w-none text-gray-700">
               <ReactMarkdown>{session.til}</ReactMarkdown>
             </div>

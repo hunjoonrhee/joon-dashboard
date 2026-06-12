@@ -109,7 +109,8 @@
     "tagCustomAdd": "직접 추가",
     "tagGapNote": "(갭 분석 미반영)",
     "completedBadge": "완료 기록",
-    "loadingDots": "불러오는 중..."
+    "loadingDots": "불러오는 중...",
+    "close": "닫기"
   },
   "study": {
     "title": "공부 기록",
@@ -127,7 +128,8 @@
     "tilCollection": "💡 TIL 모음",
     "tilKnowledgeTitle": "TIL 모음 — 지식 자산",
     "tilOptional": "💡 TIL (선택)",
-    "sessionNoTil": "아직 TIL이 없어요. 연필 아이콘을 눌러 추가해봐."
+    "sessionNoTil": "아직 TIL이 없어요. 연필 아이콘을 눌러 추가해봐.",
+    "sessionListTitle": "공부 기록"
   },
   "notes": {
     "title": "노트",
@@ -221,9 +223,7 @@
     "sourcePractical": "실전사용",
     "sourceStudy": "공부기록",
     "sourceNone": "미학습",
-    "gapNote": "인증 > 실전(1.0) > 공부기록(0.6) 가중치 적용. 프로젝트는 갭 분석에 포함 안 됨.",
-    "goalLabel": "최종 목표",
-    "careerLevelLabel": "현재 수준"
+    "gapNote": "인증 > 실전(1.0) > 공부기록(0.6) 가중치 적용. 프로젝트는 갭 분석에 포함 안 됨."
   },
   "toast": {
     "goalAdded": "목표가 추가됐어 🎯",
@@ -273,5 +273,36 @@
     "save": "저장",
     "saving": "저장 중...",
     "saved": "저장됐어!"
+  },
+  "coach": {
+    "title": "AI 코치",
+    "getAdvice": "조언 받기",
+    "analyzing": "분석 중...",
+    "refresh": "다시 분석",
+    "idleMessage": "오늘의 공부 방향을 AI가 분석해줄게",
+    "todaySkill": "오늘 공부할 것",
+    "pace": "페이스 체크",
+    "monthsCurrent": "현재 속도",
+    "monthsOptimized": "최적화 시",
+    "alert": "주의",
+    "error": "분석에 실패했어. 다시 시도해봐.",
+    "addStudy": "공부 기록 추가",
+    "insufficientData": "공부 기록이 {current}개야. {min}개 이상 쌓이면 AI가 분석해줄게."
+  },
+  "til": {
+    "write": "쓰기",
+    "preview": "미리보기",
+    "tilPlaceholder": "오늘 배운 것을 자유롭게 써봐. 마크다운 지원.",
+    "previewEmpty": "내용을 입력하면 여기서 미리볼 수 있어",
+    "back": "뒤로",
+    "save": "저장",
+    "saving": "저장 중...",
+    "saved": "저장됐어!",
+    "notFound": "기록을 찾을 수 없어",
+    "minutes": "분",
+    "saveHint": "Ctrl+S 로도 저장 가능",
+    "savedSuccess": "저장됐어! TIL을 더 자세히 작성하고 싶으면 →",
+    "editTilFull": "TIL 전체 화면에서 작성",
+    "close": "닫기"
   }
 }
