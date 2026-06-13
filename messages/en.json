@@ -78,7 +78,8 @@
     "focus": "Set as current focus goal",
     "finalGoalSub": "Final goal",
     "completedGoals": "Completed goals",
-    "tags": "Related tags"
+    "tags": "Related tags",
+    "otherGoals": "Other Goals"
   },
   "status": {
     "in_progress": "In Progress",

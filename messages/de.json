@@ -78,7 +78,8 @@
     "focus": "Als aktuelles Fokusziel festlegen",
     "finalGoalSub": "Endziel",
     "completedGoals": "Abgeschlossene Ziele",
-    "tags": "Zugehörige Tags"
+    "tags": "Zugehörige Tags",
+    "otherGoals": "Weitere Ziele"
   },
   "status": {
     "in_progress": "In Bearbeitung",

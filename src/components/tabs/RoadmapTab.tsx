@@ -1,8 +1,7 @@
 'use client'
 
 import { useToast } from '@/components/Toast'
-import { supabase } from '@/lib/supabase'
-import { upsertWithUser } from '@/lib/supabase'
+import { supabase, upsertWithUser, insertWithUser } from '@/lib/supabase'
 import type { AiRoadmap, Goal, Session, Topic } from '@/types'
 import { BarChart2, Route, Star } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -30,6 +29,7 @@ export default function RoadmapTab({
   settings = {},
 }: Props) {
   const { show } = useToast()
+  const tToast = useTranslations('toast')
   const t = useTranslations('roadmap')
   const [modal, setModal] = useState<{
     mode: 'add' | 'edit'
@@ -49,7 +49,7 @@ export default function RoadmapTab({
       .eq('id', adoptedId)
       .single()
       .then(({ data }: { data: AiRoadmap | null }) => {
-        if (data) setAdoptedRoadmap(data as AiRoadmap)
+        if (data) setAdoptedRoadmap(data)
       })
   }, [settings.adopted_roadmap_id])
 
@@ -57,7 +57,9 @@ export default function RoadmapTab({
     ...sessions.flatMap((s) => s.tags),
     ...goals.flatMap((g) => g.tags ?? []),
   ])
+
   const finalGoal = settings.big_goal ?? '리드 아키텍트'
+
   const adoptedRoadmapTags = adoptedRoadmap
     ? [
         ...new Set(
@@ -69,26 +71,36 @@ export default function RoadmapTab({
     : []
 
   const sortedGoals = [...goals].sort((a, b) => {
-    const so = { in_progress: 0, planned: 1, completed: 2 }
-    const po = { urgent: 0, high: 1, medium: 2, low: 3 }
+    const so: Record<string, number> = {
+      in_progress: 0,
+      planned: 1,
+      completed: 2,
+    }
+    const po: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 }
     if (so[a.status] !== so[b.status]) return so[a.status] - so[b.status]
     return po[a.priority] - po[b.priority]
   })
 
   const getTopics = (goalId: string) =>
-    topics.filter((t) => t.goal_id === goalId)
+    topics.filter((tp) => tp.goal_id === goalId)
   const getCategories = (goalId: string) => [
-    ...new Set(getTopics(goalId).map((t) => t.category)),
+    ...new Set(getTopics(goalId).map((tp) => tp.category)),
   ]
+
   const getPct = (goalId: string) => {
-    const t = getTopics(goalId)
-    if (t.length === 0) return 0
-    return Math.round((t.filter((t) => t.completed).length / t.length) * 100)
+    const tp = getTopics(goalId)
+    if (tp.length === 0) return 0
+    return Math.round(
+      (tp.filter((tp) => tp.completed).length / tp.length) * 100
+    )
   }
+
   const getCatPct = (goalId: string, cat: string) => {
-    const t = getTopics(goalId).filter((t) => t.category === cat)
-    if (t.length === 0) return 0
-    return Math.round((t.filter((t) => t.completed).length / t.length) * 100)
+    const tp = getTopics(goalId).filter((tp) => tp.category === cat)
+    if (tp.length === 0) return 0
+    return Math.round(
+      (tp.filter((tp) => tp.completed).length / tp.length) * 100
+    )
   }
 
   const toggleTopic = async (topic: Topic) => {
@@ -101,6 +113,24 @@ export default function RoadmapTab({
 
   const handleAdopt = async (roadmap: AiRoadmap) => {
     try {
+      // 기존 이 로드맵에서 온 goals 삭제 (재채택 시 중복 방지)
+      await supabase.from('goals').delete().eq('roadmap_id', roadmap.id)
+
+      // 각 stage → Goal 자동 생성
+      const goalPayloads = roadmap.stages.map((stage) => ({
+        name: stage.title,
+        description: stage.description,
+        status: 'planned' as const,
+        priority: 'medium' as const,
+        is_focus: stage.level === 1,
+        tags: stage.skills.flatMap((sk: { tags: string[] }) => sk.tags),
+        roadmap_id: roadmap.id,
+        stage_level: stage.level,
+      }))
+
+      await insertWithUser('goals', goalPayloads)
+
+      // settings 업데이트
       await Promise.all([
         upsertWithUser(
           'settings',
@@ -118,14 +148,15 @@ export default function RoadmapTab({
           { onConflict: 'key' }
         ),
       ])
+
       setAdoptedRoadmap(roadmap)
-      show(t('roadmapAdopted') ?? '로드맵이 채택됐어 ✓', {
+      show(t('roadmapAdopted'), {
         type: 'success',
         sub: `${roadmap.goal} · ${roadmap.career_level}`,
       })
       onRefresh()
     } catch {
-      show('저장에 실패했어', { type: 'error' })
+      show(tToast('saveFailed'), { type: 'error' })
     }
   }
 

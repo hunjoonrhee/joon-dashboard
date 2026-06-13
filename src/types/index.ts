@@ -27,9 +27,10 @@ export interface Goal {
   is_focus: boolean
   priority: 'urgent' | 'high' | 'medium' | 'low'
   tags: string[]
+  roadmap_id: string | null
+  stage_level: number | null
   created_at: string
 }
-
 export interface StudyItem {
   id: string
   session_id: string

@@ -45,27 +45,27 @@ export default function MyGoalsView({
   const tStatus = useTranslations('status')
   const router = useRouter()
 
-  // 목표 이름과 로드맵 단계 매칭 (단순 키워드 포함 여부)
-  const getRoadmapStageHint = (goal: Goal): string | null => {
-    if (!adoptedRoadmap) return null
-    const goalNameLower = goal.name.toLowerCase()
-    for (const stage of adoptedRoadmap.stages) {
-      const matched = stage.skills.some(
-        (sk) =>
-          goalNameLower.includes(sk.name.toLowerCase().split(' ')[0]) ||
-          sk.tags.some((tag) => goalNameLower.includes(tag.toLowerCase()))
-      )
-      if (matched) return stage.title
-    }
-    return null
-  }
+  // 로드맵 연결 goals vs 독립 goals 분리
+  const roadmapGoals = activeGoals.filter(
+    (g) => g.stage_level !== null && g.stage_level !== undefined
+  )
+  const independentGoals = activeGoals.filter(
+    (g) => g.stage_level === null || g.stage_level === undefined
+  )
+
+  // 단계별 그룹핑
+  const stageGroups = adoptedRoadmap
+    ? adoptedRoadmap.stages.map((stage) => ({
+        stage,
+        goals: roadmapGoals.filter((g) => g.stage_level === stage.level),
+      }))
+    : []
 
   const renderGoalCard = (g: Goal, isDone = false) => {
     const goalTopics = getTopics(g.id)
     const categories = getCategories(g.id)
     const pct = getPct(g.id)
     const isOpen = openGoals[g.id] ?? false
-    const stageHint = getRoadmapStageHint(g)
 
     return (
       <div
@@ -118,15 +118,6 @@ export default function MyGoalsView({
                   {g.description}
                 </p>
               )}
-              {/* AI 로드맵 단계 힌트 */}
-              {stageHint && (
-                <p className="text-xs text-indigo-400 mt-0.5">
-                  AI 로드맵: {stageHint}
-                </p>
-              )}
-              {!stageHint && adoptedRoadmap && (
-                <p className="text-xs text-gray-300 mt-0.5">AI 로드맵 미연결</p>
-              )}
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0">
               {goalTopics.length > 0 && (
@@ -168,7 +159,7 @@ export default function MyGoalsView({
                 />
               </div>
               <span className="text-xs text-gray-300">
-                {goalTopics.filter((t) => t.completed).length}/
+                {goalTopics.filter((tp) => tp.completed).length}/
                 {goalTopics.length}
               </span>
             </div>
@@ -177,7 +168,7 @@ export default function MyGoalsView({
         {isOpen && (
           <div className="border-t border-gray-100 px-3 py-2 flex flex-col gap-3">
             {categories.map((cat) => {
-              const catTopics = goalTopics.filter((t) => t.category === cat)
+              const catTopics = goalTopics.filter((tp) => tp.category === cat)
               const catPct = getCatPct(g.id, cat)
               return (
                 <div key={cat}>
@@ -234,17 +225,65 @@ export default function MyGoalsView({
         </button>
       </div>
 
-      {activeGoals.map((g, idx) => (
-        <div key={g.id}>
-          {idx > 0 && (
-            <div className="flex justify-start pl-4 py-0.5">
-              <div className="w-px h-3 bg-gray-200" />
-            </div>
-          )}
-          {renderGoalCard(g)}
-        </div>
-      ))}
+      {/* 로드맵 연결된 goals — 단계별 그룹핑 */}
+      {stageGroups.length > 0 && (
+        <div className="flex flex-col gap-3">
+          {stageGroups.map((group, idx) => (
+            <div key={group.stage.level}>
+              {/* 단계 헤더 */}
+              <div className="flex items-center gap-2 mb-2">
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                    group.goals.every((g) => g.status === 'completed')
+                      ? 'bg-green-500 text-white'
+                      : group.goals.some((g) => g.status === 'in_progress')
+                        ? 'bg-indigo-500 text-white'
+                        : 'bg-gray-200 text-gray-500'
+                  }`}
+                >
+                  {group.stage.level}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-gray-600 truncate">
+                    {group.stage.title}
+                  </p>
+                  <p className="text-xs text-gray-400 truncate">
+                    {group.stage.description}
+                  </p>
+                </div>
+                {idx < stageGroups.length - 1 && (
+                  <div className="w-px h-4 bg-gray-200 mx-2" />
+                )}
+              </div>
 
+              {/* 해당 단계의 goals */}
+              {group.goals.length > 0 ? (
+                <div className="flex flex-col gap-2 ml-4 border-l-2 border-gray-100 pl-3">
+                  {group.goals.map((g) => renderGoalCard(g))}
+                </div>
+              ) : (
+                <div className="ml-4 border-l-2 border-gray-100 pl-3">
+                  <p className="text-xs text-gray-300 py-1">{t('empty')}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 독립 goals (로드맵 미연결) */}
+      {independentGoals.length > 0 && (
+        <div className="flex flex-col gap-2">
+          {stageGroups.length > 0 && (
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-1">
+              기타 목표
+            </p>
+          )}
+          {independentGoals.map((g) => renderGoalCard(g))}
+        </div>
+      )}
+
+      {/* 최종 목표 카드 */}
       <div className="flex justify-start pl-4 py-0.5">
         <div className="w-px h-3 bg-gray-200" />
       </div>
@@ -256,6 +295,7 @@ export default function MyGoalsView({
         </div>
       </div>
 
+      {/* 완료된 goals */}
       {completedGoals.length > 0 && (
         <div className="mt-2">
           <button

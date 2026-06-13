@@ -78,7 +78,8 @@
     "focus": "현재 집중 목표로 설정",
     "finalGoalSub": "최종 목표",
     "completedGoals": "완료된 목표",
-    "tags": "관련 태그"
+    "tags": "관련 태그",
+    "otherGoals": "기타 목표"
   },
   "status": {
     "in_progress": "진행 중",
