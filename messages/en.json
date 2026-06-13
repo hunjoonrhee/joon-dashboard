@@ -417,5 +417,10 @@
     "domain3Sub": "Piano, guitar, composition...",
     "domain4Label": "Custom goal",
     "domain4Sub": "Write your own goal"
+  },
+  "verify": {
+    "title": "Please verify your email",
+    "sub": "We sent a confirmation link to your email.\nClick the link to get started.",
+    "spam": "If you didn't receive an email, please check your spam folder."
   }
 }

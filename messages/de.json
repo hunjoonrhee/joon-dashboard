@@ -417,5 +417,10 @@
     "domain3Sub": "Klavier, Gitarre, Komposition...",
     "domain4Label": "Eigenes Ziel",
     "domain4Sub": "Schreib dein eigenes Ziel"
+  },
+  "verify": {
+    "title": "Bitte bestätige deine E-Mail",
+    "sub": "Wir haben dir einen Bestätigungslink geschickt.\nKlicke auf den Link, um loszulegen.",
+    "spam": "Falls du keine E-Mail erhalten hast, schau bitte im Spam-Ordner nach."
   }
 }
