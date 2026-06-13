@@ -39,8 +39,10 @@ textarea::placeholder {
   color: #9ca3af;
 }
 
-input,
-textarea,
-select {
-  color: #1f2937;
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px rgb(31, 41, 55) inset !important;
+  -webkit-text-fill-color: white !important;
+  caret-color: white;
 }
