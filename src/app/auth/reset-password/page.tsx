@@ -1,6 +1,7 @@
 'use client'
 
 import { createSupabaseBrowserClient } from '@/lib/supabase-client'
+import { AuthChangeEvent } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -15,7 +16,7 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     // Supabase가 URL hash에서 세션을 자동으로 처리함
-    supabase.auth.onAuthStateChange((event) => {
+    supabase.auth.onAuthStateChange((event: AuthChangeEvent) => {
       if (event === 'PASSWORD_RECOVERY') {
         setReady(true)
       }
@@ -39,15 +40,20 @@ export default function ResetPasswordPage() {
     router.push('/ko/dashboard')
   }
 
-  const inputCls = 'w-full bg-gray-800 border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:border-indigo-500 transition-colors'
+  const inputCls =
+    'w-full bg-gray-800 border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:border-indigo-500 transition-colors'
 
   if (!ready) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
         <div className="bg-gray-900 border border-white/7 rounded-2xl p-10 max-w-sm w-full text-center">
           <div className="text-5xl mb-5">🔑</div>
-          <h1 className="text-xl font-bold text-white mb-2">링크를 확인하는 중...</h1>
-          <p className="text-sm text-gray-400">이메일의 링크를 통해 접속해줘.</p>
+          <h1 className="text-xl font-bold text-white mb-2">
+            링크를 확인하는 중...
+          </h1>
+          <p className="text-sm text-gray-400">
+            이메일의 링크를 통해 접속해줘.
+          </p>
         </div>
       </div>
     )
@@ -75,7 +81,9 @@ export default function ResetPasswordPage() {
             placeholder="비밀번호 확인"
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleReset() }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleReset()
+            }}
           />
           {error && <p className="text-xs text-red-400">{error}</p>}
           <button

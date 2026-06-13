@@ -29,13 +29,16 @@ export default function NavBar() {
       .select('value')
       .eq('key', 'name')
       .single()
-      .then(({ data }) => {
+      .then(({ data }: { data: { value: string } | null }) => {
         if (data?.value) setName(data.value)
       })
     setDateStr(
-      new Date().toLocaleDateString(locale === 'de' ? 'de-DE' : locale === 'ko' ? 'ko-KR' : 'en-US', {
-        timeZone: 'Europe/Berlin',
-      })
+      new Date().toLocaleDateString(
+        locale === 'de' ? 'de-DE' : locale === 'ko' ? 'ko-KR' : 'en-US',
+        {
+          timeZone: 'Europe/Berlin',
+        }
+      )
     )
   }, [])
 
@@ -74,7 +77,9 @@ export default function NavBar() {
             }`}
           >
             <span className="text-lg leading-none">{tab.icon}</span>
-            <span className={`text-xs ${isActive(tab.path) ? 'font-bold' : 'font-medium'}`}>
+            <span
+              className={`text-xs ${isActive(tab.path) ? 'font-bold' : 'font-medium'}`}
+            >
               {t(tab.key)}
             </span>
           </button>
@@ -84,7 +89,9 @@ export default function NavBar() {
       {/* 모바일 상단 헤더 */}
       <div className="lg:hidden bg-white border-b border-gray-100 h-12 flex items-center justify-between px-4 sticky top-0 z-10">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-indigo-500 rounded-lg flex items-center justify-center text-xs">🧭</div>
+          <div className="w-6 h-6 bg-indigo-500 rounded-lg flex items-center justify-center text-xs">
+            🧭
+          </div>
           <span className="text-sm font-bold text-gray-800">Growpath</span>
         </div>
 
