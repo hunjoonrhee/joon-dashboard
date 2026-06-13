@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import AppShell from './AppShell'
+import UserProvider from './UserProvider'
 
 export default function AppShellWrapper({
   children,
@@ -15,5 +16,9 @@ export default function AppShellWrapper({
     return <>{children}</>
   }
 
-  return <AppShell>{children}</AppShell>
+  return (
+    <UserProvider>
+      <AppShell>{children}</AppShell>
+    </UserProvider>
+  )
 }

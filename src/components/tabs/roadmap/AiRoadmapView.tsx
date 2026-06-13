@@ -1,5 +1,6 @@
 'use client'
 
+import { useUser } from '@/components/UserProvider'
 import GoalModal from '@/components/tabs/roadmap/GoalModal'
 import { supabase } from '@/lib/supabase'
 import type { AiRoadmap, RoadmapStage } from '@/types'
@@ -31,6 +32,7 @@ export default function AiRoadmapView({
 }: Props) {
   const t = useTranslations('roadmap')
   const locale = useLocale()
+  const user = useUser()
   const [roadmaps, setRoadmaps] = useState<AiRoadmap[]>([])
   const [showForm, setShowForm] = useState(false)
   const [goal, setGoal] = useState(settings.big_goal ?? '')
@@ -57,7 +59,7 @@ export default function AiRoadmapView({
       const res = await fetch('/api/roadmap/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ goal, careerLevel, locale }),
+        body: JSON.stringify({ goal, careerLevel, locale, userId: user?.id }),
       })
       if (!res.ok) throw new Error()
       const data: AiRoadmap = await res.json()
@@ -86,7 +88,6 @@ export default function AiRoadmapView({
 
   return (
     <div className="flex flex-col gap-3">
-      {/* 헤더 */}
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold text-indigo-500 uppercase tracking-widest">
           {t('aiRoadmap')}
@@ -100,7 +101,6 @@ export default function AiRoadmapView({
         </button>
       </div>
 
-      {/* 생성 폼 */}
       {showForm && (
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col gap-3">
           <div className="flex gap-2">
@@ -156,7 +156,6 @@ export default function AiRoadmapView({
         </div>
       )}
 
-      {/* 로드맵 목록 */}
       {roadmaps.length === 0 && !showForm && (
         <div className="text-center py-8">
           <p className="text-sm text-gray-400">{t('noRoadmapsYet')}</p>
@@ -173,7 +172,6 @@ export default function AiRoadmapView({
               adopted ? 'border-indigo-400 border-2' : 'border-gray-200'
             }`}
           >
-            {/* 로드맵 헤더 */}
             <div
               className={`flex items-center gap-3 px-4 py-3 cursor-pointer ${
                 adopted ? 'bg-indigo-50' : 'bg-white hover:bg-gray-50'
@@ -232,7 +230,6 @@ export default function AiRoadmapView({
               </div>
             </div>
 
-            {/* 단계 목록 */}
             {expanded && (
               <div className="border-t border-gray-100">
                 {roadmap.stages.map((stage: RoadmapStage) => (

@@ -1,5 +1,6 @@
 'use client'
 
+import { useUser } from '@/components/UserProvider'
 import { useToast } from '@/components/Toast'
 import { supabase } from '@/lib/supabase'
 import type { Project, ProjectTask } from '@/types'
@@ -36,6 +37,7 @@ export default function ProjectsTab({
   const t = useTranslations('projects')
   const tToast = useTranslations('toast')
   const { show } = useToast()
+  const user = useUser()
 
   const [openProjects, setOpenProjects] = useState<Record<string, boolean>>(
     Object.fromEntries(
@@ -48,9 +50,7 @@ export default function ProjectsTab({
   const [taskModal, setTaskModal] = useState<'add' | 'edit' | null>(null)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null)
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    null
-  )
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
   const [projectForm, setProjectForm] = useState(emptyProjectForm)
   const [taskForm, setTaskForm] = useState(emptyTaskForm)
   const [saving, setSaving] = useState(false)
@@ -72,8 +72,7 @@ export default function ProjectsTab({
     const tasks = getTasks(projectId)
     if (tasks.length === 0) return 0
     return Math.round(
-      (tasks.filter((t) => t.status === 'completed').length / tasks.length) *
-        100
+      (tasks.filter((t) => t.status === 'completed').length / tasks.length) * 100
     )
   }
 
@@ -125,7 +124,7 @@ export default function ProjectsTab({
       if (projectModal === 'add') {
         await supabase
           .from('projects')
-          .insert({ ...payload, order_index: projects.length })
+          .insert({ ...payload, order_index: projects.length, user_id: user?.id })
         show(tToast('projectAdded'), { type: 'success' })
       } else if (selectedProject) {
         await supabase
@@ -133,7 +132,6 @@ export default function ProjectsTab({
           .update(payload)
           .eq('id', selectedProject.id)
         show(tToast('projectEdited'), { type: 'success' })
-        // 완료로 바뀌면 스킬 태깅 모달 트리거
         if (
           payload.status === 'completed' &&
           selectedProject.status !== 'completed'
@@ -179,6 +177,7 @@ export default function ProjectsTab({
           ...payload,
           project_id: selectedProjectId,
           order_index: getTasks(selectedProjectId).length,
+          user_id: user?.id,
         })
         show(tToast('taskAdded'), { type: 'success' })
       } else if (selectedTask) {

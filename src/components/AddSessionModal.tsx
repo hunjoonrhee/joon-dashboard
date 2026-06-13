@@ -3,13 +3,14 @@
 import { useToast } from '@/components/Toast'
 import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
+import { useQueryClient } from '@tanstack/react-query'
 import { de, enUS, ko } from 'date-fns/locale'
 import { X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
+import { useUser } from './UserProvider'
 
 interface Props {
   onClose: () => void
@@ -45,6 +46,7 @@ export default function AddSessionModal({
   const [tagDropdownOpen, setTagDropdownOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const user = useUser()
 
   const dateFnsLocale = locale === 'ko' ? ko : locale === 'de' ? de : enUS
   const dateFormat =
@@ -124,6 +126,7 @@ export default function AddSessionModal({
           : null,
         tags: selectedTags,
         til: til.trim() || null,
+        user_id: user?.id,
       })
       const matchedTags = selectedTags.filter((tag) => tagPool.includes(tag))
       if (matchedTags.length > 0) {

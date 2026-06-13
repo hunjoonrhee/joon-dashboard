@@ -1,5 +1,6 @@
 'use client'
 
+import { useUser } from '@/components/UserProvider'
 import { useToast } from '@/components/Toast'
 import { supabase } from '@/lib/supabase'
 import type { Certification, Setting } from '@/types'
@@ -20,6 +21,7 @@ export default function SettingsPage() {
   const currentLocale = useLocale()
   const t = useTranslations('settings')
   const { show } = useToast()
+  const user = useUser()
 
   const [form, setForm] = useState({
     name: '',
@@ -70,7 +72,7 @@ export default function SettingsPage() {
     setSaving(true)
     await Promise.all(
       Object.entries(form).map(([key, value]) =>
-        supabase.from('settings').upsert({ key, value }, { onConflict: 'key' })
+        supabase.from('settings').upsert({ key, value, user_id: user?.id }, { onConflict: 'key' })
       )
     )
     setSaving(false)
@@ -92,6 +94,7 @@ export default function SettingsPage() {
         issuer: certForm.issuer.trim() || null,
         tags,
         issued_at: certForm.issued_at || null,
+        user_id: user?.id,
       })
       .select()
       .single()
@@ -133,7 +136,6 @@ export default function SettingsPage() {
       </button>
 
       <div className="flex flex-col gap-4">
-        {/* 기본 설정 */}
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <p className="text-sm font-medium text-gray-700 mb-4">
             {t('basicSettings')}
@@ -184,7 +186,6 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* 자격증 */}
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-medium text-gray-700">
@@ -310,7 +311,6 @@ export default function SettingsPage() {
           )}
         </div>
 
-        {/* 언어 설정 */}
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <p className="text-sm font-medium text-gray-700 mb-3">
             {t('language')}

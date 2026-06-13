@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const { goal, careerLevel, locale } = await req.json()
+  const { goal, careerLevel, locale, userId } = await req.json()
   const lang =
     locale === 'de' ? 'German' : locale === 'en' ? 'English' : 'Korean'
   if (!goal || !careerLevel) {
@@ -83,7 +83,6 @@ Generate a learning roadmap from the current level to the final goal. Adapt the 
       body: requestBody,
     })
 
-    // 503 / 429 — 3초 후 1회 retry
     if (geminiRes.status === 503 || geminiRes.status === 429) {
       await sleep(3000)
       geminiRes = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
@@ -101,7 +100,6 @@ Generate a learning roadmap from the current level to the final goal. Adapt the 
 
     const geminiData = await geminiRes.json()
 
-    // thinking 모델은 parts가 여러 개일 수 있음 — text 타입만 추출
     const parts = geminiData.candidates?.[0]?.content?.parts ?? []
     const raw =
       parts
@@ -111,7 +109,6 @@ Generate a learning roadmap from the current level to the final goal. Adapt the 
 
     console.log('Gemini raw:', raw.slice(0, 300))
 
-    // backtick, thinking 태그, 앞뒤 공백 제거 후 { 로 시작하는 JSON 추출
     const jsonMatch = raw.match(/\{[\s\S]*\}/)
     if (!jsonMatch) {
       console.error('No JSON found in raw:', raw)
@@ -124,10 +121,9 @@ Generate a learning roadmap from the current level to the final goal. Adapt the 
 
     const stages: RoadmapStage[] = parsed.stages
 
-    // Supabase에 저장
     const { data, error } = await supabase
       .from('ai_roadmaps')
-      .insert({ goal, career_level: careerLevel, stages, adopted: false })
+      .insert({ goal, career_level: careerLevel, stages, adopted: false, user_id: userId ?? null })
       .select()
       .single()
 

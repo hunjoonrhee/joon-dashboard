@@ -1,6 +1,7 @@
 'use client'
 
 import Modal from '@/components/Modal'
+import { useUser } from '@/components/UserProvider'
 import { useToast } from '@/components/Toast'
 import { cancelBtnCls, saveBtnCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
@@ -25,6 +26,7 @@ export default function ProjectSkillModal({
   const t = useTranslations('projects')
   const tCommon = useTranslations('common')
   const { show } = useToast()
+  const user = useUser()
   const [tagPool, setTagPool] = useState<string[]>([])
   const [selected, setSelected] = useState<string[]>([])
   const [customInput, setCustomInput] = useState('')
@@ -79,7 +81,7 @@ export default function ProjectSkillModal({
       const { error } = await supabase
         .from('project_skills')
         .upsert(
-          { project_id: projectId, tags: selected },
+          { project_id: projectId, tags: selected, user_id: user?.id },
           { onConflict: 'project_id' }
         )
       if (error) throw error
@@ -99,7 +101,6 @@ export default function ProjectSkillModal({
         {projectName} — {t('skillModalSub')}
       </p>
 
-      {/* 선택된 태그 */}
       {selected.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-3">
           {selected.map((tag) => (
@@ -116,7 +117,6 @@ export default function ProjectSkillModal({
         </div>
       )}
 
-      {/* 로드맵 태그 풀 */}
       {tagPool.length > 0 && (
         <div className="mb-3">
           <p className="text-xs text-gray-400 mb-2">{t('roadmapTags')}</p>
@@ -138,7 +138,6 @@ export default function ProjectSkillModal({
         </div>
       )}
 
-      {/* 커스텀 태그 입력 */}
       <div className="flex gap-2 mb-1">
         <input
           type="text"

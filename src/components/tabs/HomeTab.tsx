@@ -56,7 +56,7 @@ export default function HomeTab({
       .select('*')
       .eq('id', adoptedId)
       .single()
-      .then(({ data }) => {
+      .then(({ data }: { data: AiRoadmap | null }) => {
         if (data) setAdoptedRoadmap(data as AiRoadmap)
       })
   }, [settings.adopted_roadmap_id])

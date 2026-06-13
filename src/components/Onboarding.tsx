@@ -1,5 +1,6 @@
 'use client'
 
+import { getCurrentUserId } from '@/lib/supabase'
 import { supabase } from '@/lib/supabase'
 import { useState } from 'react'
 
@@ -68,14 +69,16 @@ export default function Onboarding({ onComplete }: Props) {
 
   const finish = async () => {
     setSaving(true)
+    const userId = await getCurrentUserId()
 
     const upserts = [
-      { key: 'onboarding_completed', value: 'true' },
-      { key: 'name', value: values.name || 'Joon' },
-      { key: 'big_goal', value: values.big_goal || '리드 아키텍트' },
+      { key: 'onboarding_completed', value: 'true', user_id: userId },
+      { key: 'name', value: values.name || 'Joon', user_id: userId },
+      { key: 'big_goal', value: values.big_goal || '리드 아키텍트', user_id: userId },
       {
         key: 'big_goal_sub',
         value: values.big_goal_sub || '시니어 → 리드 → 아키텍트',
+        user_id: userId,
       },
     ]
 
@@ -89,6 +92,7 @@ export default function Onboarding({ onComplete }: Props) {
         name: values.today.trim(),
         date: today,
         source_type: 'manual',
+        user_id: userId,
       })
     }
 

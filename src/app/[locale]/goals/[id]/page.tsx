@@ -1,5 +1,6 @@
 'use client'
 
+import { useUser } from '@/components/UserProvider'
 import { supabase } from '@/lib/supabase'
 import type { Goal, Topic } from '@/types'
 import { ArrowLeft, Check, Pencil, Plus, Trash2, X } from 'lucide-react'
@@ -35,6 +36,7 @@ const statusStyle: Record<Goal['status'], string> = {
 export default function GoalDetail() {
   const { id } = useParams()
   const router = useRouter()
+  const user = useUser()
   const [goal, setGoal] = useState<Goal | null>(null)
   const [topics, setTopics] = useState<Topic[]>([])
   const [loading, setLoading] = useState(true)
@@ -113,6 +115,7 @@ export default function GoalDetail() {
         category: newCategory.trim() || 'general',
         goal_id: goal.id,
         completed: false,
+        user_id: user?.id,
       })
       .select()
       .single()
@@ -175,7 +178,6 @@ export default function GoalDetail() {
       </button>
 
       <div className="flex flex-col gap-4">
-        {/* 기본 정보 */}
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-medium text-gray-700">기본 정보</p>
@@ -328,7 +330,6 @@ export default function GoalDetail() {
           )}
         </div>
 
-        {/* 서브태스크 */}
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-medium text-gray-700">서브태스크</p>

@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase-client'
 import { useTranslations } from 'next-intl'
+import { useState } from 'react'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState<'google' | 'github' | null>(null)
@@ -11,12 +11,14 @@ export default function LoginPage() {
 
   async function signIn(provider: 'google' | 'github') {
     setLoading(provider)
-    await supabase.auth.signInWithOAuth({
+    console.log('signIn called:', provider)
+    const result = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin}/auth/callback`,
       },
     })
+    console.log('signInWithOAuth result:', result)
     setLoading(null)
   }
 

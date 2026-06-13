@@ -2,6 +2,7 @@
 
 import Modal from '@/components/Modal'
 import { useToast } from '@/components/Toast'
+import { useUser } from '@/components/UserProvider'
 import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
 import type { Goal } from '@/types'
@@ -38,6 +39,7 @@ export default function GoalModal({
   const tPriority = useTranslations('priority')
   const tToast = useTranslations('toast')
   const { show } = useToast()
+  const user = useUser()
 
   const [form, setForm] = useState({
     name: goal?.name ?? preset?.name ?? '',
@@ -80,6 +82,7 @@ export default function GoalModal({
       priority: form.priority,
       is_focus: form.is_focus,
       tags: form.tags,
+      user_id: user?.id,
     }
     try {
       if (form.is_focus)

@@ -1,5 +1,6 @@
 'use client'
 
+import { useUser } from '@/components/UserProvider'
 import { useToast } from '@/components/Toast'
 import { supabase } from '@/lib/supabase'
 import type { AiRoadmap, Goal, Session, Topic } from '@/types'
@@ -30,6 +31,7 @@ export default function RoadmapTab({
 }: Props) {
   const { show } = useToast()
   const t = useTranslations('roadmap')
+  const user = useUser()
   const [modal, setModal] = useState<{
     mode: 'add' | 'edit'
     goal?: Goal
@@ -104,19 +106,19 @@ export default function RoadmapTab({
         supabase
           .from('settings')
           .upsert(
-            { key: 'adopted_roadmap_id', value: roadmap.id },
+            { key: 'adopted_roadmap_id', value: roadmap.id, user_id: user?.id },
             { onConflict: 'key' }
           ),
         supabase
           .from('settings')
           .upsert(
-            { key: 'big_goal', value: roadmap.goal },
+            { key: 'big_goal', value: roadmap.goal, user_id: user?.id },
             { onConflict: 'key' }
           ),
         supabase
           .from('settings')
           .upsert(
-            { key: 'big_goal_sub', value: roadmap.career_level },
+            { key: 'big_goal_sub', value: roadmap.career_level, user_id: user?.id },
             { onConflict: 'key' }
           ),
       ])

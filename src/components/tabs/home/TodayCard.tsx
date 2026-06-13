@@ -1,5 +1,6 @@
 'use client'
 
+import { useUser } from '@/components/UserProvider'
 import { inputCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
 import type { ProjectTask, TodayItem, Topic } from '@/types'
@@ -25,6 +26,7 @@ export default function TodayCard({
   onRefresh,
 }: Props) {
   const t = useTranslations('home')
+  const user = useUser()
   const [addingItem, setAddingItem] = useState(false)
   const [newItem, setNewItem] = useState('')
   const [newTag, setNewTag] = useState('')
@@ -36,7 +38,14 @@ export default function TodayCard({
     sourceId: string
   ) => {
     const today = new Date().toISOString().split('T')[0]
-    await supabase.from('today_items').insert({ name, tag, date: today, source_type: sourceType, source_id: sourceId })
+    await supabase.from('today_items').insert({
+      name,
+      tag,
+      date: today,
+      source_type: sourceType,
+      source_id: sourceId,
+      user_id: user?.id,
+    })
     onRefresh()
   }
 
@@ -48,6 +57,7 @@ export default function TodayCard({
       tag: newTag.trim() || null,
       date: today,
       source_type: 'manual',
+      user_id: user?.id,
     })
     setNewItem('')
     setNewTag('')
