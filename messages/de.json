@@ -79,7 +79,9 @@
     "finalGoalSub": "Endziel",
     "completedGoals": "Abgeschlossene Ziele",
     "tags": "Zugehörige Tags",
-    "otherGoals": "Weitere Ziele"
+    "otherGoals": "Weitere Ziele",
+    "stageLink": "Roadmap-Stufe verknüpfen",
+    "stageLinkNone": "Nicht verknüpfen"
   },
   "status": {
     "in_progress": "In Bearbeitung",

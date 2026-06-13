@@ -30,6 +30,7 @@ export interface Goal {
   roadmap_id: string | null
   stage_level: number | null
   created_at: string
+  is_auto_generated: boolean
 }
 export interface StudyItem {
   id: string

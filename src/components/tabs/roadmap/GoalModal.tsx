@@ -3,9 +3,8 @@
 import Modal from '@/components/Modal'
 import { useToast } from '@/components/Toast'
 import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
-import { supabase } from '@/lib/supabase'
-import { insertWithUser } from '@/lib/supabase'
-import type { Goal } from '@/types'
+import { insertWithUser, supabase } from '@/lib/supabase'
+import type { AiRoadmap, Goal } from '@/types'
 import { Trash2, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -21,6 +20,7 @@ interface Props {
   goal?: Goal
   preset?: Preset
   tagPool?: string[]
+  adoptedRoadmap?: AiRoadmap | null
   onClose: () => void
   onSaved: () => void
 }
@@ -30,6 +30,7 @@ export default function GoalModal({
   goal,
   preset,
   tagPool: tagPoolProp,
+  adoptedRoadmap,
   onClose,
   onSaved,
 }: Props) {
@@ -47,12 +48,12 @@ export default function GoalModal({
     priority: (goal?.priority ?? 'medium') as Goal['priority'],
     is_focus: goal?.is_focus ?? false,
     tags: goal?.tags ?? preset?.tags ?? ([] as string[]),
+    stage_level: goal?.stage_level ?? (null as number | null),
   })
   const [saving, setSaving] = useState(false)
   const [tagSearch, setTagSearch] = useState('')
   const [tagDropdownOpen, setTagDropdownOpen] = useState(false)
 
-  // tagPool — prop 우선, 없으면 preset.tags
   const tagPool = tagPoolProp ?? preset?.tags ?? []
 
   const filteredTags = tagSearch.trim()
@@ -81,6 +82,8 @@ export default function GoalModal({
       priority: form.priority,
       is_focus: form.is_focus,
       tags: form.tags,
+      stage_level: form.stage_level,
+      roadmap_id: form.stage_level && adoptedRoadmap ? adoptedRoadmap.id : null,
     }
     try {
       if (form.is_focus)
@@ -177,6 +180,30 @@ export default function GoalModal({
             </select>
           </div>
         </div>
+
+        {/* 로드맵 단계 연결 — 채택된 로드맵 있을 때만 표시 */}
+        {adoptedRoadmap && (
+          <div>
+            <label className={labelCls}>{t('stageLink')}</label>
+            <select
+              className={inputCls}
+              value={form.stage_level ?? ''}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  stage_level: e.target.value ? Number(e.target.value) : null,
+                })
+              }
+            >
+              <option value="">{t('stageLinkNone')}</option>
+              {adoptedRoadmap.stages.map((s) => (
+                <option key={s.level} value={s.level}>
+                  {s.level}단계 — {s.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div>
           <label className={labelCls}>{t('tags')}</label>

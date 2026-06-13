@@ -79,7 +79,9 @@
     "finalGoalSub": "Final goal",
     "completedGoals": "Completed goals",
     "tags": "Related tags",
-    "otherGoals": "Other Goals"
+    "otherGoals": "Other Goals",
+    "stageLink": "Link to roadmap stage",
+    "stageLinkNone": "No link"
   },
   "status": {
     "in_progress": "In Progress",

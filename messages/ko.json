@@ -79,7 +79,9 @@
     "finalGoalSub": "최종 목표",
     "completedGoals": "완료된 목표",
     "tags": "관련 태그",
-    "otherGoals": "기타 목표"
+    "otherGoals": "기타 목표",
+"stageLink": "로드맵 단계 연결",
+"stageLinkNone": "연결 안 함"
   },
   "status": {
     "in_progress": "진행 중",

@@ -1,7 +1,7 @@
 'use client'
 
 import { useToast } from '@/components/Toast'
-import { supabase, upsertWithUser, insertWithUser } from '@/lib/supabase'
+import { insertWithUser, supabase, upsertWithUser } from '@/lib/supabase'
 import type { AiRoadmap, Goal, Session, Topic } from '@/types'
 import { BarChart2, Route, Star } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -126,6 +126,7 @@ export default function RoadmapTab({
         tags: stage.skills.flatMap((sk: { tags: string[] }) => sk.tags),
         roadmap_id: roadmap.id,
         stage_level: stage.level,
+        is_auto_generated: true, // 추가
       }))
 
       await insertWithUser('goals', goalPayloads)
@@ -232,6 +233,7 @@ export default function RoadmapTab({
           mode={modal.mode}
           goal={modal.goal}
           tagPool={adoptedRoadmapTags}
+          adoptedRoadmap={adoptedRoadmap} // 추가
           onClose={() => setModal(null)}
           onSaved={() => {
             setModal(null)
