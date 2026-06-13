@@ -2,7 +2,7 @@
 
 import { useToast } from '@/components/Toast'
 import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
-import { supabase } from '@/lib/supabase'
+import { supabase, insertWithUser } from '@/lib/supabase'
 import { useQueryClient } from '@tanstack/react-query'
 import { de, enUS, ko } from 'date-fns/locale'
 import { X } from 'lucide-react'
@@ -46,7 +46,7 @@ export default function AddSessionModal({
   const [tagDropdownOpen, setTagDropdownOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const user = useUser()
+
 
   const dateFnsLocale = locale === 'ko' ? ko : locale === 'de' ? de : enUS
   const dateFormat =
@@ -118,7 +118,7 @@ export default function AddSessionModal({
     if (!title.trim()) return
     setSaving(true)
     try {
-      await supabase.from('sessions').insert({
+      await insertWithUser('sessions', {
         date: getDateValue(),
         title: title.trim(),
         duration_minutes: getDurationValue()
@@ -126,7 +126,6 @@ export default function AddSessionModal({
           : null,
         tags: selectedTags,
         til: til.trim() || null,
-        user_id: user?.id,
       })
       const matchedTags = selectedTags.filter((tag) => tagPool.includes(tag))
       if (matchedTags.length > 0) {

@@ -1,8 +1,8 @@
 'use client'
 
-import { useUser } from '@/components/UserProvider'
 import { useToast } from '@/components/Toast'
 import { supabase } from '@/lib/supabase'
+import { upsertWithUser } from '@/lib/supabase'
 import type { AiRoadmap, Goal, Session, Topic } from '@/types'
 import { BarChart2, Route, Star } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -31,7 +31,6 @@ export default function RoadmapTab({
 }: Props) {
   const { show } = useToast()
   const t = useTranslations('roadmap')
-  const user = useUser()
   const [modal, setModal] = useState<{
     mode: 'add' | 'edit'
     goal?: Goal
@@ -103,24 +102,9 @@ export default function RoadmapTab({
   const handleAdopt = async (roadmap: AiRoadmap) => {
     try {
       await Promise.all([
-        supabase
-          .from('settings')
-          .upsert(
-            { key: 'adopted_roadmap_id', value: roadmap.id, user_id: user?.id },
-            { onConflict: 'key' }
-          ),
-        supabase
-          .from('settings')
-          .upsert(
-            { key: 'big_goal', value: roadmap.goal, user_id: user?.id },
-            { onConflict: 'key' }
-          ),
-        supabase
-          .from('settings')
-          .upsert(
-            { key: 'big_goal_sub', value: roadmap.career_level, user_id: user?.id },
-            { onConflict: 'key' }
-          ),
+        upsertWithUser('settings', { key: 'adopted_roadmap_id', value: roadmap.id }, { onConflict: 'key' }),
+        upsertWithUser('settings', { key: 'big_goal', value: roadmap.goal }, { onConflict: 'key' }),
+        upsertWithUser('settings', { key: 'big_goal_sub', value: roadmap.career_level }, { onConflict: 'key' }),
       ])
       setAdoptedRoadmap(roadmap)
       show(t('roadmapAdopted') ?? '로드맵이 채택됐어 ✓', {

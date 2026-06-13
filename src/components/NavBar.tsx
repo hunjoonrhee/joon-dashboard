@@ -1,17 +1,18 @@
 'use client'
 
 import { supabase } from '@/lib/supabase'
+import { createSupabaseBrowserClient } from '@/lib/supabase-client'
 import { Settings } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 const tabs = [
-  { key: 'home', path: '', icon: '🏠' },
-  { key: 'study', path: '/study', icon: '📖' },
-  { key: 'notes', path: '/notes', icon: '✍️' },
-  { key: 'roadmap', path: '/roadmap', icon: '🗺' },
-  { key: 'projects', path: '/projects', icon: '🚀' },
+  { key: 'home', path: '/dashboard', icon: '🏠' },
+  { key: 'study', path: '/dashboard/study', icon: '📖' },
+  { key: 'notes', path: '/dashboard/notes', icon: '✍️' },
+  { key: 'roadmap', path: '/dashboard/roadmap', icon: '🗺' },
+  { key: 'projects', path: '/dashboard/projects', icon: '🚀' },
 ]
 
 export default function NavBar() {
@@ -19,7 +20,7 @@ export default function NavBar() {
   const router = useRouter()
   const t = useTranslations('nav')
   const locale = pathname.split('/')[1] ?? 'ko'
-  const [name, setName] = useState('Joon')
+  const [name, setName] = useState('J')
   const [dateStr, setDateStr] = useState('')
 
   useEffect(() => {
@@ -31,7 +32,6 @@ export default function NavBar() {
       .then(({ data }) => {
         if (data?.value) setName(data.value)
       })
-    // 날짜는 클라이언트에서만 렌더 — SSR hydration mismatch 방지
     setDateStr(
       new Date().toLocaleDateString(locale === 'de' ? 'de-DE' : locale === 'ko' ? 'ko-KR' : 'en-US', {
         timeZone: 'Europe/Berlin',
@@ -41,17 +41,21 @@ export default function NavBar() {
 
   const isActive = (path: string) => {
     const fullPath = `/${locale}${path}`
-    return pathname === fullPath || (path === '' && pathname === `/${locale}`)
+    return pathname === fullPath || pathname.startsWith(`/${locale}${path}/`)
   }
 
-  const navigate = (path: string) => {
-    router.push(`/${locale}${path}`)
-  }
+  const navigate = (path: string) => router.push(`/${locale}${path}`)
 
   const switchLocale = (newLocale: string) => {
     const segments = pathname.split('/')
     segments[1] = newLocale
     router.push(segments.join('/'))
+  }
+
+  const handleSignOut = async () => {
+    const client = createSupabaseBrowserClient()
+    await client.auth.signOut()
+    router.push(`/${locale}/login`)
   }
 
   return (
@@ -79,17 +83,12 @@ export default function NavBar() {
 
       {/* 모바일 상단 헤더 */}
       <div className="lg:hidden bg-white border-b border-gray-100 h-12 flex items-center justify-between px-4 sticky top-0 z-10">
-        {/* 왼쪽: 로고 */}
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-indigo-500 rounded-lg flex items-center justify-center text-xs" suppressHydrationWarning>
-            🎯
-          </div>
-          <span className="text-sm font-bold text-gray-800">Dashboard</span>
+          <div className="w-6 h-6 bg-indigo-500 rounded-lg flex items-center justify-center text-xs">🧭</div>
+          <span className="text-sm font-bold text-gray-800">Growpath</span>
         </div>
 
-        {/* 오른쪽: 언어 전환 + 설정 */}
         <div className="flex items-center gap-2">
-          {/* 언어 전환 */}
           <div className="flex gap-0.5 bg-gray-100 rounded-lg p-0.5">
             {(['ko', 'de', 'en'] as const).map((l) => (
               <button
@@ -105,12 +104,17 @@ export default function NavBar() {
               </button>
             ))}
           </div>
-          {/* 설정 버튼 */}
           <button
-            onClick={() => navigate('/settings')}
+            onClick={() => navigate('/dashboard/settings')}
             className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
           >
             <Settings size={17} />
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors text-xs"
+          >
+            ⎋
           </button>
         </div>
       </div>

@@ -1,10 +1,10 @@
 'use client'
 
 import Modal from '@/components/Modal'
-import { useUser } from '@/components/UserProvider'
 import { useToast } from '@/components/Toast'
 import { cancelBtnCls, saveBtnCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
+import { upsertWithUser } from '@/lib/supabase'
 import type { AiRoadmap } from '@/types'
 import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -26,7 +26,6 @@ export default function ProjectSkillModal({
   const t = useTranslations('projects')
   const tCommon = useTranslations('common')
   const { show } = useToast()
-  const user = useUser()
   const [tagPool, setTagPool] = useState<string[]>([])
   const [selected, setSelected] = useState<string[]>([])
   const [customInput, setCustomInput] = useState('')
@@ -78,10 +77,8 @@ export default function ProjectSkillModal({
     }
     setSaving(true)
     try {
-      const { error } = await supabase
-        .from('project_skills')
-        .upsert(
-          { project_id: projectId, tags: selected, user_id: user?.id },
+      const { error } = await upsertWithUser('project_skills', 
+          { project_id: projectId, tags: selected },
           { onConflict: 'project_id' }
         )
       if (error) throw error

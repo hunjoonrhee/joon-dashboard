@@ -1,6 +1,7 @@
 'use client'
 
 import { supabase } from '@/lib/supabase'
+import { insertWithUser } from '@/lib/supabase'
 import type { Goal } from '@/types'
 import { Pencil, Plus, Star, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -92,7 +93,7 @@ export default function GoalList({ goals, onRefresh }: Props) {
         .neq('id', selected?.id ?? '')
     }
     if (modal === 'add') {
-      await supabase.from('goals').insert(payload)
+      await insertWithUser('goals', payload)
     } else if (selected) {
       await supabase.from('goals').update(payload).eq('id', selected.id)
     }

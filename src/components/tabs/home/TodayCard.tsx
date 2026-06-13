@@ -1,8 +1,8 @@
 'use client'
 
-import { useUser } from '@/components/UserProvider'
 import { inputCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
+import { insertWithUser } from '@/lib/supabase'
 import type { ProjectTask, TodayItem, Topic } from '@/types'
 import { Check, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -26,7 +26,6 @@ export default function TodayCard({
   onRefresh,
 }: Props) {
   const t = useTranslations('home')
-  const user = useUser()
   const [addingItem, setAddingItem] = useState(false)
   const [newItem, setNewItem] = useState('')
   const [newTag, setNewTag] = useState('')
@@ -38,13 +37,12 @@ export default function TodayCard({
     sourceId: string
   ) => {
     const today = new Date().toISOString().split('T')[0]
-    await supabase.from('today_items').insert({
+    await insertWithUser('today_items', {
       name,
       tag,
       date: today,
       source_type: sourceType,
       source_id: sourceId,
-      user_id: user?.id,
     })
     onRefresh()
   }
@@ -52,12 +50,11 @@ export default function TodayCard({
   const addTodayItem = async () => {
     if (!newItem.trim()) return
     const today = new Date().toISOString().split('T')[0]
-    await supabase.from('today_items').insert({
+    await insertWithUser('today_items', {
       name: newItem.trim(),
       tag: newTag.trim() || null,
       date: today,
       source_type: 'manual',
-      user_id: user?.id,
     })
     setNewItem('')
     setNewTag('')

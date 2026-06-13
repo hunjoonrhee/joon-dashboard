@@ -3,6 +3,7 @@
 import { goalStatusStyle, priorityStyle } from '@/lib/statusConfig'
 import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
+import { insertWithUser } from '@/lib/supabase'
 import type { Goal, Topic } from '@/types'
 import {
   ChevronDown,
@@ -82,7 +83,7 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
         .neq('id', selected?.id ?? '')
     }
     if (modal === 'add') {
-      await supabase.from('goals').insert(payload)
+      await insertWithUser('goals', payload)
     } else if (selected) {
       await supabase.from('goals').update(payload).eq('id', selected.id)
     }

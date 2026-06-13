@@ -46,7 +46,7 @@ export default function AiRoadmapView({
       .from('ai_roadmaps')
       .select('*')
       .order('created_at', { ascending: false })
-      .then(({ data }) => {
+      .then(({ data }: { data: AiRoadmap[] | null }) => {
         if (data) setRoadmaps(data as AiRoadmap[])
       })
   }, [])

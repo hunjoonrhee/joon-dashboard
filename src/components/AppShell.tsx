@@ -2,7 +2,6 @@
 
 import AddSessionModal from '@/components/AddSessionModal'
 import NavBar from '@/components/NavBar'
-import Onboarding from '@/components/Onboarding'
 import Sidebar from '@/components/Sidebar'
 import GoalModal from '@/components/tabs/roadmap/GoalModal'
 import { ToastProvider } from '@/components/Toast'
@@ -16,6 +15,14 @@ import { useEffect, useState } from 'react'
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const tNav = useTranslations('nav')
   const tCommon = useTranslations('common')
+
+  // /ko/dashboard/study → segment = 'study'
+  // /ko/dashboard → segment = ''
+  const pathname = usePathname()
+  const router = useRouter()
+  const locale = pathname.split('/')[1] ?? 'ko'
+  const segment = pathname.split('/')[3] ?? ''
+
   const pageTitles: Record<string, string> = {
     '': tNav('home'),
     study: tNav('study'),
@@ -24,14 +31,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     projects: tNav('projects'),
     settings: tNav('settings'),
   }
-  const [onboarding, setOnboarding] = useState<boolean | null>(null)
-  const { studyModalOpen, openStudyModal, closeStudyModal } = useModalStore()
-  const [showGoalModal, setShowGoalModal] = useState(false)
-  const pathname = usePathname()
-  const router = useRouter()
 
-  const locale = pathname.split('/')[1] ?? 'ko'
-  const segment = pathname.split('/')[2] ?? ''
   const pageTitle = pageTitles[segment] ?? ''
 
   const today =
@@ -54,16 +54,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     settings: { label: `+ ${tNav('study')}`, modal: 'study' },
   }
 
-  useEffect(() => {
-    supabase
-      .from('settings')
-      .select('value')
-      .eq('key', 'onboarding_completed')
-      .single()
-      .then(({ data }) => {
-        setOnboarding(data?.value !== 'true')
-      })
-  }, [])
+  const { studyModalOpen, openStudyModal, closeStudyModal } = useModalStore()
+  const [showGoalModal, setShowGoalModal] = useState(false)
 
   const btnConfig = headerButtonConfig[segment] ?? headerButtonConfig['']
 
@@ -74,19 +66,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   const handleSignOut = async () => {
-    const supabaseClient = createSupabaseBrowserClient()
-    await supabaseClient.auth.signOut()
+    const client = createSupabaseBrowserClient()
+    await client.auth.signOut()
     router.push(`/${locale}/login`)
-  }
-
-  if (onboarding === null) return null
-
-  if (onboarding) {
-    return (
-      <ToastProvider>
-        <Onboarding onComplete={() => setOnboarding(false)} />
-      </ToastProvider>
-    )
   }
 
   return (

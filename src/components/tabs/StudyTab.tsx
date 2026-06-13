@@ -2,6 +2,7 @@
 
 import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
 import { supabase } from '@/lib/supabase'
+import { insertWithUser } from '@/lib/supabase'
 import type { Session, StudyForm } from '@/types'
 import { Trash2 } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
@@ -104,7 +105,7 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
       til: form.til || null,
     }
     if (modal === 'add') {
-      await supabase.from('sessions').insert(payload)
+      await insertWithUser('sessions', payload)
     } else if (selected) {
       await supabase.from('sessions').update(payload).eq('id', selected.id)
     }

@@ -1,8 +1,8 @@
 'use client'
 
-import { useUser } from '@/components/UserProvider'
 import { useToast } from '@/components/Toast'
 import { supabase } from '@/lib/supabase'
+import { insertWithUser } from '@/lib/supabase'
 import type { Note } from '@/types'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -22,7 +22,6 @@ export default function NotesTab({ notes, onRefresh }: Props) {
   const { show } = useToast()
   const tToast = useTranslations('toast')
   const tNotes = useTranslations('notes')
-  const user = useUser()
 
   const [selected, setSelected] = useState<Note | null>(null)
   const [title, setTitle] = useState('')
@@ -63,7 +62,7 @@ export default function NotesTab({ notes, onRefresh }: Props) {
       if (isNew || !selected) {
         const { data } = await supabase
           .from('notes')
-          .insert({ ...payload, user_id: user?.id })
+          
           .select()
           .single()
         if (data) {

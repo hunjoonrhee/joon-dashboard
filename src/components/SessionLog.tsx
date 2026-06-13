@@ -1,6 +1,7 @@
 'use client'
 
 import { supabase } from '@/lib/supabase'
+import { insertWithUser } from '@/lib/supabase'
 import { getTagColor } from '@/lib/tagColor'
 import type { Session } from '@/types'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
@@ -66,7 +67,7 @@ export default function SessionLog({ sessions, onRefresh }: Props) {
       til: form.til || null,
     }
     if (modal === 'add') {
-      await supabase.from('sessions').insert(payload)
+      await insertWithUser('sessions', payload)
     } else if (selected) {
       await supabase.from('sessions').update(payload).eq('id', selected.id)
     }

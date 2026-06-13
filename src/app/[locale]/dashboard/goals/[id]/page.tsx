@@ -1,7 +1,7 @@
 'use client'
 
-import { useUser } from '@/components/UserProvider'
 import { supabase } from '@/lib/supabase'
+import { insertWithUser } from '@/lib/supabase'
 import type { Goal, Topic } from '@/types'
 import { ArrowLeft, Check, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
@@ -36,7 +36,6 @@ const statusStyle: Record<Goal['status'], string> = {
 export default function GoalDetail() {
   const { id } = useParams()
   const router = useRouter()
-  const user = useUser()
   const [goal, setGoal] = useState<Goal | null>(null)
   const [topics, setTopics] = useState<Topic[]>([])
   const [loading, setLoading] = useState(true)

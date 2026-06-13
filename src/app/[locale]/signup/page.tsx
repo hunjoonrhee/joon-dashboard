@@ -20,7 +20,7 @@ const GitHubIcon = () => (
   </svg>
 )
 
-export default function LoginPage() {
+export default function SignupPage() {
   const t = useTranslations('login')
   const locale = useLocale()
   const router = useRouter()
@@ -28,6 +28,10 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordConfirm, setPasswordConfirm] = useState('')
+  const [nickname, setNickname] = useState('')
+  const [agreeTerms, setAgreeTerms] = useState(false)
+  const [agreePrivacy, setAgreePrivacy] = useState(false)
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -43,27 +47,28 @@ export default function LoginPage() {
     setLoading(null)
   }
 
-  const handleLogin = async () => {
-    if (!email || !password) return
+  const handleSignup = async () => {
+    if (!email || !password || !nickname) { setError('모든 항목을 입력해줘'); return }
+    if (password !== passwordConfirm) { setError(t('passwordMismatch')); return }
+    if (!agreeTerms || !agreePrivacy) { setError(t('agreeRequired')); return }
+
     setLoading('email')
     setError(null)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { nickname },
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin}/auth/callback`,
+      },
+    })
     if (error) {
-      setError(t('loginError'))
+      setError(error.message.includes('already registered') ? t('emailExists') : error.message)
       setLoading(null)
       return
     }
-    router.push(`/${locale}/dashboard`)
-  }
-
-  const handleForgotPassword = async () => {
-    if (!email) { setError(t('emailRequired')); return }
-    setLoading('reset')
-    await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin}/auth/reset-password`,
-    })
-    setLoading(null)
-    setError(t('resetSent'))
+    router.push('/auth/verify')
   }
 
   const inputCls = 'w-full bg-gray-800 border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:border-indigo-500 transition-colors'
@@ -79,11 +84,11 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-gray-900 border border-white/7 rounded-2xl p-7">
-          <h2 className="text-lg font-bold text-white mb-1">{t('loginTitle')}</h2>
+          <h2 className="text-lg font-bold text-white mb-1">{t('signupTitle')}</h2>
           <p className="text-sm text-gray-500 mb-6">
-            {t('noAccount')}{' '}
-            <button onClick={() => router.push(`/${locale}/signup`)} className="text-indigo-400 hover:text-indigo-300 transition-colors">
-              {t('signupLink')}
+            {t('hasAccount')}{' '}
+            <button onClick={() => router.push(`/${locale}/login`)} className="text-indigo-400 hover:text-indigo-300 transition-colors">
+              {t('loginLink')}
             </button>
           </p>
 
@@ -91,12 +96,12 @@ export default function LoginPage() {
             <button onClick={() => signInWithOAuth('google')} disabled={loading !== null}
               className="flex items-center justify-center gap-2.5 w-full py-2.5 bg-gray-800 border border-white/10 rounded-xl text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50 transition-colors">
               <GoogleIcon />
-              {loading === 'google' ? t('loading') : t('googleLogin')}
+              {loading === 'google' ? t('loading') : t('googleSignup')}
             </button>
             <button onClick={() => signInWithOAuth('github')} disabled={loading !== null}
               className="flex items-center justify-center gap-2.5 w-full py-2.5 bg-gray-800 border border-white/10 rounded-xl text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50 transition-colors">
               <GitHubIcon />
-              {loading === 'github' ? t('loading') : t('githubLogin')}
+              {loading === 'github' ? t('loading') : t('githubSignup')}
             </button>
           </div>
 
@@ -107,24 +112,34 @@ export default function LoginPage() {
           </div>
 
           <div className="flex flex-col gap-2.5">
+            <input type="text" className={inputCls} placeholder={t('nickname')}
+              value={nickname} onChange={(e) => setNickname(e.target.value)} />
             <input type="email" className={inputCls} placeholder={t('email')}
               value={email} onChange={(e) => setEmail(e.target.value)} />
             <input type="password" className={inputCls} placeholder={t('password')}
-              value={password} onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleLogin() }} />
-            <div className="text-right">
-              <button onClick={handleForgotPassword} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
-                {t('forgotPassword')}
-              </button>
+              value={password} onChange={(e) => setPassword(e.target.value)} />
+            <input type="password" className={inputCls} placeholder={t('passwordConfirm')}
+              value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSignup() }} />
+            <div className="flex flex-col gap-2 mt-1">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} className="w-4 h-4 rounded accent-indigo-500" />
+                <span className="text-xs text-gray-400">{t('agreeTerms')}</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={agreePrivacy} onChange={(e) => setAgreePrivacy(e.target.checked)} className="w-4 h-4 rounded accent-indigo-500" />
+                <span className="text-xs text-gray-400">{t('agreePrivacy')}</span>
+              </label>
             </div>
           </div>
 
           {error && <p className="text-xs text-red-400 mt-3">{error}</p>}
 
-          <button onClick={handleLogin} disabled={loading !== null}
+          <button onClick={handleSignup} disabled={loading !== null}
             className="w-full mt-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 rounded-xl text-sm font-semibold text-white transition-colors">
-            {loading === 'email' ? t('loading') : t('loginBtn')}
+            {loading === 'email' ? t('loading') : t('signupBtn')}
           </button>
+          <p className="text-xs text-gray-500 text-center mt-3">{t('terms')}</p>
         </div>
       </div>
     </div>

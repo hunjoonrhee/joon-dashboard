@@ -1,8 +1,8 @@
 'use client'
 
-import { useUser } from '@/components/UserProvider'
 import { useToast } from '@/components/Toast'
 import { supabase } from '@/lib/supabase'
+import { insertWithUser } from '@/lib/supabase'
 import type { Project, ProjectTask } from '@/types'
 import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -37,7 +37,6 @@ export default function ProjectsTab({
   const t = useTranslations('projects')
   const tToast = useTranslations('toast')
   const { show } = useToast()
-  const user = useUser()
 
   const [openProjects, setOpenProjects] = useState<Record<string, boolean>>(
     Object.fromEntries(
@@ -124,7 +123,7 @@ export default function ProjectsTab({
       if (projectModal === 'add') {
         await supabase
           .from('projects')
-          .insert({ ...payload, order_index: projects.length, user_id: user?.id })
+          .insert({ ...payload, order_index: projects.length, user_id: await (await import('@/lib/supabase')).getCurrentUserId() })
         show(tToast('projectAdded'), { type: 'success' })
       } else if (selectedProject) {
         await supabase
@@ -173,11 +172,10 @@ export default function ProjectsTab({
     const payload = { name: taskForm.name, status: taskForm.status }
     try {
       if (taskModal === 'add') {
-        await supabase.from('project_tasks').insert({
+        await insertWithUser('project_tasks', {
           ...payload,
           project_id: selectedProjectId,
           order_index: getTasks(selectedProjectId).length,
-          user_id: user?.id,
         })
         show(tToast('taskAdded'), { type: 'success' })
       } else if (selectedTask) {

@@ -1,8 +1,8 @@
 'use client'
 
-import { useUser } from '@/components/UserProvider'
 import { useToast } from '@/components/Toast'
 import { supabase } from '@/lib/supabase'
+import { insertWithUser, upsertWithUser } from '@/lib/supabase'
 import type { Certification, Setting } from '@/types'
 import { ArrowLeft, Check, Trash2 } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
@@ -21,7 +21,6 @@ export default function SettingsPage() {
   const currentLocale = useLocale()
   const t = useTranslations('settings')
   const { show } = useToast()
-  const user = useUser()
 
   const [form, setForm] = useState({
     name: '',
@@ -72,7 +71,7 @@ export default function SettingsPage() {
     setSaving(true)
     await Promise.all(
       Object.entries(form).map(([key, value]) =>
-        supabase.from('settings').upsert({ key, value, user_id: user?.id }, { onConflict: 'key' })
+        upsertWithUser('settings', { key, value }, { onConflict: 'key' })
       )
     )
     setSaving(false)
@@ -89,13 +88,7 @@ export default function SettingsPage() {
       .filter(Boolean)
     const { data, error } = await supabase
       .from('certifications')
-      .insert({
-        name: certForm.name.trim(),
-        issuer: certForm.issuer.trim() || null,
-        tags,
-        issued_at: certForm.issued_at || null,
-        user_id: user?.id,
-      })
+
       .select()
       .single()
     setSavingCert(false)

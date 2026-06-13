@@ -121,9 +121,19 @@ Generate a learning roadmap from the current level to the final goal. Adapt the 
 
     const stages: RoadmapStage[] = parsed.stages
 
+    if (!userId) {
+      return NextResponse.json({ stages })
+    }
+
     const { data, error } = await supabase
       .from('ai_roadmaps')
-      .insert({ goal, career_level: careerLevel, stages, adopted: false, user_id: userId ?? null })
+      .insert({
+        goal,
+        career_level: careerLevel,
+        stages,
+        adopted: false,
+        user_id: userId ?? null,
+      })
       .select()
       .single()
 
