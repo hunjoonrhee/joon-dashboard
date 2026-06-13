@@ -6,8 +6,9 @@ import UserProvider from './UserProvider'
 
 const PUBLIC_PATTERNS = [
   /\/login$/,
-  /\/signup$/,
+  /\/signup/,
   /\/try/,
+  /\/verify/,
   /\/onboarding/,
   /^\/(ko|de|en)$/,
 ]
