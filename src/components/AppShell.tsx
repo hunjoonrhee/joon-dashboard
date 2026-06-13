@@ -5,12 +5,11 @@ import NavBar from '@/components/NavBar'
 import Sidebar from '@/components/Sidebar'
 import GoalModal from '@/components/tabs/roadmap/GoalModal'
 import { ToastProvider } from '@/components/Toast'
-import { supabase } from '@/lib/supabase'
 import { createSupabaseBrowserClient } from '@/lib/supabase-client'
 import { useModalStore } from '@/store/modalStore'
 import { useTranslations } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const tNav = useTranslations('nav')
@@ -77,7 +76,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <Sidebar />
         <div className="flex-1 lg:ml-56 flex flex-col min-h-screen">
           <NavBar />
-          <div className="hidden lg:flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100 sticky top-0 z-10">
+          <div className="hidden lg:flex items-center justify-between px-6 h-[57px] bg-white border-b border-gray-100 sticky top-0 z-10">
             <h1 className="text-base font-bold text-gray-800">{pageTitle}</h1>
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-400" suppressHydrationWarning>
@@ -93,7 +92,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 onClick={handleSignOut}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-100 text-gray-500 text-sm font-medium hover:bg-gray-200 transition-colors"
               >
-                로그아웃
+                {tCommon('logout')}
               </button>
             </div>
           </div>

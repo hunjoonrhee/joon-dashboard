@@ -45,7 +45,7 @@ export default function GoalDetail() {
   })
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       const [{ data: g }, { data: tp }] = await Promise.all([
         supabase.from('goals').select('*').eq('id', id).single(),
         supabase
@@ -67,7 +67,7 @@ export default function GoalDetail() {
       if (tp) setTopics(tp)
       setLoading(false)
     }
-    fetch()
+    fetchData()
   }, [id])
 
   const saveInfo = async () => {
@@ -145,6 +145,13 @@ export default function GoalDetail() {
     )
   }
 
+  const totalPct =
+    topics.length === 0
+      ? 0
+      : Math.round(
+          (topics.filter((tp) => tp.completed).length / topics.length) * 100
+        )
+
   if (loading)
     return (
       <main className="min-h-screen flex items-center justify-center">
@@ -160,7 +167,7 @@ export default function GoalDetail() {
     )
 
   return (
-    <main className="mx-auto px-4 py-4">
+    <main className="mx-auto px-4 py-4 max-w-6xl">
       <button
         onClick={() => router.back()}
         className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 mb-6 transition-colors"
@@ -170,6 +177,7 @@ export default function GoalDetail() {
       </button>
 
       <div className="flex flex-col gap-4">
+        {/* 기본 정보 */}
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-medium text-gray-700">
@@ -177,16 +185,7 @@ export default function GoalDetail() {
             </p>
             {!editingInfo ? (
               <button
-                onClick={() => {
-                  setInfoDraft({
-                    name: goal.name,
-                    description: goal.description ?? '',
-                    status: goal.status,
-                    priority: goal.priority,
-                    is_focus: goal.is_focus,
-                  })
-                  setEditingInfo(true)
-                }}
+                onClick={() => setEditingInfo(true)}
                 className="text-gray-400 hover:text-indigo-500 transition-colors"
               >
                 <Pencil size={15} />
@@ -297,7 +296,7 @@ export default function GoalDetail() {
             </div>
           ) : (
             <div className="flex items-start justify-between">
-              <div>
+              <div className="flex-1 min-w-0">
                 <h1 className="text-lg font-semibold text-gray-800">
                   {goal.name}
                 </h1>
@@ -311,8 +310,26 @@ export default function GoalDetail() {
                     ★ {t('focus')}
                   </p>
                 )}
+                {/* 전체 진행도 */}
+                {topics.length > 0 && (
+                  <div className="mt-3">
+                    <div className="flex justify-between text-xs text-gray-400 mb-1">
+                      <span>{totalPct}%</span>
+                      <span>
+                        {topics.filter((tp) => tp.completed).length}/
+                        {topics.length}
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-indigo-500 rounded-full transition-all"
+                        style={{ width: `${totalPct}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+              <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                 <span
                   className={`text-xs px-2 py-0.5 rounded-full ${priorityStyle[goal.priority]}`}
                 >
@@ -328,9 +345,12 @@ export default function GoalDetail() {
           )}
         </div>
 
+        {/* 체크리스트 */}
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-gray-700">{t('title')}</p>
+            <p className="text-sm font-medium text-gray-700">
+              {t('checklist')}
+            </p>
             <button
               onClick={() => setAddingTopic(true)}
               className="text-indigo-500 hover:text-indigo-700 transition-colors"
@@ -345,7 +365,7 @@ export default function GoalDetail() {
                 type="text"
                 autoFocus
                 className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo-400"
-                placeholder="항목 이름..."
+                placeholder={t('checklistPlaceholder')}
                 value={newTopic}
                 onChange={(e) => setNewTopic(e.target.value)}
                 onKeyDown={(e) => {
@@ -355,7 +375,7 @@ export default function GoalDetail() {
               <input
                 type="text"
                 className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo-400"
-                placeholder="카테고리 (예: theory, coding)"
+                placeholder={t('checklistCategory')}
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
               />
@@ -378,7 +398,17 @@ export default function GoalDetail() {
           )}
 
           {topics.length === 0 && !addingTopic ? (
-            <p className="text-sm text-gray-400">{t('empty')}</p>
+            <div className="text-center py-6">
+              <p className="text-sm text-gray-400 leading-relaxed">
+                {t('checklistEmpty')}
+              </p>
+              <button
+                onClick={() => setAddingTopic(true)}
+                className="mt-3 text-xs text-indigo-500 hover:text-indigo-700 font-medium transition-colors"
+              >
+                + {t('checklistPlaceholder')}
+              </button>
+            </div>
           ) : (
             <div className="flex flex-col gap-4">
               {categories.map((cat) => {
@@ -400,14 +430,14 @@ export default function GoalDetail() {
                       {catTopics.map((tp) => (
                         <div
                           key={tp.id}
-                          className="flex items-center justify-between"
+                          className="flex items-center justify-between group"
                         >
                           <div
                             className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
                             onClick={() => toggleTopic(tp)}
                           >
                             <div
-                              className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${tp.completed ? 'bg-indigo-500 border-indigo-500' : 'border-gray-300'}`}
+                              className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${tp.completed ? 'bg-indigo-500 border-indigo-500' : 'border-gray-300 hover:border-indigo-300'}`}
                             >
                               {tp.completed && (
                                 <span className="text-white text-xs">✓</span>
@@ -421,7 +451,7 @@ export default function GoalDetail() {
                           </div>
                           <button
                             onClick={() => removeTopic(tp)}
-                            className="text-gray-300 hover:text-red-400 transition-colors ml-2 flex-shrink-0"
+                            className="text-gray-200 hover:text-red-400 transition-colors ml-2 flex-shrink-0 opacity-0 group-hover:opacity-100"
                           >
                             <Trash2 size={13} />
                           </button>

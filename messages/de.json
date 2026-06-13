@@ -82,7 +82,11 @@
     "otherGoals": "Weitere Ziele",
     "stageLink": "Roadmap-Stufe verknüpfen",
     "stageLinkNone": "Nicht verknüpfen",
-    "finalGoalTitle": "Bis {goal}"
+    "finalGoalTitle": "Bis {goal}",
+    "checklist": "Checkliste",
+    "checklistEmpty": "Fügen Sie Checklistenpunkte hinzu. Kleine Schritte machen Ziele leichter erreichbar.",
+    "checklistPlaceholder": "Aufgabe eingeben...",
+    "checklistCategory": "Kategorie (z.B. Theorie, Praxis, Recherche)"
   },
   "status": {
     "in_progress": "In Bearbeitung",
@@ -114,7 +118,8 @@
     "tagGapNote": "(nicht in Gap-Analyse)",
     "completedBadge": "Abschlusseintrag",
     "loadingDots": "Wird geladen...",
-    "close": "Schließen"
+    "close": "Schließen",
+    "logout": "Abmelden"
   },
   "study": {
     "title": "Lernprotokoll",

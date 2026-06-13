@@ -82,7 +82,11 @@
     "otherGoals": "기타 목표",
     "stageLink": "로드맵 단계 연결",
     "stageLinkNone": "연결 안 함",
-    "finalGoalTitle": "{goal}까지"
+    "finalGoalTitle": "{goal}까지",
+    "checklist": "체크리스트",
+    "checklistEmpty": "체크리스트 항목을 추가해보세요. 목표를 작은 단계로 쪼개면 달성하기 훨씬 쉬워요.",
+    "checklistPlaceholder": "항목 이름...",
+    "checklistCategory": "카테고리 (예: 이론, 실습, 리서치)"
   },
   "status": {
     "in_progress": "진행 중",
@@ -114,7 +118,8 @@
     "tagGapNote": "(갭 분석 미반영)",
     "completedBadge": "완료 기록",
     "loadingDots": "불러오는 중...",
-    "close": "닫기"
+    "close": "닫기",
+    "logout": "로그아웃"
   },
   "study": {
     "title": "공부 기록",

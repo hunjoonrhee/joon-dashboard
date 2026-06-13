@@ -55,7 +55,7 @@ export default function Sidebar() {
   return (
     <aside className="w-56 bg-white border-r border-gray-100 fixed top-0 left-0 h-screen flex flex-col z-20 hidden lg:flex">
       <div
-        className="flex items-center gap-2.5 px-5 py-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+        className="flex items-center gap-2.5 px-5 h-[57px] border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
         onClick={() => navigate('/dashboard')}
       >
         <div className="w-7 h-7 bg-indigo-500 rounded-lg flex items-center justify-center text-sm">
@@ -86,7 +86,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="px-3 py-3 border-t border-gray-100">
-        <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-gray-50 cursor-pointer mb-1">
+        <div className="flex items-center gap-2.5 px-6 h-[57px] rounded-xl hover:bg-gray-50 cursor-pointer mb-1">
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-violet-400 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
             {name.charAt(0).toUpperCase()}
           </div>

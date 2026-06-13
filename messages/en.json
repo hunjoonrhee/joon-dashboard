@@ -82,7 +82,11 @@
     "otherGoals": "Other Goals",
     "stageLink": "Link to roadmap stage",
     "stageLinkNone": "No link",
-    "finalGoalTitle": "Towards {goal}"
+    "finalGoalTitle": "Towards {goal}",
+    "checklist": "Checklist",
+    "checklistEmpty": "Add checklist items. Breaking goals into small steps makes them much easier to achieve.",
+    "checklistPlaceholder": "Item name...",
+    "checklistCategory": "Category (e.g. theory, practice, research)"
   },
   "status": {
     "in_progress": "In Progress",
@@ -114,7 +118,8 @@
     "tagGapNote": "(not in gap analysis)",
     "completedBadge": "Completion log",
     "loadingDots": "Loading...",
-    "close": "Close"
+    "close": "Close",
+    "logout": "Log Out"
   },
   "study": {
     "title": "Study Log",
