@@ -206,6 +206,7 @@ export default function HomeTab({
         sessions={sessions}
         goals={goals}
         adoptedRoadmap={adoptedRoadmap}
+        isPro={true}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

@@ -4,6 +4,7 @@ import type { AiRoadmap, Goal, Session } from '@/types'
 import { useModalStore } from '@/store/modalStore'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface CoachResource {
   type: 'docs' | 'youtube' | 'book' | 'course'
@@ -31,6 +32,7 @@ interface Props {
   goals: Goal[]
   adoptedRoadmap: AiRoadmap | null
   onRefresh?: () => void
+  isPro?: boolean
 }
 
 type Status = 'idle' | 'loading' | 'done' | 'error'
@@ -42,9 +44,12 @@ export default function CoachCard({
   goals,
   adoptedRoadmap,
   onRefresh,
+  isPro = false,
 }: Props) {
   const t = useTranslations('coach')
+  const tTutor = useTranslations('tutor')
   const locale = useLocale()
+  const router = useRouter()
   const [status, setStatus] = useState<Status>('idle')
   const [data, setData] = useState<CoachSuggestion | null>(null)
   const [lastFetched, setLastFetched] = useState<string | null>(null)
@@ -83,7 +88,15 @@ export default function CoachCard({
     }
   }
 
-
+  const handleStartTutor = () => {
+    if (!data?.today?.skill) return
+    if (!isPro) {
+      router.push(`/${locale}/dashboard/tutor?gate=true`)
+      return
+    }
+    const topic = encodeURIComponent(data.today.skill)
+    router.push(`/${locale}/dashboard/tutor?topic=${topic}`)
+  }
 
   if (!adoptedRoadmap) return null
 
@@ -114,7 +127,6 @@ export default function CoachCard({
           )}
         </div>
 
-        {/* 데이터 부족 */}
         {!hasEnoughData && (
           <div className="text-center py-3">
             <p className="text-sm text-gray-400">📊</p>
@@ -127,7 +139,6 @@ export default function CoachCard({
           </div>
         )}
 
-        {/* idle */}
         {hasEnoughData && status === 'idle' && (
           <div className="text-center py-3">
             <p className="text-xs text-gray-400">{t('idleMessage')}</p>
@@ -140,7 +151,6 @@ export default function CoachCard({
           </div>
         )}
 
-        {/* loading */}
         {status === 'loading' && (
           <div className="flex flex-col gap-2 animate-pulse">
             <div className="h-3 bg-gray-100 rounded w-3/4" />
@@ -149,7 +159,6 @@ export default function CoachCard({
           </div>
         )}
 
-        {/* error */}
         {status === 'error' && (
           <div className="text-center py-2">
             <p className="text-xs text-red-400 mb-2">{t('error')}</p>
@@ -162,10 +171,8 @@ export default function CoachCard({
           </div>
         )}
 
-        {/* done */}
         {status === 'done' && data && (
           <div className="flex flex-col gap-3">
-            {/* 데이터 부족 (AI 응답) */}
             {data.insufficient && (
               <p className="text-xs text-gray-400 text-center py-2">
                 {data.insufficientMessage}
@@ -174,7 +181,6 @@ export default function CoachCard({
 
             {!data.insufficient && (
               <>
-                {/* 오늘 공부할 것 */}
                 <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3">
                   <p className="text-xs font-semibold text-indigo-600 mb-1">
                     ⚡ {t('todaySkill')}
@@ -185,15 +191,27 @@ export default function CoachCard({
                   <p className="text-xs text-indigo-500 mt-0.5">
                     {data.today.reason}
                   </p>
-                  <button
-                    onClick={() => openStudyModal(data.today.skill)}
-                    className="mt-2 text-xs text-indigo-600 font-medium hover:text-indigo-800 transition-colors border border-indigo-200 rounded-lg px-2.5 py-1 hover:bg-indigo-100"
-                  >
-                    + {t('addStudy')}
-                  </button>
+                  <div className="flex items-center gap-2 mt-2">
+                    <button
+                      onClick={handleStartTutor}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-500 text-white text-xs font-medium hover:bg-indigo-600 transition-colors"
+                    >
+                      ▶ {tTutor('startStudy')}
+                      {!isPro && (
+                        <span className="ml-1 bg-white/20 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                          Pro
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => openStudyModal(data.today.skill)}
+                      className="text-xs text-indigo-600 font-medium hover:text-indigo-800 transition-colors border border-indigo-200 rounded-lg px-2.5 py-1.5 hover:bg-indigo-100"
+                    >
+                      + {t('addStudy')}
+                    </button>
+                  </div>
                 </div>
 
-                {/* 학습 리소스 */}
                 {data.resources && data.resources.length > 0 && (
                   <div className="bg-gray-50 border border-gray-100 rounded-xl p-3">
                     <p className="text-xs font-semibold text-gray-500 mb-2">
@@ -236,7 +254,6 @@ export default function CoachCard({
                   </div>
                 )}
 
-                {/* 페이스 체크 */}
                 <div className="bg-gray-50 border border-gray-100 rounded-xl p-3">
                   <p className="text-xs font-semibold text-gray-500 mb-1">
                     📈 {t('pace')}
@@ -247,31 +264,24 @@ export default function CoachCard({
                       <p className="text-base font-bold text-gray-700">
                         {Math.round(data.pace.currentMonths)}
                       </p>
-                      <p className="text-xs text-gray-400">
-                        {t('monthsCurrent')}
-                      </p>
+                      <p className="text-xs text-gray-400">{t('monthsCurrent')}</p>
                     </div>
                     <div className="text-gray-300 self-center">→</div>
                     <div className="text-center">
                       <p className="text-base font-bold text-indigo-600">
                         {Math.round(data.pace.optimizedMonths)}
                       </p>
-                      <p className="text-xs text-gray-400">
-                        {t('monthsOptimized')}
-                      </p>
+                      <p className="text-xs text-gray-400">{t('monthsOptimized')}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* 이상 감지 */}
                 {data.alert.hasAlert && (
                   <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
                     <p className="text-xs font-semibold text-amber-600 mb-1">
                       ⚠ {t('alert')}
                     </p>
-                    <p className="text-xs text-amber-700">
-                      {data.alert.message}
-                    </p>
+                    <p className="text-xs text-amber-700">{data.alert.message}</p>
                   </div>
                 )}
               </>
@@ -279,7 +289,6 @@ export default function CoachCard({
           </div>
         )}
       </div>
-
     </>
   )
 }

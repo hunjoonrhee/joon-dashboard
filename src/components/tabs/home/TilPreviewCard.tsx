@@ -29,7 +29,7 @@ export default function TilPreviewCard({ sessions, onAddStudy }: Props) {
           {t('recentTil')}
         </p>
         <button
-          onClick={() => router.push('study')}
+          onClick={() => router.push(`/${locale}/dashboard/study`)}
           className="text-xs text-indigo-500 font-medium hover:text-indigo-700"
         >
           {t('viewAll')}
@@ -56,7 +56,7 @@ export default function TilPreviewCard({ sessions, onAddStudy }: Props) {
             <div
               key={s.id}
               className="py-2.5 cursor-pointer"
-              onClick={() => router.push(`sessions/${s.id}`)}
+              onClick={() => router.push(`/${locale}/dashboard/sessions/${s.id}`)}
             >
               <p className="text-xs text-gray-400 mb-1">{dateLabel(s.date)}</p>
               <p className="text-sm font-semibold text-gray-800 mb-1 truncate">

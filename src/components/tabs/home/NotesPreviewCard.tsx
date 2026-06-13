@@ -26,7 +26,7 @@ export default function NotesPreviewCard({ notes }: Props) {
           {t('recentNotes')}
         </p>
         <button
-          onClick={() => router.push('notes')}
+          onClick={() => router.push(`/${locale}/dashboard/notes`)}
           className="text-xs text-indigo-500 font-medium hover:text-indigo-700"
         >
           {t('viewAll')}
@@ -43,7 +43,7 @@ export default function NotesPreviewCard({ notes }: Props) {
             {t('notesEmptySub')}
           </p>
           <button
-            onClick={() => router.push('notes')}
+            onClick={() => router.push(`/${locale}/dashboard/notes`)}
             className="mt-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-orange-600 bg-orange-50 border border-orange-100 hover:bg-orange-100 transition-colors"
           >
             {t('firstNote')}
@@ -55,7 +55,7 @@ export default function NotesPreviewCard({ notes }: Props) {
             <div
               key={note.id}
               className="py-2.5 cursor-pointer"
-              onClick={() => router.push('notes')}
+              onClick={() => router.push(`/${locale}/dashboard/notes`)}
             >
               <div className="flex items-center gap-1.5 mb-1">
                 {note.mood && <span className="text-sm">{note.mood}</span>}
