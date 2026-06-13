@@ -1,5 +1,5 @@
-import { supabase } from '@/lib/supabase'
 import type { RoadmapStage } from '@/types'
+import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
 const GEMINI_API_URL =
@@ -54,9 +54,16 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  // Service role 클라이언트 — RLS 우회, user_id 직접 주입
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   const { goal, careerLevel, locale, userId } = await req.json()
   const lang =
     locale === 'de' ? 'German' : locale === 'en' ? 'English' : 'Korean'
+
   if (!goal || !careerLevel) {
     return NextResponse.json(
       { error: 'goal and careerLevel are required' },
@@ -99,7 +106,6 @@ Generate a learning roadmap from the current level to the final goal. Adapt the 
     }
 
     const geminiData = await geminiRes.json()
-
     const parts = geminiData.candidates?.[0]?.content?.parts ?? []
     const raw =
       parts
@@ -117,22 +123,23 @@ Generate a learning roadmap from the current level to the final goal. Adapt the 
         { status: 502 }
       )
     }
-    const parsed = JSON.parse(jsonMatch[0])
 
+    const parsed = JSON.parse(jsonMatch[0])
     const stages: RoadmapStage[] = parsed.stages
 
+    // 비회원 체험 — DB 저장 스킵
     if (!userId) {
       return NextResponse.json({ stages })
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('ai_roadmaps')
       .insert({
         goal,
         career_level: careerLevel,
         stages,
         adopted: false,
-        user_id: userId ?? null,
+        user_id: userId,
       })
       .select()
       .single()
