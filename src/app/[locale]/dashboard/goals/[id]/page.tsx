@@ -3,6 +3,7 @@
 import { getCurrentUserId, supabase } from '@/lib/supabase'
 import type { Goal, Topic } from '@/types'
 import { ArrowLeft, Check, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -11,19 +12,6 @@ const priorityStyle: Record<Goal['priority'], string> = {
   high: 'bg-orange-100 text-orange-700',
   medium: 'bg-blue-100 text-blue-700',
   low: 'bg-gray-100 text-gray-500',
-}
-
-const priorityLabel: Record<Goal['priority'], string> = {
-  urgent: 'Urgent',
-  high: 'High',
-  medium: 'Medium',
-  low: 'Low',
-}
-
-const statusLabel: Record<Goal['status'], string> = {
-  in_progress: '진행 중',
-  completed: '완료',
-  planned: '예정',
 }
 
 const statusStyle: Record<Goal['status'], string> = {
@@ -35,6 +23,11 @@ const statusStyle: Record<Goal['status'], string> = {
 export default function GoalDetail() {
   const { id } = useParams()
   const router = useRouter()
+  const t = useTranslations('goals')
+  const tCommon = useTranslations('common')
+  const tStatus = useTranslations('status')
+  const tPriority = useTranslations('priority')
+
   const [goal, setGoal] = useState<Goal | null>(null)
   const [topics, setTopics] = useState<Topic[]>([])
   const [loading, setLoading] = useState(true)
@@ -53,7 +46,7 @@ export default function GoalDetail() {
 
   useEffect(() => {
     const fetch = async () => {
-      const [{ data: g }, { data: t }] = await Promise.all([
+      const [{ data: g }, { data: tp }] = await Promise.all([
         supabase.from('goals').select('*').eq('id', id).single(),
         supabase
           .from('topics')
@@ -71,7 +64,7 @@ export default function GoalDetail() {
           is_focus: g.is_focus,
         })
       }
-      if (t) setTopics(t)
+      if (tp) setTopics(tp)
       setLoading(false)
     }
     fetch()
@@ -131,55 +124,57 @@ export default function GoalDetail() {
       .update({ completed: !topic.completed })
       .eq('id', topic.id)
     setTopics((prev) =>
-      prev.map((t) =>
-        t.id === topic.id ? { ...t, completed: !t.completed } : t
+      prev.map((tp) =>
+        tp.id === topic.id ? { ...tp, completed: !tp.completed } : tp
       )
     )
   }
 
   const removeTopic = async (topic: Topic) => {
     await supabase.from('topics').delete().eq('id', topic.id)
-    setTopics((prev) => prev.filter((t) => t.id !== topic.id))
+    setTopics((prev) => prev.filter((tp) => tp.id !== topic.id))
   }
 
-  const categories = [...new Set(topics.map((t) => t.category))]
+  const categories = [...new Set(topics.map((tp) => tp.category))]
 
   const getPct = (cat: string) => {
-    const filtered = topics.filter((t) => t.category === cat)
+    const filtered = topics.filter((tp) => tp.category === cat)
     if (filtered.length === 0) return 0
     return Math.round(
-      (filtered.filter((t) => t.completed).length / filtered.length) * 100
+      (filtered.filter((tp) => tp.completed).length / filtered.length) * 100
     )
   }
 
   if (loading)
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-400 text-sm">불러오는 중...</p>
+        <p className="text-gray-400 text-sm">{tCommon('loadingDots')}</p>
       </main>
     )
 
   if (!goal)
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-400 text-sm">목표를 찾을 수 없어요.</p>
+        <p className="text-gray-400 text-sm">{t('empty')}</p>
       </main>
     )
 
   return (
     <main className="mx-auto px-4 py-4">
       <button
-        onClick={() => router.push('/roadmap')}
+        onClick={() => router.back()}
         className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 mb-6 transition-colors"
       >
         <ArrowLeft size={16} />
-        <span className="text-sm">뒤로</span>
+        <span className="text-sm">{tCommon('cancel')}</span>
       </button>
 
       <div className="flex flex-col gap-4">
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-gray-700">기본 정보</p>
+            <p className="text-sm font-medium text-gray-700">
+              {t('editModal')}
+            </p>
             {!editingInfo ? (
               <button
                 onClick={() => {
@@ -219,7 +214,7 @@ export default function GoalDetail() {
             <div className="flex flex-col gap-3">
               <div>
                 <label className="text-xs text-gray-500 mb-1 block">
-                  목표 이름
+                  {t('name')}
                 </label>
                 <input
                   type="text"
@@ -231,7 +226,9 @@ export default function GoalDetail() {
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">설명</label>
+                <label className="text-xs text-gray-500 mb-1 block">
+                  {t('description')}
+                </label>
                 <input
                   type="text"
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
@@ -244,7 +241,7 @@ export default function GoalDetail() {
               <div className="flex gap-3">
                 <div className="flex-1">
                   <label className="text-xs text-gray-500 mb-1 block">
-                    우선순위
+                    {t('priority')}
                   </label>
                   <select
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
@@ -256,15 +253,15 @@ export default function GoalDetail() {
                       })
                     }
                   >
-                    <option value="urgent">Urgent</option>
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
+                    <option value="urgent">{tPriority('urgent')}</option>
+                    <option value="high">{tPriority('high')}</option>
+                    <option value="medium">{tPriority('medium')}</option>
+                    <option value="low">{tPriority('low')}</option>
                   </select>
                 </div>
                 <div className="flex-1">
                   <label className="text-xs text-gray-500 mb-1 block">
-                    상태
+                    {t('status')}
                   </label>
                   <select
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
@@ -276,9 +273,11 @@ export default function GoalDetail() {
                       })
                     }
                   >
-                    <option value="in_progress">진행 중</option>
-                    <option value="completed">완료</option>
-                    <option value="planned">예정</option>
+                    <option value="in_progress">
+                      {tStatus('in_progress')}
+                    </option>
+                    <option value="completed">{tStatus('completed')}</option>
+                    <option value="planned">{tStatus('planned')}</option>
                   </select>
                 </div>
               </div>
@@ -292,7 +291,7 @@ export default function GoalDetail() {
                   }
                 />
                 <label htmlFor="is_focus" className="text-sm text-gray-600">
-                  현재 집중 목표로 설정
+                  {t('focus')}
                 </label>
               </div>
             </div>
@@ -309,7 +308,7 @@ export default function GoalDetail() {
                 )}
                 {goal.is_focus && (
                   <p className="text-xs text-indigo-500 mt-2 font-medium">
-                    ★ 현재 집중 목표
+                    ★ {t('focus')}
                   </p>
                 )}
               </div>
@@ -317,12 +316,12 @@ export default function GoalDetail() {
                 <span
                   className={`text-xs px-2 py-0.5 rounded-full ${priorityStyle[goal.priority]}`}
                 >
-                  {priorityLabel[goal.priority]}
+                  {tPriority(goal.priority)}
                 </span>
                 <span
                   className={`text-xs px-2 py-0.5 rounded-full ${statusStyle[goal.status]}`}
                 >
-                  {statusLabel[goal.status]}
+                  {tStatus(goal.status)}
                 </span>
               </div>
             </div>
@@ -331,7 +330,7 @@ export default function GoalDetail() {
 
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-gray-700">서브태스크</p>
+            <p className="text-sm font-medium text-gray-700">{t('title')}</p>
             <button
               onClick={() => setAddingTopic(true)}
               className="text-indigo-500 hover:text-indigo-700 transition-colors"
@@ -379,14 +378,12 @@ export default function GoalDetail() {
           )}
 
           {topics.length === 0 && !addingTopic ? (
-            <p className="text-sm text-gray-400">
-              + 버튼으로 서브태스크를 추가해보세요.
-            </p>
+            <p className="text-sm text-gray-400">{t('empty')}</p>
           ) : (
             <div className="flex flex-col gap-4">
               {categories.map((cat) => {
                 const pct = getPct(cat)
-                const catTopics = topics.filter((t) => t.category === cat)
+                const catTopics = topics.filter((tp) => tp.category === cat)
                 return (
                   <div key={cat}>
                     <div className="flex justify-between text-xs text-gray-600 mb-1">
@@ -400,30 +397,30 @@ export default function GoalDetail() {
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      {catTopics.map((t) => (
+                      {catTopics.map((tp) => (
                         <div
-                          key={t.id}
+                          key={tp.id}
                           className="flex items-center justify-between"
                         >
                           <div
                             className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
-                            onClick={() => toggleTopic(t)}
+                            onClick={() => toggleTopic(tp)}
                           >
                             <div
-                              className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${t.completed ? 'bg-indigo-500 border-indigo-500' : 'border-gray-300'}`}
+                              className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${tp.completed ? 'bg-indigo-500 border-indigo-500' : 'border-gray-300'}`}
                             >
-                              {t.completed && (
+                              {tp.completed && (
                                 <span className="text-white text-xs">✓</span>
                               )}
                             </div>
                             <span
-                              className={`text-sm truncate ${t.completed ? 'line-through text-gray-300' : 'text-gray-700'}`}
+                              className={`text-sm truncate ${tp.completed ? 'line-through text-gray-300' : 'text-gray-700'}`}
                             >
-                              {t.name}
+                              {tp.name}
                             </span>
                           </div>
                           <button
-                            onClick={() => removeTopic(t)}
+                            onClick={() => removeTopic(tp)}
                             className="text-gray-300 hover:text-red-400 transition-colors ml-2 flex-shrink-0"
                           >
                             <Trash2 size={13} />

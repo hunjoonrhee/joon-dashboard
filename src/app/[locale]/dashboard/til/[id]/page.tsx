@@ -27,7 +27,7 @@ export default function TilPage() {
       .select('*')
       .eq('id', id)
       .single()
-      .then(({ data }) => {
+      .then(({ data }: { data: Session | null }) => {
         if (data) {
           setSession(data as Session)
           setTil(data.til ?? '')
