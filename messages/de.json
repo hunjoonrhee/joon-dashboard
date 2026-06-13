@@ -81,7 +81,8 @@
     "tags": "Zugehörige Tags",
     "otherGoals": "Weitere Ziele",
     "stageLink": "Roadmap-Stufe verknüpfen",
-    "stageLinkNone": "Nicht verknüpfen"
+    "stageLinkNone": "Nicht verknüpfen",
+    "finalGoalTitle": "Bis {goal}"
   },
   "status": {
     "in_progress": "In Bearbeitung",

@@ -225,7 +225,9 @@ export default function MyGoalsView({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-gray-700">{finalGoal}까지</p>
+        <p className="text-sm font-semibold text-gray-700">
+          {t('finalGoalTitle', { goal: finalGoal })}
+        </p>
         <button
           onClick={onAdd}
           className="text-indigo-500 hover:text-indigo-700 transition-colors"

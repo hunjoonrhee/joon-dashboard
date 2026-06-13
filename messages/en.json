@@ -81,7 +81,8 @@
     "tags": "Related tags",
     "otherGoals": "Other Goals",
     "stageLink": "Link to roadmap stage",
-    "stageLinkNone": "No link"
+    "stageLinkNone": "No link",
+    "finalGoalTitle": "Towards {goal}"
   },
   "status": {
     "in_progress": "In Progress",
