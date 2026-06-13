@@ -1,7 +1,6 @@
 'use client'
 
-import { supabase } from '@/lib/supabase'
-import { insertWithUser } from '@/lib/supabase'
+import { getCurrentUserId, supabase } from '@/lib/supabase'
 import type { Goal, Topic } from '@/types'
 import { ArrowLeft, Check, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
@@ -107,6 +106,7 @@ export default function GoalDetail() {
   const addTopic = async () => {
     if (!newTopic.trim() || !goal) return
     setSaving(true)
+    const userId = await getCurrentUserId()
     const { data } = await supabase
       .from('topics')
       .insert({
@@ -114,7 +114,7 @@ export default function GoalDetail() {
         category: newCategory.trim() || 'general',
         goal_id: goal.id,
         completed: false,
-        user_id: user?.id,
+        user_id: userId,
       })
       .select()
       .single()
@@ -380,7 +380,7 @@ export default function GoalDetail() {
 
           {topics.length === 0 && !addingTopic ? (
             <p className="text-sm text-gray-400">
-              + 버튼으로 서브태스크를 추가해봐.
+              + 버튼으로 서브태스크를 추가해보세요.
             </p>
           ) : (
             <div className="flex flex-col gap-4">
