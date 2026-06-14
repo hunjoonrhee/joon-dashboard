@@ -1,23 +1,23 @@
-'use client'
+'use client';
 
-import type { Note } from '@/types'
-import { useLocale, useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
+import type { Note } from '@/types';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 interface Props {
-  notes: Note[]
+  notes: Note[];
 }
 
 export default function NotesPreviewCard({ notes }: Props) {
-  const t = useTranslations('home')
-  const router = useRouter()
-  const locale = useLocale()
+  const t = useTranslations('home');
+  const router = useRouter();
+  const locale = useLocale();
 
   const dateLabel = (d: string) =>
     new Date(d).toLocaleDateString(
       locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
       { month: 'short', day: 'numeric' }
-    )
+    );
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4">
@@ -74,5 +74,5 @@ export default function NotesPreviewCard({ notes }: Props) {
         </div>
       )}
     </div>
-  )
+  );
 }

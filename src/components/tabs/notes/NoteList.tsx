@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import type { Note } from '@/types'
-import { useLocale, useTranslations } from 'next-intl'
+import type { Note } from '@/types';
+import { useLocale, useTranslations } from 'next-intl';
 
 interface Props {
-  notes: Note[]
-  selectedId: string | null
-  onSelect: (note: Note) => void
-  onNew: () => void
+  notes: Note[];
+  selectedId: string | null;
+  onSelect: (note: Note) => void;
+  onNew: () => void;
 }
 
 export default function NoteList({
@@ -16,14 +16,14 @@ export default function NoteList({
   onSelect,
   onNew,
 }: Props) {
-  const t = useTranslations('notes')
-  const locale = useLocale()
+  const t = useTranslations('notes');
+  const locale = useLocale();
 
   const dateLabel = (d: string) =>
     new Date(d).toLocaleDateString(
       locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
       { month: 'long', day: 'numeric' }
-    )
+    );
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4">
@@ -77,5 +77,5 @@ export default function NoteList({
         </div>
       )}
     </div>
-  )
+  );
 }

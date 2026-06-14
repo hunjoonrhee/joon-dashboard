@@ -1,26 +1,26 @@
-'use client'
+'use client';
 
-import type { Session } from '@/types'
-import { useLocale, useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
+import type { Session } from '@/types';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 interface Props {
-  sessions: Session[]
-  onAddStudy: () => void
+  sessions: Session[];
+  onAddStudy: () => void;
 }
 
 export default function TilPreviewCard({ sessions, onAddStudy }: Props) {
-  const t = useTranslations('home')
-  const router = useRouter()
-  const locale = useLocale()
+  const t = useTranslations('home');
+  const router = useRouter();
+  const locale = useLocale();
 
-  const tilSessions = sessions.filter((s) => s.til).slice(0, 2)
+  const tilSessions = sessions.filter((s) => s.til).slice(0, 2);
 
   const dateLabel = (d: string) =>
     new Date(d).toLocaleDateString(
       locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
       { month: 'short', day: 'numeric' }
-    )
+    );
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4">
@@ -56,7 +56,9 @@ export default function TilPreviewCard({ sessions, onAddStudy }: Props) {
             <div
               key={s.id}
               className="py-2.5 cursor-pointer"
-              onClick={() => router.push(`/${locale}/dashboard/sessions/${s.id}`)}
+              onClick={() =>
+                router.push(`/${locale}/dashboard/sessions/${s.id}`)
+              }
             >
               <p className="text-xs text-gray-400 mb-1">{dateLabel(s.date)}</p>
               <p className="text-sm font-semibold text-gray-800 mb-1 truncate">
@@ -82,5 +84,5 @@ export default function TilPreviewCard({ sessions, onAddStudy }: Props) {
         </div>
       )}
     </div>
-  )
+  );
 }

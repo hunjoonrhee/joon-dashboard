@@ -1,16 +1,16 @@
-'use client'
+'use client';
 
-import type { AiRoadmap } from '@/types'
-import { useTranslations } from 'next-intl'
+import type { AiRoadmap } from '@/types';
+import { useTranslations } from 'next-intl';
 
 interface Props {
-  settings: Record<string, string>
-  overallPct: number
-  streak: number
-  monthCount: number
-  completedTopicsCount: number
-  adoptedRoadmap: AiRoadmap | null
-  gapPct: number | null
+  settings: Record<string, string>;
+  overallPct: number;
+  streak: number;
+  monthCount: number;
+  completedTopicsCount: number;
+  adoptedRoadmap: AiRoadmap | null;
+  gapPct: number | null;
 }
 
 export default function HeroCard({
@@ -22,7 +22,7 @@ export default function HeroCard({
   adoptedRoadmap,
   gapPct,
 }: Props) {
-  const t = useTranslations('home')
+  const t = useTranslations('home');
 
   const gapColor =
     gapPct === null
@@ -31,7 +31,7 @@ export default function HeroCard({
         ? 'bg-emerald-300'
         : gapPct >= 40
           ? 'bg-amber-300'
-          : 'bg-rose-300'
+          : 'bg-rose-300';
 
   const gapTextColor =
     gapPct === null
@@ -40,7 +40,7 @@ export default function HeroCard({
         ? 'text-emerald-100'
         : gapPct >= 40
           ? 'text-amber-100'
-          : 'text-rose-100'
+          : 'text-rose-100';
 
   return (
     <div className="lg:col-span-2 bg-gradient-to-br from-indigo-500 to-violet-500 rounded-2xl p-5 text-white relative overflow-hidden">
@@ -117,5 +117,5 @@ export default function HeroCard({
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,23 +1,23 @@
-'use client'
+'use client';
 
-import { getTagColor } from '@/lib/tagColor'
-import type { Session } from '@/types'
-import { useLocale, useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
+import { getTagColor } from '@/lib/tagColor';
+import type { Session } from '@/types';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 interface Props {
-  sessions: Session[]
+  sessions: Session[];
 }
 
 export default function TilList({ sessions }: Props) {
-  const router = useRouter()
-  const locale = useLocale()
-  const t = useTranslations('study')
+  const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations('study');
 
   const dateLabel = (d: string) =>
     new Date(d).toLocaleDateString(
       locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US'
-    )
+    );
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4">
@@ -56,5 +56,5 @@ export default function TilList({ sessions }: Props) {
         </div>
       )}
     </div>
-  )
+  );
 }

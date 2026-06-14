@@ -1,25 +1,25 @@
-'use client'
+'use client';
 
-import Modal from '@/components/Modal'
-import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
-import type { Project } from '@/types'
-import { Trash2 } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import Modal from '@/components/Modal';
+import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles';
+import type { Project } from '@/types';
+import { Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface ProjectForm {
-  name: string
-  description: string
-  status: Project['status']
+  name: string;
+  description: string;
+  status: Project['status'];
 }
 
 interface Props {
-  mode: 'add' | 'edit'
-  form: ProjectForm
-  saving: boolean
-  onChange: (form: ProjectForm) => void
-  onSave: () => void
-  onDelete?: () => void
-  onClose: () => void
+  mode: 'add' | 'edit';
+  form: ProjectForm;
+  saving: boolean;
+  onChange: (form: ProjectForm) => void;
+  onSave: () => void;
+  onDelete?: () => void;
+  onClose: () => void;
 }
 
 export default function ProjectModal({
@@ -31,9 +31,9 @@ export default function ProjectModal({
   onDelete,
   onClose,
 }: Props) {
-  const t = useTranslations('projects')
-  const tCommon = useTranslations('common')
-  const tStatus = useTranslations('status')
+  const t = useTranslations('projects');
+  const tCommon = useTranslations('common');
+  const tStatus = useTranslations('status');
 
   return (
     <Modal
@@ -97,5 +97,5 @@ export default function ProjectModal({
         </div>
       </div>
     </Modal>
-  )
+  );
 }

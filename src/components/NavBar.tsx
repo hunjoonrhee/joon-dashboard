@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { supabase } from '@/lib/supabase'
-import { createSupabaseBrowserClient } from '@/lib/supabase-client'
-import { Settings } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase';
+import { createSupabaseBrowserClient } from '@/lib/supabase-client';
+import { Settings } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 const tabs = [
   { key: 'home', path: '/dashboard', icon: '🏠' },
@@ -13,15 +13,15 @@ const tabs = [
   { key: 'notes', path: '/dashboard/notes', icon: '✍️' },
   { key: 'roadmap', path: '/dashboard/roadmap', icon: '🗺' },
   { key: 'projects', path: '/dashboard/projects', icon: '🚀' },
-]
+];
 
 export default function NavBar() {
-  const pathname = usePathname()
-  const router = useRouter()
-  const t = useTranslations('nav')
-  const locale = pathname.split('/')[1] ?? 'ko'
-  const [name, setName] = useState('J')
-  const [dateStr, setDateStr] = useState('')
+  const pathname = usePathname();
+  const router = useRouter();
+  const t = useTranslations('nav');
+  const locale = pathname.split('/')[1] ?? 'ko';
+  const [name, setName] = useState('J');
+  const [dateStr, setDateStr] = useState('');
 
   useEffect(() => {
     supabase
@@ -30,8 +30,8 @@ export default function NavBar() {
       .eq('key', 'name')
       .single()
       .then(({ data }: { data: { value: string } | null }) => {
-        if (data?.value) setName(data.value)
-      })
+        if (data?.value) setName(data.value);
+      });
     setDateStr(
       new Date().toLocaleDateString(
         locale === 'de' ? 'de-DE' : locale === 'ko' ? 'ko-KR' : 'en-US',
@@ -39,27 +39,27 @@ export default function NavBar() {
           timeZone: 'Europe/Berlin',
         }
       )
-    )
-  }, [])
+    );
+  }, []);
 
   const isActive = (path: string) => {
-    const fullPath = `/${locale}${path}`
-    return pathname === fullPath || pathname.startsWith(`/${locale}${path}/`)
-  }
+    const fullPath = `/${locale}${path}`;
+    return pathname === fullPath || pathname.startsWith(`/${locale}${path}/`);
+  };
 
-  const navigate = (path: string) => router.push(`/${locale}${path}`)
+  const navigate = (path: string) => router.push(`/${locale}${path}`);
 
   const switchLocale = (newLocale: string) => {
-    const segments = pathname.split('/')
-    segments[1] = newLocale
-    router.push(segments.join('/'))
-  }
+    const segments = pathname.split('/');
+    segments[1] = newLocale;
+    router.push(segments.join('/'));
+  };
 
   const handleSignOut = async () => {
-    const client = createSupabaseBrowserClient()
-    await client.auth.signOut()
-    router.push(`/${locale}/login`)
-  }
+    const client = createSupabaseBrowserClient();
+    await client.auth.signOut();
+    router.push(`/${locale}/login`);
+  };
 
   return (
     <>
@@ -126,5 +126,5 @@ export default function NavBar() {
         </div>
       </div>
     </>
-  )
+  );
 }

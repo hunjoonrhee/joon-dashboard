@@ -1,45 +1,45 @@
-'use client'
+'use client';
 
-import { useToast } from '@/components/Toast'
-import { supabase } from '@/lib/supabase'
-import { insertWithUser, upsertWithUser } from '@/lib/supabase'
-import type { Certification, Setting } from '@/types'
-import { ArrowLeft, Check, Trash2 } from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
-import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useToast } from '@/components/Toast';
+import { supabase } from '@/lib/supabase';
+import { insertWithUser, upsertWithUser } from '@/lib/supabase';
+import type { Certification, Setting } from '@/types';
+import { ArrowLeft, Check, Trash2 } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 const LOCALES = [
   { value: 'ko', label: '한국어' },
   { value: 'de', label: 'Deutsch' },
   { value: 'en', label: 'English' },
-]
+];
 
 export default function SettingsPage() {
-  const router = useRouter()
-  const pathname = usePathname()
-  const currentLocale = useLocale()
-  const t = useTranslations('settings')
-  const { show } = useToast()
+  const router = useRouter();
+  const pathname = usePathname();
+  const currentLocale = useLocale();
+  const t = useTranslations('settings');
+  const { show } = useToast();
 
   const [form, setForm] = useState({
     name: '',
     big_goal: '',
     big_goal_sub: '',
     monthly_session_target: '',
-  })
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  });
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-  const [certs, setCerts] = useState<Certification[]>([])
+  const [certs, setCerts] = useState<Certification[]>([]);
   const [certForm, setCertForm] = useState({
     name: '',
     issuer: '',
     tags: '',
     issued_at: '',
-  })
-  const [addingCert, setAddingCert] = useState(false)
-  const [savingCert, setSavingCert] = useState(false)
+  });
+  const [addingCert, setAddingCert] = useState(false);
+  const [savingCert, setSavingCert] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -49,74 +49,74 @@ export default function SettingsPage() {
           .from('certifications')
           .select('*')
           .order('created_at', { ascending: false }),
-      ])
+      ]);
       if (settingsRes.data) {
-        const map: Record<string, string> = {}
+        const map: Record<string, string> = {};
         settingsRes.data.forEach((s: Setting) => {
-          map[s.key] = s.value
-        })
+          map[s.key] = s.value;
+        });
         setForm({
           name: map.name ?? '',
           big_goal: map.big_goal ?? '',
           big_goal_sub: map.big_goal_sub ?? '',
           monthly_session_target: map.monthly_session_target ?? '',
-        })
+        });
       }
-      if (certsRes.data) setCerts(certsRes.data as Certification[])
-    }
-    load()
-  }, [])
+      if (certsRes.data) setCerts(certsRes.data as Certification[]);
+    };
+    load();
+  }, []);
 
   const save = async () => {
-    setSaving(true)
+    setSaving(true);
     await Promise.all(
       Object.entries(form).map(([key, value]) =>
         upsertWithUser('settings', { key, value }, { onConflict: 'key' })
       )
-    )
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }
+    );
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
 
   const saveCert = async () => {
-    if (!certForm.name.trim()) return
-    setSavingCert(true)
+    if (!certForm.name.trim()) return;
+    setSavingCert(true);
     const tags = certForm.tags
       .split(',')
       .map((t) => t.trim())
-      .filter(Boolean)
+      .filter(Boolean);
     const { data, error } = await supabase
       .from('certifications')
 
       .select()
-      .single()
-    setSavingCert(false)
+      .single();
+    setSavingCert(false);
     if (error) {
-      show(t('certSaveFailed'), { type: 'error' })
-      return
+      show(t('certSaveFailed'), { type: 'error' });
+      return;
     }
-    setCerts((prev) => [data as Certification, ...prev])
-    setCertForm({ name: '', issuer: '', tags: '', issued_at: '' })
-    setAddingCert(false)
-    show(t('certAdded'), { type: 'success' })
-  }
+    setCerts((prev) => [data as Certification, ...prev]);
+    setCertForm({ name: '', issuer: '', tags: '', issued_at: '' });
+    setAddingCert(false);
+    show(t('certAdded'), { type: 'success' });
+  };
 
   const deleteCert = async (id: string) => {
-    await supabase.from('certifications').delete().eq('id', id)
-    setCerts((prev) => prev.filter((c) => c.id !== id))
-    show(t('certDeleted'), { type: 'info' })
-  }
+    await supabase.from('certifications').delete().eq('id', id);
+    setCerts((prev) => prev.filter((c) => c.id !== id));
+    show(t('certDeleted'), { type: 'info' });
+  };
 
   const switchLocale = (locale: string) => {
-    const segments = pathname.split('/')
-    segments[1] = locale
-    router.push(segments.join('/'))
-  }
+    const segments = pathname.split('/');
+    segments[1] = locale;
+    router.push(segments.join('/'));
+  };
 
   const inputCls =
-    'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400'
-  const labelCls = 'text-xs text-gray-500 mb-1 block'
+    'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400';
+  const labelCls = 'text-xs text-gray-500 mb-1 block';
 
   return (
     <main className="min-h-screen p-4 max-w-2xl mx-auto">
@@ -343,5 +343,5 @@ export default function SettingsPage() {
         </button>
       </div>
     </main>
-  )
+  );
 }

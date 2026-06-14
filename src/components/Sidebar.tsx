@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { supabase } from '@/lib/supabase'
-import { createSupabaseBrowserClient } from '@/lib/supabase-client'
-import { Settings } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase';
+import { createSupabaseBrowserClient } from '@/lib/supabase-client';
+import { Settings } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 const navItems = [
   { key: 'home', path: '/dashboard', icon: '🏠' },
@@ -13,15 +13,15 @@ const navItems = [
   { key: 'notes', path: '/dashboard/notes', icon: '✍️' },
   { key: 'roadmap', path: '/dashboard/roadmap', icon: '🗺' },
   { key: 'projects', path: '/dashboard/projects', icon: '🚀' },
-]
+];
 
 export default function Sidebar() {
-  const pathname = usePathname()
-  const router = useRouter()
-  const locale = pathname.split('/')[1] ?? 'ko'
-  const t = useTranslations('nav')
-  const [name, setName] = useState('Joon')
-  const [role, setRole] = useState('')
+  const pathname = usePathname();
+  const router = useRouter();
+  const locale = pathname.split('/')[1] ?? 'ko';
+  const t = useTranslations('nav');
+  const [name, setName] = useState('Joon');
+  const [role, setRole] = useState('');
 
   useEffect(() => {
     supabase
@@ -29,28 +29,28 @@ export default function Sidebar() {
       .select('*')
       .then(({ data }: { data: { key: string; value: string }[] | null }) => {
         if (data) {
-          const map: Record<string, string> = {}
+          const map: Record<string, string> = {};
           data.forEach((s: { key: string; value: string }) => {
-            map[s.key] = s.value
-          })
-          if (map.name) setName(map.name)
-          if (map.big_goal_sub) setRole(map.big_goal_sub)
+            map[s.key] = s.value;
+          });
+          if (map.name) setName(map.name);
+          if (map.big_goal_sub) setRole(map.big_goal_sub);
         }
-      })
-  }, [])
+      });
+  }, []);
 
   const isActive = (path: string) => {
-    const fullPath = `/${locale}${path}`
-    return pathname === fullPath || pathname.startsWith(`/${locale}${path}/`)
-  }
+    const fullPath = `/${locale}${path}`;
+    return pathname === fullPath || pathname.startsWith(`/${locale}${path}/`);
+  };
 
-  const navigate = (path: string) => router.push(`/${locale}${path}`)
+  const navigate = (path: string) => router.push(`/${locale}${path}`);
 
   const handleSignOut = async () => {
-    const client = createSupabaseBrowserClient()
-    await client.auth.signOut()
-    router.push(`/${locale}/login`)
-  }
+    const client = createSupabaseBrowserClient();
+    await client.auth.signOut();
+    router.push(`/${locale}/login`);
+  };
 
   return (
     <aside className="w-56 bg-white border-r border-gray-100 fixed top-0 left-0 h-screen flex flex-col z-20 hidden lg:flex">
@@ -116,5 +116,5 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
-  )
+  );
 }

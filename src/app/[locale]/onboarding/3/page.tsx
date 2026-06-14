@@ -1,65 +1,65 @@
-'use client'
+'use client';
 
-import { createSupabaseBrowserClient } from '@/lib/supabase-client'
-import { supabase as supabaseClient } from '@/lib/supabase'
-import { upsertWithUser } from '@/lib/supabase'
-import { useLocale, useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { createSupabaseBrowserClient } from '@/lib/supabase-client';
+import { supabase as supabaseClient } from '@/lib/supabase';
+import { upsertWithUser } from '@/lib/supabase';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface RoadmapStage {
-  level: number
-  title: string
-  description: string
-  skills: { name: string; tags: string[] }[]
+  level: number;
+  title: string;
+  description: string;
+  skills: { name: string; tags: string[] }[];
 }
 
 export default function Onboarding3() {
-  const router = useRouter()
-  const locale = useLocale()
-  const t = useTranslations('onboarding')
-  const supabase = createSupabaseBrowserClient()
+  const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations('onboarding');
+  const supabase = createSupabaseBrowserClient();
 
-  const [stages, setStages] = useState<RoadmapStage[]>([])
-  const [goal, setGoal] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [saving, setSaving] = useState(false)
+  const [stages, setStages] = useState<RoadmapStage[]>([]);
+  const [goal, setGoal] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const ob_goal = sessionStorage.getItem('ob_goal')
-    const ob_level = sessionStorage.getItem('ob_level')
-    const ob_stages = sessionStorage.getItem('ob_stages')
+    const ob_goal = sessionStorage.getItem('ob_goal');
+    const ob_level = sessionStorage.getItem('ob_level');
+    const ob_stages = sessionStorage.getItem('ob_stages');
 
     if (!ob_goal) {
-      router.push(`/${locale}/onboarding/1`)
-      return
+      router.push(`/${locale}/onboarding/1`);
+      return;
     }
 
-    setGoal(ob_goal)
+    setGoal(ob_goal);
 
     if (ob_stages) {
       try {
-        setStages(JSON.parse(ob_stages))
-        setLoading(false)
-        return
+        setStages(JSON.parse(ob_stages));
+        setLoading(false);
+        return;
       } catch {}
     }
 
     if (ob_level) {
-      generateRoadmap(ob_goal, ob_level)
+      generateRoadmap(ob_goal, ob_level);
     } else {
-      router.push(`/${locale}/onboarding/2`)
+      router.push(`/${locale}/onboarding/2`);
     }
-  }, [])
+  }, []);
 
   const generateRoadmap = async (goal: string, level: string) => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
       const {
         data: { user },
-      } = await supabase.auth.getUser()
+      } = await supabase.auth.getUser();
       const res = await fetch('/api/roadmap/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -69,26 +69,26 @@ export default function Onboarding3() {
           locale,
           userId: user?.id,
         }),
-      })
-      if (!res.ok) throw new Error()
-      const data = await res.json()
-      setStages(data.stages ?? [])
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setStages(data.stages ?? []);
     } catch {
-      setError(t('step3Error'))
+      setError(t('step3Error'));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleStart = async () => {
-    setSaving(true)
+    setSaving(true);
     try {
       const {
         data: { user },
-      } = await supabase.auth.getUser()
-      if (!user) return
+      } = await supabase.auth.getUser();
+      if (!user) return;
 
-      const ob_level = sessionStorage.getItem('ob_level') ?? ''
+      const ob_level = sessionStorage.getItem('ob_level') ?? '';
 
       // 로드맵 DB 저장 + 자동 채택
       if (stages.length > 0) {
@@ -102,14 +102,14 @@ export default function Onboarding3() {
             user_id: user.id,
           })
           .select()
-          .single()
+          .single();
 
         if (roadmap) {
           await upsertWithUser(
             'settings',
             { key: 'adopted_roadmap_id', value: roadmap.id },
             { onConflict: 'key' }
-          )
+          );
         }
       }
 
@@ -129,18 +129,18 @@ export default function Onboarding3() {
           { key: 'big_goal_sub', value: ob_level },
           { onConflict: 'key' }
         ),
-      ])
+      ]);
 
-      sessionStorage.removeItem('ob_domain')
-      sessionStorage.removeItem('ob_goal')
-      sessionStorage.removeItem('ob_level')
-      sessionStorage.removeItem('ob_stages')
+      sessionStorage.removeItem('ob_domain');
+      sessionStorage.removeItem('ob_goal');
+      sessionStorage.removeItem('ob_level');
+      sessionStorage.removeItem('ob_stages');
 
-      router.push(`/${locale}/dashboard`)
+      router.push(`/${locale}/dashboard`);
     } catch {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
@@ -165,9 +165,9 @@ export default function Onboarding3() {
             <p className="text-sm text-red-400 mb-4">{error}</p>
             <button
               onClick={() => {
-                const g = sessionStorage.getItem('ob_goal') ?? ''
-                const l = sessionStorage.getItem('ob_level') ?? ''
-                generateRoadmap(g, l)
+                const g = sessionStorage.getItem('ob_goal') ?? '';
+                const l = sessionStorage.getItem('ob_level') ?? '';
+                generateRoadmap(g, l);
               }}
               className="px-4 py-2 bg-indigo-500 rounded-lg text-sm font-medium text-white"
             >
@@ -217,5 +217,5 @@ export default function Onboarding3() {
         )}
       </div>
     </div>
-  )
+  );
 }

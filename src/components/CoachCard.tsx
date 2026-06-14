@@ -1,43 +1,43 @@
-'use client'
+'use client';
 
-import type { AiRoadmap, Goal, Session } from '@/types'
-import { useModalStore } from '@/store/modalStore'
-import { useLocale, useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import type { AiRoadmap, Goal, Session } from '@/types';
+import { useModalStore } from '@/store/modalStore';
+import { useLocale, useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface CoachResource {
-  type: 'docs' | 'youtube' | 'book' | 'course'
-  title: string
-  description: string
-  url: string
+  type: 'docs' | 'youtube' | 'book' | 'course';
+  title: string;
+  description: string;
+  url: string;
 }
 
 interface CoachSuggestion {
-  insufficient?: boolean
-  insufficientMessage?: string
-  today: { skill: string; reason: string }
-  resources?: CoachResource[]
+  insufficient?: boolean;
+  insufficientMessage?: string;
+  today: { skill: string; reason: string };
+  resources?: CoachResource[];
   pace: {
-    currentMonths: number
-    optimizedMonths: number
-    sessionsPerWeek: number
-    message: string
-  }
-  alert: { hasAlert: boolean; message: string }
+    currentMonths: number;
+    optimizedMonths: number;
+    sessionsPerWeek: number;
+    message: string;
+  };
+  alert: { hasAlert: boolean; message: string };
 }
 
 interface Props {
-  sessions: Session[]
-  goals: Goal[]
-  adoptedRoadmap: AiRoadmap | null
-  onRefresh?: () => void
-  isPro?: boolean
+  sessions: Session[];
+  goals: Goal[];
+  adoptedRoadmap: AiRoadmap | null;
+  onRefresh?: () => void;
+  isPro?: boolean;
 }
 
-type Status = 'idle' | 'loading' | 'done' | 'error'
+type Status = 'idle' | 'loading' | 'done' | 'error';
 
-const MIN_SESSIONS = 3
+const MIN_SESSIONS = 3;
 
 export default function CoachCard({
   sessions,
@@ -46,61 +46,61 @@ export default function CoachCard({
   onRefresh,
   isPro = false,
 }: Props) {
-  const t = useTranslations('coach')
-  const tTutor = useTranslations('tutor')
-  const locale = useLocale()
-  const router = useRouter()
-  const [status, setStatus] = useState<Status>('idle')
-  const [data, setData] = useState<CoachSuggestion | null>(null)
-  const [lastFetched, setLastFetched] = useState<string | null>(null)
-  const { openStudyModal } = useModalStore()
+  const t = useTranslations('coach');
+  const tTutor = useTranslations('tutor');
+  const locale = useLocale();
+  const router = useRouter();
+  const [status, setStatus] = useState<Status>('idle');
+  const [data, setData] = useState<CoachSuggestion | null>(null);
+  const [lastFetched, setLastFetched] = useState<string | null>(null);
+  const { openStudyModal } = useModalStore();
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
-    const cached = localStorage.getItem('coach_suggestion')
-    const cachedDate = localStorage.getItem('coach_suggestion_date')
+    const cached = localStorage.getItem('coach_suggestion');
+    const cachedDate = localStorage.getItem('coach_suggestion_date');
     if (cached && cachedDate === today) {
-      setData(JSON.parse(cached))
-      setStatus('done')
-      setLastFetched(cachedDate)
+      setData(JSON.parse(cached));
+      setStatus('done');
+      setLastFetched(cachedDate);
     }
-  }, [today])
+  }, [today]);
 
   const getAdvice = async () => {
-    if (!adoptedRoadmap) return
-    setStatus('loading')
+    if (!adoptedRoadmap) return;
+    setStatus('loading');
     try {
       const res = await window.fetch('/api/coach/suggest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessions, adoptedRoadmap, goals, locale }),
-      })
-      if (!res.ok) throw new Error()
-      const json: CoachSuggestion = await res.json()
-      setData(json)
-      setStatus('done')
-      setLastFetched(today)
-      localStorage.setItem('coach_suggestion', JSON.stringify(json))
-      localStorage.setItem('coach_suggestion_date', today)
+      });
+      if (!res.ok) throw new Error();
+      const json: CoachSuggestion = await res.json();
+      setData(json);
+      setStatus('done');
+      setLastFetched(today);
+      localStorage.setItem('coach_suggestion', JSON.stringify(json));
+      localStorage.setItem('coach_suggestion_date', today);
     } catch {
-      setStatus('error')
+      setStatus('error');
     }
-  }
+  };
 
   const handleStartTutor = () => {
-    if (!data?.today?.skill) return
+    if (!data?.today?.skill) return;
     if (!isPro) {
-      router.push(`/${locale}/dashboard/tutor?gate=true`)
-      return
+      router.push(`/${locale}/dashboard/tutor?gate=true`);
+      return;
     }
-    const topic = encodeURIComponent(data.today.skill)
-    router.push(`/${locale}/dashboard/tutor?topic=${topic}`)
-  }
+    const topic = encodeURIComponent(data.today.skill);
+    router.push(`/${locale}/dashboard/tutor?topic=${topic}`);
+  };
 
-  if (!adoptedRoadmap) return null
+  if (!adoptedRoadmap) return null;
 
-  const hasEnoughData = sessions.length >= MIN_SESSIONS
+  const hasEnoughData = sessions.length >= MIN_SESSIONS;
 
   return (
     <>
@@ -264,14 +264,18 @@ export default function CoachCard({
                       <p className="text-base font-bold text-gray-700">
                         {Math.round(data.pace.currentMonths)}
                       </p>
-                      <p className="text-xs text-gray-400">{t('monthsCurrent')}</p>
+                      <p className="text-xs text-gray-400">
+                        {t('monthsCurrent')}
+                      </p>
                     </div>
                     <div className="text-gray-300 self-center">→</div>
                     <div className="text-center">
                       <p className="text-base font-bold text-indigo-600">
                         {Math.round(data.pace.optimizedMonths)}
                       </p>
-                      <p className="text-xs text-gray-400">{t('monthsOptimized')}</p>
+                      <p className="text-xs text-gray-400">
+                        {t('monthsOptimized')}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -281,7 +285,9 @@ export default function CoachCard({
                     <p className="text-xs font-semibold text-amber-600 mb-1">
                       ⚠ {t('alert')}
                     </p>
-                    <p className="text-xs text-amber-700">{data.alert.message}</p>
+                    <p className="text-xs text-amber-700">
+                      {data.alert.message}
+                    </p>
                   </div>
                 )}
               </>
@@ -290,5 +296,5 @@ export default function CoachCard({
         )}
       </div>
     </>
-  )
+  );
 }

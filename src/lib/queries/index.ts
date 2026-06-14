@@ -1,6 +1,15 @@
-import { supabase } from '@/lib/supabase'
-import type { Goal, Note, Project, ProjectTask, Session, Setting, TodayItem, Topic } from '@/types'
-import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase';
+import type {
+  Goal,
+  Note,
+  Project,
+  ProjectTask,
+  Session,
+  Setting,
+  TodayItem,
+  Topic,
+} from '@/types';
+import { useQuery } from '@tanstack/react-query';
 
 // ─── Sessions ───────────────────────────────────────────
 export const useSessions = () =>
@@ -10,48 +19,48 @@ export const useSessions = () =>
       const { data } = await supabase
         .from('sessions')
         .select('*')
-        .order('date', { ascending: false })
-      return (data ?? []) as Session[]
+        .order('date', { ascending: false });
+      return (data ?? []) as Session[];
     },
-  })
+  });
 
 // ─── Topics ─────────────────────────────────────────────
 export const useTopics = () =>
   useQuery({
     queryKey: ['topics'],
     queryFn: async () => {
-      const { data } = await supabase.from('topics').select('*')
-      return (data ?? []) as Topic[]
+      const { data } = await supabase.from('topics').select('*');
+      return (data ?? []) as Topic[];
     },
-  })
+  });
 
 // ─── Goals ──────────────────────────────────────────────
 export const useGoals = () =>
   useQuery({
     queryKey: ['goals'],
     queryFn: async () => {
-      const { data } = await supabase.from('goals').select('*')
-      return (data ?? []) as Goal[]
+      const { data } = await supabase.from('goals').select('*');
+      return (data ?? []) as Goal[];
     },
-  })
+  });
 
 // ─── Settings ───────────────────────────────────────────
 export const useSettings = () =>
   useQuery({
     queryKey: ['settings'],
     queryFn: async () => {
-      const { data } = await supabase.from('settings').select('*')
-      const map: Record<string, string> = {}
-      ;(data ?? []).forEach((s: Setting) => {
-        map[s.key] = s.value
-      })
-      return map
+      const { data } = await supabase.from('settings').select('*');
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((s: Setting) => {
+        map[s.key] = s.value;
+      });
+      return map;
     },
-  })
+  });
 
 // ─── Today Items ────────────────────────────────────────
 export const useTodayItems = () => {
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toISOString().split('T')[0];
   return useQuery({
     queryKey: ['today_items', today],
     queryFn: async () => {
@@ -59,11 +68,11 @@ export const useTodayItems = () => {
         .from('today_items')
         .select('*')
         .eq('date', today)
-        .order('created_at')
-      return (data ?? []) as TodayItem[]
+        .order('created_at');
+      return (data ?? []) as TodayItem[];
     },
-  })
-}
+  });
+};
 
 // ─── Projects ───────────────────────────────────────────
 export const useProjects = () =>
@@ -73,10 +82,10 @@ export const useProjects = () =>
       const { data } = await supabase
         .from('projects')
         .select('*')
-        .order('order_index')
-      return (data ?? []) as Project[]
+        .order('order_index');
+      return (data ?? []) as Project[];
     },
-  })
+  });
 
 // ─── Project Tasks ──────────────────────────────────────
 export const useProjectTasks = () =>
@@ -86,10 +95,10 @@ export const useProjectTasks = () =>
       const { data } = await supabase
         .from('project_tasks')
         .select('*')
-        .order('order_index')
-      return (data ?? []) as ProjectTask[]
+        .order('order_index');
+      return (data ?? []) as ProjectTask[];
     },
-  })
+  });
 
 // ─── Notes ──────────────────────────────────────────────
 export const useNotes = (limit?: number) =>
@@ -99,9 +108,9 @@ export const useNotes = (limit?: number) =>
       let q = supabase
         .from('notes')
         .select('*')
-        .order('updated_at', { ascending: false })
-      if (limit) q = q.limit(limit)
-      const { data } = await q
-      return (data ?? []) as Note[]
+        .order('updated_at', { ascending: false });
+      if (limit) q = q.limit(limit);
+      const { data } = await q;
+      return (data ?? []) as Note[];
     },
-  })
+  });

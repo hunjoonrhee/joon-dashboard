@@ -1,12 +1,12 @@
-'use client'
+'use client';
 
-import NotesTab from '@/components/tabs/NotesTab'
-import { useNotes } from '@/lib/queries'
-import { useQueryClient } from '@tanstack/react-query'
+import NotesTab from '@/components/tabs/NotesTab';
+import { useNotes } from '@/lib/queries';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function NotesPage() {
-  const queryClient = useQueryClient()
-  const { data: notes = [] } = useNotes()
+  const queryClient = useQueryClient();
+  const { data: notes = [] } = useNotes();
 
   return (
     <main className="px-6 py-6">
@@ -15,5 +15,5 @@ export default function NotesPage() {
         onRefresh={() => queryClient.invalidateQueries({ queryKey: ['notes'] })}
       />
     </main>
-  )
+  );
 }

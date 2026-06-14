@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import HomeTab from '@/components/tabs/HomeTab'
+import HomeTab from '@/components/tabs/HomeTab';
 import {
   useGoals,
   useNotes,
@@ -9,22 +9,22 @@ import {
   useSettings,
   useTodayItems,
   useTopics,
-} from '@/lib/queries'
-import { useQueryClient } from '@tanstack/react-query'
+} from '@/lib/queries';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function HomePage() {
-  const queryClient = useQueryClient()
-  const { data: sessions = [] } = useSessions()
-  const { data: topics = [] } = useTopics()
-  const { data: goals = [] } = useGoals()
-  const { data: settings = {} } = useSettings()
-  const { data: todayItems = [] } = useTodayItems()
-  const { data: projectTasks = [] } = useProjectTasks()
-  const { data: notes = [] } = useNotes(3)
+  const queryClient = useQueryClient();
+  const { data: sessions = [] } = useSessions();
+  const { data: topics = [] } = useTopics();
+  const { data: goals = [] } = useGoals();
+  const { data: settings = {} } = useSettings();
+  const { data: todayItems = [] } = useTodayItems();
+  const { data: projectTasks = [] } = useProjectTasks();
+  const { data: notes = [] } = useNotes(3);
 
   const refresh = () => {
-    queryClient.invalidateQueries()
-  }
+    queryClient.invalidateQueries();
+  };
 
   return (
     <main className="px-6 py-6">
@@ -39,5 +39,5 @@ export default function HomePage() {
         onRefresh={refresh}
       />
     </main>
-  )
+  );
 }

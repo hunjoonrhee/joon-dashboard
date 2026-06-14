@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import AddSessionModal from '@/components/AddSessionModal'
-import { calcMaxStreak, calcStreak } from '@/lib/streak'
-import { supabase } from '@/lib/supabase'
+import AddSessionModal from '@/components/AddSessionModal';
+import { calcMaxStreak, calcStreak } from '@/lib/streak';
+import { supabase } from '@/lib/supabase';
 import type {
   AiRoadmap,
   Goal,
@@ -11,25 +11,25 @@ import type {
   Session,
   TodayItem,
   Topic,
-} from '@/types'
-import { useLocale, useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
-import CoachCard from '../CoachCard'
-import HeroCard from './home/HeroCard'
-import NotesPreviewCard from './home/NotesPreviewCard'
-import TilPreviewCard from './home/TilPreviewCard'
-import TodayCard from './home/TodayCard'
-import WeeklyActivityCard from './home/WeeklyActivityCard'
+} from '@/types';
+import { useLocale, useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import CoachCard from '../CoachCard';
+import HeroCard from './home/HeroCard';
+import NotesPreviewCard from './home/NotesPreviewCard';
+import TilPreviewCard from './home/TilPreviewCard';
+import TodayCard from './home/TodayCard';
+import WeeklyActivityCard from './home/WeeklyActivityCard';
 
 interface Props {
-  sessions: Session[]
-  topics: Topic[]
-  goals: Goal[]
-  settings: Record<string, string>
-  todayItems: TodayItem[]
-  projectTasks?: ProjectTask[]
-  notes?: Note[]
-  onRefresh: () => void
+  sessions: Session[];
+  topics: Topic[];
+  goals: Goal[];
+  settings: Record<string, string>;
+  todayItems: TodayItem[];
+  projectTasks?: ProjectTask[];
+  notes?: Note[];
+  onRefresh: () => void;
 }
 
 export default function HomeTab({
@@ -42,81 +42,81 @@ export default function HomeTab({
   notes = [],
   onRefresh,
 }: Props) {
-  const t = useTranslations('home')
-  const locale = useLocale()
-  const [showSessionModal, setShowSessionModal] = useState(false)
-  const [completedItemName, setCompletedItemName] = useState('')
-  const [adoptedRoadmap, setAdoptedRoadmap] = useState<AiRoadmap | null>(null)
+  const t = useTranslations('home');
+  const locale = useLocale();
+  const [showSessionModal, setShowSessionModal] = useState(false);
+  const [completedItemName, setCompletedItemName] = useState('');
+  const [adoptedRoadmap, setAdoptedRoadmap] = useState<AiRoadmap | null>(null);
 
   useEffect(() => {
-    const adoptedId = settings.adopted_roadmap_id
-    if (!adoptedId) return
+    const adoptedId = settings.adopted_roadmap_id;
+    if (!adoptedId) return;
     supabase
       .from('ai_roadmaps')
       .select('*')
       .eq('id', adoptedId)
       .single()
       .then(({ data }: { data: AiRoadmap | null }) => {
-        if (data) setAdoptedRoadmap(data as AiRoadmap)
-      })
-  }, [settings.adopted_roadmap_id])
+        if (data) setAdoptedRoadmap(data as AiRoadmap);
+      });
+  }, [settings.adopted_roadmap_id]);
 
-  const streak = calcStreak(sessions)
-  const maxStreak = calcMaxStreak(sessions)
+  const streak = calcStreak(sessions);
+  const maxStreak = calcMaxStreak(sessions);
 
-  const focusGoals = goals.filter((g) => g.is_focus)
+  const focusGoals = goals.filter((g) => g.is_focus);
   const totalTopics = topics.filter((t) =>
     focusGoals.some((g) => g.id === t.goal_id)
-  )
-  const completedTopics = totalTopics.filter((t) => t.completed)
+  );
+  const completedTopics = totalTopics.filter((t) => t.completed);
   const overallPct =
     totalTopics.length === 0
       ? 0
-      : Math.round((completedTopics.length / totalTopics.length) * 100)
+      : Math.round((completedTopics.length / totalTopics.length) * 100);
 
-  const thisMonth = new Date().getMonth()
+  const thisMonth = new Date().getMonth();
   const monthCount = sessions.filter(
     (s) => new Date(s.date).getMonth() === thisMonth
-  ).length
+  ).length;
 
   // 갭 분석 계산 — 채택된 로드맵 기준 (공부기록 태그 + 목표 태그)
   const studiedTags = new Set([
     ...sessions.flatMap((s) => s.tags),
     ...goals.flatMap((g) => g.tags ?? []),
-  ])
+  ]);
   const gapPct = (() => {
-    if (!adoptedRoadmap) return null
-    const allSkills = adoptedRoadmap.stages.flatMap((s) => s.skills)
-    if (allSkills.length === 0) return null
+    if (!adoptedRoadmap) return null;
+    const allSkills = adoptedRoadmap.stages.flatMap((s) => s.skills);
+    if (allSkills.length === 0) return null;
     const studied = allSkills.filter((sk) =>
       sk.tags.some((tag) => studiedTags.has(tag))
-    ).length
-    return Math.round((studied / allSkills.length) * 100)
-  })()
+    ).length;
+    return Math.round((studied / allSkills.length) * 100);
+  })();
 
   const suggestedTopics = totalTopics
     .filter((t) => !t.completed)
     .filter((t) => !todayItems.some((ti) => ti.source_id === t.id))
-    .slice(0, 3)
+    .slice(0, 3);
 
   const suggestedTasks = projectTasks
     .filter((t) => t.status === 'in_progress')
     .filter((t) => !todayItems.some((ti) => ti.source_id === t.id))
-    .slice(0, 2)
+    .slice(0, 2);
 
   const getTopicGoalName = (topic: Topic) =>
-    focusGoals.find((g) => g.id === topic.goal_id)?.name ?? ''
+    focusGoals.find((g) => g.id === topic.goal_id)?.name ?? '';
 
   const weeklyStats = (() => {
-    const today = new Date()
-    const dayOfWeek = today.getDay()
-    const monday = new Date(today)
-    monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
-    monday.setHours(0, 0, 0, 0)
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    monday.setHours(0, 0, 0, 0);
     const weeklySessions = sessions.filter((s) => {
-      const sd = new Date(s.date)
-      return sd >= monday && sd <= today
-    })
+      const sd = new Date(s.date);
+      return sd >= monday && sd <= today;
+    });
     return {
       hours:
         Math.round(
@@ -128,18 +128,18 @@ export default function HomeTab({
             10
         ) / 10,
       tilCount: weeklySessions.filter((s) => s.til).length,
-    }
-  })()
+    };
+  })();
 
   const week = (() => {
-    const today = new Date()
-    const dayOfWeek = today.getDay()
-    const monday = new Date(today)
-    monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
     return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(monday)
-      d.setDate(monday.getDate() + i)
-      const dateStr = d.toISOString().split('T')[0]
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const dateStr = d.toISOString().split('T')[0];
       return {
         label: d
           .toLocaleDateString(
@@ -149,38 +149,38 @@ export default function HomeTab({
           .slice(0, 2),
         hasSession: sessions.some((s) => s.date === dateStr),
         isToday: d.toDateString() === today.toDateString(),
-      }
-    })
-  })()
+      };
+    });
+  })();
 
   const toggleToday = async (item: TodayItem) => {
-    const nowCompleted = !item.completed
+    const nowCompleted = !item.completed;
     await supabase
       .from('today_items')
       .update({ completed: nowCompleted })
-      .eq('id', item.id)
+      .eq('id', item.id);
     if (nowCompleted && item.source_type === 'topic' && item.source_id) {
       await supabase
         .from('topics')
         .update({ completed: true })
-        .eq('id', item.source_id)
+        .eq('id', item.source_id);
     }
     if (nowCompleted) {
-      setCompletedItemName(item.name)
-      setShowSessionModal(true)
+      setCompletedItemName(item.name);
+      setShowSessionModal(true);
     }
-    onRefresh()
-  }
+    onRefresh();
+  };
 
-  const achievements: string[] = []
+  const achievements: string[] = [];
   if (completedTopics.length > 0)
     achievements.push(
       `🎉 ${focusGoals[0]?.name ?? ''} ${t('achievementTopics', { count: completedTopics.length })}`
-    )
+    );
   if (streak >= 3)
-    achievements.push(`🔥 ${t('achievementStreak', { count: streak })}`)
+    achievements.push(`🔥 ${t('achievementStreak', { count: streak })}`);
   if (monthCount >= 5)
-    achievements.push(`📈 ${t('achievementMonth', { count: monthCount })}`)
+    achievements.push(`📈 ${t('achievementMonth', { count: monthCount })}`);
 
   return (
     <div className="flex flex-col gap-4">
@@ -257,16 +257,16 @@ export default function HomeTab({
         <AddSessionModal
           initialTitle={completedItemName}
           onClose={() => {
-            setShowSessionModal(false)
-            setCompletedItemName('')
+            setShowSessionModal(false);
+            setCompletedItemName('');
           }}
           onSaved={() => {
-            setShowSessionModal(false)
-            setCompletedItemName('')
-            onRefresh()
+            setShowSessionModal(false);
+            setCompletedItemName('');
+            onRefresh();
           }}
         />
       )}
     </div>
-  )
+  );
 }

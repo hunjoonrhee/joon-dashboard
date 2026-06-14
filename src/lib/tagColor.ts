@@ -6,12 +6,12 @@ const COLORS = [
   'bg-pink-50 text-pink-500',
   'bg-orange-50 text-orange-500',
   'bg-sky-50 text-sky-500',
-]
+];
 
 export function getTagColor(tag: string): string {
-  let hash = 0
+  let hash = 0;
   for (let i = 0; i < tag.length; i++) {
-    hash = tag.charCodeAt(i) + ((hash << 5) - hash)
+    hash = tag.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return COLORS[Math.abs(hash) % COLORS.length]
+  return COLORS[Math.abs(hash) % COLORS.length];
 }

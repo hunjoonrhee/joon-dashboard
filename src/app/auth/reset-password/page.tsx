@@ -1,47 +1,47 @@
-'use client'
+'use client';
 
-import { createSupabaseBrowserClient } from '@/lib/supabase-client'
-import { AuthChangeEvent } from '@supabase/supabase-js'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { createSupabaseBrowserClient } from '@/lib/supabase-client';
+import { AuthChangeEvent } from '@supabase/supabase-js';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function ResetPasswordPage() {
-  const router = useRouter()
-  const supabase = createSupabaseBrowserClient()
-  const [password, setPassword] = useState('')
-  const [passwordConfirm, setPasswordConfirm] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [ready, setReady] = useState(false)
+  const router = useRouter();
+  const supabase = createSupabaseBrowserClient();
+  const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     // Supabase가 URL hash에서 세션을 자동으로 처리함
     supabase.auth.onAuthStateChange((event: AuthChangeEvent) => {
       if (event === 'PASSWORD_RECOVERY') {
-        setReady(true)
+        setReady(true);
       }
-    })
-  }, [])
+    });
+  }, []);
 
   const handleReset = async () => {
-    if (!password || !passwordConfirm) return
+    if (!password || !passwordConfirm) return;
     if (password !== passwordConfirm) {
-      setError('비밀번호가 일치하지 않아')
-      return
+      setError('비밀번호가 일치하지 않아');
+      return;
     }
-    setLoading(true)
-    setError(null)
-    const { error } = await supabase.auth.updateUser({ password })
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase.auth.updateUser({ password });
     if (error) {
-      setError(error.message)
-      setLoading(false)
-      return
+      setError(error.message);
+      setLoading(false);
+      return;
     }
-    router.push('/ko/dashboard')
-  }
+    router.push('/ko/dashboard');
+  };
 
   const inputCls =
-    'w-full bg-gray-800 border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:border-indigo-500 transition-colors'
+    'w-full bg-gray-800 border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:border-indigo-500 transition-colors';
 
   if (!ready) {
     return (
@@ -56,7 +56,7 @@ export default function ResetPasswordPage() {
           </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -82,7 +82,7 @@ export default function ResetPasswordPage() {
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') handleReset()
+              if (e.key === 'Enter') handleReset();
             }}
           />
           {error && <p className="text-xs text-red-400">{error}</p>}
@@ -96,5 +96,5 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

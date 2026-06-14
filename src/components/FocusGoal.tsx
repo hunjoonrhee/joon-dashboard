@@ -1,104 +1,104 @@
-'use client'
+'use client';
 
-import { supabase } from '@/lib/supabase'
-import { insertWithUser } from '@/lib/supabase'
-import type { Goal, Topic } from '@/types'
-import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
-import Modal from './Modal'
+import { supabase } from '@/lib/supabase';
+import { insertWithUser } from '@/lib/supabase';
+import type { Goal, Topic } from '@/types';
+import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import Modal from './Modal';
 
 interface Props {
-  topics: Topic[]
-  goals: Goal[]
-  onRefresh?: () => void
+  topics: Topic[];
+  goals: Goal[];
+  onRefresh?: () => void;
 }
 
 export default function FocusGoal({ topics, goals, onRefresh }: Props) {
-  const [modal, setModal] = useState<'add' | 'edit' | null>(null)
-  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null)
-  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null)
-  const [form, setForm] = useState({ name: '', category: 'theory' })
-  const [saving, setSaving] = useState(false)
-  const [openCats, setOpenCats] = useState<Record<string, boolean>>({})
+  const [modal, setModal] = useState<'add' | 'edit' | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
+  const [form, setForm] = useState({ name: '', category: 'theory' });
+  const [saving, setSaving] = useState(false);
+  const [openCats, setOpenCats] = useState<Record<string, boolean>>({});
 
-  const focusGoals = goals.filter((g) => g.is_focus)
+  const focusGoals = goals.filter((g) => g.is_focus);
   const getTopics = (goalId: string) =>
-    topics.filter((t) => t.goal_id === goalId)
+    topics.filter((t) => t.goal_id === goalId);
   const getCategories = (goalId: string) => [
     ...new Set(getTopics(goalId).map((t) => t.category)),
-  ]
+  ];
 
   const getPct = (goalId: string, cat: string) => {
-    const filtered = getTopics(goalId).filter((t) => t.category === cat)
-    if (filtered.length === 0) return 0
+    const filtered = getTopics(goalId).filter((t) => t.category === cat);
+    if (filtered.length === 0) return 0;
     return Math.round(
       (filtered.filter((t) => t.completed).length / filtered.length) * 100
-    )
-  }
+    );
+  };
 
   const toggleCat = (key: string) => {
-    setOpenCats((prev) => ({ ...prev, [key]: !prev[key] }))
-  }
+    setOpenCats((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
-  const isCatOpen = (key: string) => openCats[key] ?? false
+  const isCatOpen = (key: string) => openCats[key] ?? false;
 
   const toggle = async (topic: Topic) => {
     await supabase
       .from('topics')
       .update({ completed: !topic.completed })
-      .eq('id', topic.id)
-    onRefresh?.()
-  }
+      .eq('id', topic.id);
+    onRefresh?.();
+  };
 
   const open = (type: 'add' | 'edit', goalId: string, topic?: Topic) => {
-    setSelectedGoalId(goalId)
+    setSelectedGoalId(goalId);
     if (type === 'edit' && topic) {
-      setSelectedTopic(topic)
-      setForm({ name: topic.name, category: topic.category })
+      setSelectedTopic(topic);
+      setForm({ name: topic.name, category: topic.category });
     } else {
-      setSelectedTopic(null)
-      const cats = getCategories(goalId)
-      setForm({ name: '', category: cats[0] ?? 'theory' })
+      setSelectedTopic(null);
+      const cats = getCategories(goalId);
+      setForm({ name: '', category: cats[0] ?? 'theory' });
     }
-    setModal(type)
-  }
+    setModal(type);
+  };
 
   const close = () => {
-    setModal(null)
-    setSelectedTopic(null)
-    setSelectedGoalId(null)
-    setForm({ name: '', category: 'theory' })
-  }
+    setModal(null);
+    setSelectedTopic(null);
+    setSelectedGoalId(null);
+    setForm({ name: '', category: 'theory' });
+  };
 
   const save = async () => {
-    if (!selectedGoalId) return
-    setSaving(true)
+    if (!selectedGoalId) return;
+    setSaving(true);
     if (modal === 'add') {
       await supabase.from('topics').insert({
         name: form.name,
         category: form.category,
         goal_id: selectedGoalId,
         completed: false,
-      })
+      });
     } else if (selectedTopic) {
       await supabase
         .from('topics')
         .update({ name: form.name, category: form.category })
-        .eq('id', selectedTopic.id)
+        .eq('id', selectedTopic.id);
     }
-    setSaving(false)
-    close()
-    onRefresh?.()
-  }
+    setSaving(false);
+    close();
+    onRefresh?.();
+  };
 
   const remove = async () => {
-    if (!selectedTopic) return
-    await supabase.from('topics').delete().eq('id', selectedTopic.id)
-    close()
-    onRefresh?.()
-  }
+    if (!selectedTopic) return;
+    await supabase.from('topics').delete().eq('id', selectedTopic.id);
+    close();
+    onRefresh?.();
+  };
 
-  if (focusGoals.length === 0) return null
+  if (focusGoals.length === 0) return null;
 
   return (
     <>
@@ -107,7 +107,7 @@ export default function FocusGoal({ topics, goals, onRefresh }: Props) {
 
         <div className="flex flex-col gap-5">
           {focusGoals.map((focusGoal, idx) => {
-            const categories = getCategories(focusGoal.id)
+            const categories = getCategories(focusGoal.id);
             return (
               <div key={focusGoal.id}>
                 {idx > 0 && <div className="border-t border-gray-100 mb-5" />}
@@ -128,12 +128,12 @@ export default function FocusGoal({ topics, goals, onRefresh }: Props) {
                 ) : (
                   <div className="flex flex-col gap-2">
                     {categories.map((cat) => {
-                      const pct = getPct(focusGoal.id, cat)
+                      const pct = getPct(focusGoal.id, cat);
                       const catTopics = getTopics(focusGoal.id).filter(
                         (t) => t.category === cat
-                      )
-                      const catKey = `${focusGoal.id}-${cat}`
-                      const isOpen = isCatOpen(catKey)
+                      );
+                      const catKey = `${focusGoal.id}-${cat}`;
+                      const isOpen = isCatOpen(catKey);
                       return (
                         <div
                           key={cat}
@@ -211,7 +211,7 @@ export default function FocusGoal({ topics, goals, onRefresh }: Props) {
                             </div>
                           )}
                         </div>
-                      )
+                      );
                     })}
                   </div>
                 )}
@@ -222,7 +222,7 @@ export default function FocusGoal({ topics, goals, onRefresh }: Props) {
                   </p>
                 )}
               </div>
-            )
+            );
           })}
         </div>
       </div>
@@ -288,5 +288,5 @@ export default function FocusGoal({ topics, goals, onRefresh }: Props) {
         </Modal>
       )}
     </>
-  )
+  );
 }

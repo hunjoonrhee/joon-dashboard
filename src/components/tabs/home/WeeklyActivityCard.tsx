@@ -1,24 +1,24 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl';
 
 interface WeekDay {
-  label: string
-  hasSession: boolean
-  isToday: boolean
+  label: string;
+  hasSession: boolean;
+  isToday: boolean;
 }
 
 interface WeeklyStats {
-  hours: number
-  tilCount: number
+  hours: number;
+  tilCount: number;
 }
 
 interface Props {
-  streak: number
-  maxStreak: number
-  week: WeekDay[]
-  weeklyStats: WeeklyStats
-  completedTopicsCount: number
+  streak: number;
+  maxStreak: number;
+  week: WeekDay[];
+  weeklyStats: WeeklyStats;
+  completedTopicsCount: number;
 }
 
 export default function WeeklyActivityCard({
@@ -28,7 +28,7 @@ export default function WeeklyActivityCard({
   weeklyStats,
   completedTopicsCount,
 }: Props) {
-  const t = useTranslations('home')
+  const t = useTranslations('home');
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4">
@@ -126,5 +126,5 @@ export default function WeeklyActivityCard({
         ))}
       </div>
     </div>
-  )
+  );
 }

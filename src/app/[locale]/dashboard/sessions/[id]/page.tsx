@@ -1,33 +1,33 @@
-'use client'
+'use client';
 
-import { supabase } from '@/lib/supabase'
-import { getTagColor } from '@/lib/tagColor'
-import type { Session, StudyItem } from '@/types'
-import { ArrowLeft, Check, Pencil, Plus, X } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import ReactMarkdown from 'react-markdown'
+import { supabase } from '@/lib/supabase';
+import { getTagColor } from '@/lib/tagColor';
+import type { Session, StudyItem } from '@/types';
+import { ArrowLeft, Check, Pencil, Plus, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 export default function SessionDetail() {
-  const t = useTranslations('study')
-  const { id } = useParams()
-  const router = useRouter()
-  const [session, setSession] = useState<Session | null>(null)
-  const [studyItems, setStudyItems] = useState<StudyItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [editingTil, setEditingTil] = useState(false)
-  const [tilDraft, setTilDraft] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [newKeyword, setNewKeyword] = useState('')
-  const [addingKeyword, setAddingKeyword] = useState(false)
-  const [editingInfo, setEditingInfo] = useState(false)
+  const t = useTranslations('study');
+  const { id } = useParams();
+  const router = useRouter();
+  const [session, setSession] = useState<Session | null>(null);
+  const [studyItems, setStudyItems] = useState<StudyItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingTil, setEditingTil] = useState(false);
+  const [tilDraft, setTilDraft] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [newKeyword, setNewKeyword] = useState('');
+  const [addingKeyword, setAddingKeyword] = useState(false);
+  const [editingInfo, setEditingInfo] = useState(false);
   const [infoDraft, setInfoDraft] = useState({
     title: '',
     date: '',
     duration_minutes: '',
     tags: '',
-  })
+  });
 
   useEffect(() => {
     const fetch = async () => {
@@ -38,26 +38,26 @@ export default function SessionDetail() {
           .select('*')
           .eq('session_id', id)
           .order('created_at'),
-      ])
+      ]);
       if (s) {
-        setSession(s)
-        setTilDraft(s.til ?? '')
+        setSession(s);
+        setTilDraft(s.til ?? '');
         setInfoDraft({
           title: s.title,
           date: s.date,
           duration_minutes: s.duration_minutes?.toString() ?? '',
           tags: s.tags.join(', '),
-        })
+        });
       }
-      if (items) setStudyItems(items)
-      setLoading(false)
-    }
-    fetch()
-  }, [id])
+      if (items) setStudyItems(items);
+      setLoading(false);
+    };
+    fetch();
+  }, [id]);
 
   const saveInfo = async () => {
-    if (!session) return
-    setSaving(true)
+    if (!session) return;
+    setSaving(true);
     const payload = {
       title: infoDraft.title,
       date: infoDraft.date,
@@ -68,12 +68,12 @@ export default function SessionDetail() {
         .split(',')
         .map((t) => t.trim())
         .filter(Boolean),
-    }
-    await supabase.from('sessions').update(payload).eq('id', session.id)
-    setSession({ ...session, ...payload })
-    setSaving(false)
-    setEditingInfo(false)
-  }
+    };
+    await supabase.from('sessions').update(payload).eq('id', session.id);
+    setSession({ ...session, ...payload });
+    setSaving(false);
+    setEditingInfo(false);
+  };
 
   const cancelInfo = () => {
     setInfoDraft({
@@ -81,57 +81,57 @@ export default function SessionDetail() {
       date: session?.date ?? '',
       duration_minutes: session?.duration_minutes?.toString() ?? '',
       tags: session?.tags.join(', ') ?? '',
-    })
-    setEditingInfo(false)
-  }
+    });
+    setEditingInfo(false);
+  };
 
   const saveTil = async () => {
-    if (!session) return
-    setSaving(true)
+    if (!session) return;
+    setSaving(true);
     await supabase
       .from('sessions')
       .update({ til: tilDraft || null })
-      .eq('id', session.id)
-    setSession({ ...session, til: tilDraft || null })
-    setSaving(false)
-    setEditingTil(false)
-  }
+      .eq('id', session.id);
+    setSession({ ...session, til: tilDraft || null });
+    setSaving(false);
+    setEditingTil(false);
+  };
 
   const cancelTil = () => {
-    setTilDraft(session?.til ?? '')
-    setEditingTil(false)
-  }
+    setTilDraft(session?.til ?? '');
+    setEditingTil(false);
+  };
 
   const addKeyword = async () => {
-    if (!newKeyword.trim() || !session) return
+    if (!newKeyword.trim() || !session) return;
     const { data } = await supabase
       .from('study_items')
       .insert({ session_id: session.id, keyword: newKeyword.trim() })
       .select()
-      .single()
-    if (data) setStudyItems((prev) => [...prev, data])
-    setNewKeyword('')
-    setAddingKeyword(false)
-  }
+      .single();
+    if (data) setStudyItems((prev) => [...prev, data]);
+    setNewKeyword('');
+    setAddingKeyword(false);
+  };
 
   const removeKeyword = async (item: StudyItem) => {
-    await supabase.from('study_items').delete().eq('id', item.id)
-    setStudyItems((prev) => prev.filter((i) => i.id !== item.id))
-  }
+    await supabase.from('study_items').delete().eq('id', item.id);
+    setStudyItems((prev) => prev.filter((i) => i.id !== item.id));
+  };
 
   if (loading)
     return (
       <main className="min-h-screen flex items-center justify-center">
         <p className="text-gray-400 text-sm">불러오는 중...</p>
       </main>
-    )
+    );
 
   if (!session)
     return (
       <main className="min-h-screen flex items-center justify-center">
         <p className="text-gray-400 text-sm">세션을 찾을 수 없어요.</p>
       </main>
-    )
+    );
 
   return (
     <main className="mx-auto px-4 py-4">
@@ -281,8 +281,8 @@ export default function SessionDetail() {
                 value={newKeyword}
                 onChange={(e) => setNewKeyword(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') addKeyword()
-                  if (e.key === 'Escape') setAddingKeyword(false)
+                  if (e.key === 'Enter') addKeyword();
+                  if (e.key === 'Escape') setAddingKeyword(false);
                 }}
               />
               <button
@@ -346,5 +346,5 @@ export default function SessionDetail() {
         </div>
       </div>
     </main>
-  )
+  );
 }

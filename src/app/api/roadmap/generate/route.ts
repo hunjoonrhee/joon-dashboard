@@ -1,9 +1,9 @@
-import type { RoadmapStage } from '@/types'
-import { createClient } from '@supabase/supabase-js'
-import { NextRequest, NextResponse } from 'next/server'
+import type { RoadmapStage } from '@/types';
+import { createClient } from '@supabase/supabase-js';
+import { NextRequest, NextResponse } from 'next/server';
 
 const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 const SYSTEM_PROMPT = `You are an expert learning path designer who can create roadmaps for any domain — programming, languages, music, design, fitness, or any other skill.
 Given a person's current level and their final goal, generate a realistic and actionable learning roadmap.
@@ -41,95 +41,95 @@ JSON schema:
       ]
     }
   ]
-}`
+}`;
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.GEMINI_API_KEY
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
       { error: 'GEMINI_API_KEY not set' },
       { status: 500 }
-    )
+    );
   }
 
   // Service role 클라이언트 — RLS 우회, user_id 직접 주입
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  );
 
-  const { goal, careerLevel, locale, userId } = await req.json()
+  const { goal, careerLevel, locale, userId } = await req.json();
   const lang =
-    locale === 'de' ? 'German' : locale === 'en' ? 'English' : 'Korean'
+    locale === 'de' ? 'German' : locale === 'en' ? 'English' : 'Korean';
 
   if (!goal || !careerLevel) {
     return NextResponse.json(
       { error: 'goal and careerLevel are required' },
       { status: 400 }
-    )
+    );
   }
 
   const userPrompt = `Current level: ${careerLevel}
 Final goal: ${goal}
 Output language: ${lang}
 
-Generate a learning roadmap from the current level to the final goal. Adapt the content naturally to the domain (e.g. programming, language learning, music, design, etc.). All stage titles, skill names, and descriptions must be written in ${lang}. Tags must always be in English.`
+Generate a learning roadmap from the current level to the final goal. Adapt the content naturally to the domain (e.g. programming, language learning, music, design, etc.). All stage titles, skill names, and descriptions must be written in ${lang}. Tags must always be in English.`;
 
   const requestBody = JSON.stringify({
     system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
     contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
     generationConfig: { temperature: 0.7, maxOutputTokens: 32768 },
-  })
+  });
 
   try {
     let geminiRes = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: requestBody,
-    })
+    });
 
     if (geminiRes.status === 503 || geminiRes.status === 429) {
-      await sleep(3000)
+      await sleep(3000);
       geminiRes = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: requestBody,
-      })
+      });
     }
 
     if (!geminiRes.ok) {
-      const err = await geminiRes.text()
-      console.error('Gemini error:', err)
-      return NextResponse.json({ error: 'Gemini API error' }, { status: 502 })
+      const err = await geminiRes.text();
+      console.error('Gemini error:', err);
+      return NextResponse.json({ error: 'Gemini API error' }, { status: 502 });
     }
 
-    const geminiData = await geminiRes.json()
-    const parts = geminiData.candidates?.[0]?.content?.parts ?? []
+    const geminiData = await geminiRes.json();
+    const parts = geminiData.candidates?.[0]?.content?.parts ?? [];
     const raw =
       parts
         .filter((p: { text?: string }) => typeof p.text === 'string')
         .map((p: { text: string }) => p.text)
-        .join('') ?? ''
+        .join('') ?? '';
 
-    console.log('Gemini raw:', raw.slice(0, 300))
+    console.log('Gemini raw:', raw.slice(0, 300));
 
-    const jsonMatch = raw.match(/\{[\s\S]*\}/)
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      console.error('No JSON found in raw:', raw)
+      console.error('No JSON found in raw:', raw);
       return NextResponse.json(
         { error: 'Invalid AI response', raw: raw.slice(0, 500) },
         { status: 502 }
-      )
+      );
     }
 
-    const parsed = JSON.parse(jsonMatch[0])
-    const stages: RoadmapStage[] = parsed.stages
+    const parsed = JSON.parse(jsonMatch[0]);
+    const stages: RoadmapStage[] = parsed.stages;
 
     // 비회원 체험 — DB 저장 스킵
     if (!userId) {
-      return NextResponse.json({ stages })
+      return NextResponse.json({ stages });
     }
 
     const { data, error } = await supabaseAdmin
@@ -142,19 +142,19 @@ Generate a learning roadmap from the current level to the final goal. Adapt the 
         user_id: userId,
       })
       .select()
-      .single()
+      .single();
 
     if (error) {
-      console.error('Supabase error:', error)
-      return NextResponse.json({ error: 'DB save failed' }, { status: 500 })
+      console.error('Supabase error:', error);
+      return NextResponse.json({ error: 'DB save failed' }, { status: 500 });
     }
 
-    return NextResponse.json(data)
+    return NextResponse.json(data);
   } catch (e) {
-    console.error('Route error:', e)
+    console.error('Route error:', e);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 }

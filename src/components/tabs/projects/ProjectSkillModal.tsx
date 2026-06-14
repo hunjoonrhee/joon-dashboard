@@ -1,20 +1,20 @@
-'use client'
+'use client';
 
-import Modal from '@/components/Modal'
-import { useToast } from '@/components/Toast'
-import { cancelBtnCls, saveBtnCls } from '@/lib/styles'
-import { supabase } from '@/lib/supabase'
-import { upsertWithUser } from '@/lib/supabase'
-import type { AiRoadmap } from '@/types'
-import { X } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import Modal from '@/components/Modal';
+import { useToast } from '@/components/Toast';
+import { cancelBtnCls, saveBtnCls } from '@/lib/styles';
+import { supabase } from '@/lib/supabase';
+import { upsertWithUser } from '@/lib/supabase';
+import type { AiRoadmap } from '@/types';
+import { X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 
 interface Props {
-  projectId: string
-  projectName: string
-  onClose: () => void
-  onSaved: () => void
+  projectId: string;
+  projectName: string;
+  onClose: () => void;
+  onSaved: () => void;
 }
 
 export default function ProjectSkillModal({
@@ -23,13 +23,13 @@ export default function ProjectSkillModal({
   onClose,
   onSaved,
 }: Props) {
-  const t = useTranslations('projects')
-  const tCommon = useTranslations('common')
-  const { show } = useToast()
-  const [tagPool, setTagPool] = useState<string[]>([])
-  const [selected, setSelected] = useState<string[]>([])
-  const [customInput, setCustomInput] = useState('')
-  const [saving, setSaving] = useState(false)
+  const t = useTranslations('projects');
+  const tCommon = useTranslations('common');
+  const { show } = useToast();
+  const [tagPool, setTagPool] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [customInput, setCustomInput] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -37,60 +37,61 @@ export default function ProjectSkillModal({
         .from('settings')
         .select('value')
         .eq('key', 'adopted_roadmap_id')
-        .single()
-      if (!setting?.value) return
+        .single();
+      if (!setting?.value) return;
       const { data: roadmap } = await supabase
         .from('ai_roadmaps')
         .select('stages')
         .eq('id', setting.value)
-        .single()
-      if (!roadmap?.stages) return
+        .single();
+      if (!roadmap?.stages) return;
       const tags = [
         ...new Set(
           roadmap.stages.flatMap((s: AiRoadmap['stages'][number]) =>
             s.skills.flatMap((sk) => sk.tags)
           )
         ),
-      ] as string[]
-      setTagPool(tags.sort())
-    }
-    load()
-  }, [])
+      ] as string[];
+      setTagPool(tags.sort());
+    };
+    load();
+  }, []);
 
   const toggle = (tag: string) => {
     setSelected((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    )
-  }
+    );
+  };
 
   const addCustom = () => {
-    const trimmed = customInput.trim()
-    if (!trimmed || selected.includes(trimmed)) return
-    setSelected((prev) => [...prev, trimmed])
-    setCustomInput('')
-  }
+    const trimmed = customInput.trim();
+    if (!trimmed || selected.includes(trimmed)) return;
+    setSelected((prev) => [...prev, trimmed]);
+    setCustomInput('');
+  };
 
   const save = async () => {
     if (selected.length === 0) {
-      onClose()
-      return
+      onClose();
+      return;
     }
-    setSaving(true)
+    setSaving(true);
     try {
-      const { error } = await upsertWithUser('project_skills', 
-          { project_id: projectId, tags: selected },
-          { onConflict: 'project_id' }
-        )
-      if (error) throw error
-      show(t('skillsSaved'), { type: 'success' })
-      onSaved()
-      onClose()
+      const { error } = await upsertWithUser(
+        'project_skills',
+        { project_id: projectId, tags: selected },
+        { onConflict: 'project_id' }
+      );
+      if (error) throw error;
+      show(t('skillsSaved'), { type: 'success' });
+      onSaved();
+      onClose();
     } catch {
-      show(t('skillsSaveFailed'), { type: 'error' })
+      show(t('skillsSaveFailed'), { type: 'error' });
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   return (
     <Modal title={t('skillModalTitle')} onClose={onClose}>
@@ -142,8 +143,8 @@ export default function ProjectSkillModal({
           onChange={(e) => setCustomInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
-              e.preventDefault()
-              addCustom()
+              e.preventDefault();
+              addCustom();
             }
           }}
           placeholder={t('customTagPlaceholder')}
@@ -175,5 +176,5 @@ export default function ProjectSkillModal({
         </div>
       </div>
     </Modal>
-  )
+  );
 }

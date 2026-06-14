@@ -1,25 +1,25 @@
-'use client'
+'use client';
 
-import type { Note } from '@/types'
-import { Pencil, Trash2 } from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
-import ReactMarkdown from 'react-markdown'
+import type { Note } from '@/types';
+import { Pencil, Trash2 } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import ReactMarkdown from 'react-markdown';
 
-const moods = ['🎯', '🤔', '💪', '😴', '🔥', '😊', '😤']
+const moods = ['🎯', '🤔', '💪', '😴', '🔥', '😊', '😤'];
 
 interface EditorProps {
-  title: string
-  content: string
-  mood: string | null
-  saving: boolean
-  isNew: boolean
-  selectedNote: Note | null
-  onTitleChange: (v: string) => void
-  onContentChange: (v: string) => void
-  onMoodChange: (v: string | null) => void
-  onSave: () => void
-  onCancel: () => void
-  onDelete?: () => void
+  title: string;
+  content: string;
+  mood: string | null;
+  saving: boolean;
+  isNew: boolean;
+  selectedNote: Note | null;
+  onTitleChange: (v: string) => void;
+  onContentChange: (v: string) => void;
+  onMoodChange: (v: string | null) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  onDelete?: () => void;
 }
 
 export function NoteEditorPanel({
@@ -35,8 +35,8 @@ export function NoteEditorPanel({
   onCancel,
   onDelete,
 }: EditorProps) {
-  const t = useTranslations('notes')
-  const tCommon = useTranslations('common')
+  const t = useTranslations('notes');
+  const tCommon = useTranslations('common');
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col min-h-[500px]">
@@ -93,24 +93,24 @@ export function NoteEditorPanel({
         </button>
       </div>
     </div>
-  )
+  );
 }
 
 interface ViewProps {
-  note: Note
-  onEdit: () => void
-  onDelete: () => void
+  note: Note;
+  onEdit: () => void;
+  onDelete: () => void;
 }
 
 export function NoteViewPanel({ note, onEdit, onDelete }: ViewProps) {
-  const t = useTranslations('notes')
-  const locale = useLocale()
+  const t = useTranslations('notes');
+  const locale = useLocale();
 
   const dateLabel = (d: string) =>
     new Date(d).toLocaleDateString(
       locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
       { month: 'long', day: 'numeric' }
-    )
+    );
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col min-h-[500px]">
@@ -145,11 +145,11 @@ export function NoteViewPanel({ note, onEdit, onDelete }: ViewProps) {
         <ReactMarkdown>{note.content}</ReactMarkdown>
       </div>
     </div>
-  )
+  );
 }
 
 export function NoteEmptyPanel({ onNew }: { onNew: () => void }) {
-  const t = useTranslations('notes')
+  const t = useTranslations('notes');
   return (
     <div
       className="bg-white rounded-xl border border-dashed border-gray-200 flex items-center justify-center min-h-[500px] cursor-pointer hover:border-indigo-300 transition-colors"
@@ -162,5 +162,5 @@ export function NoteEmptyPanel({ onNew }: { onNew: () => void }) {
         </p>
       </div>
     </div>
-  )
+  );
 }

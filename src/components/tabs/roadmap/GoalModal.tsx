@@ -1,28 +1,28 @@
-'use client'
+'use client';
 
-import Modal from '@/components/Modal'
-import { useToast } from '@/components/Toast'
-import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
-import { insertWithUser, supabase } from '@/lib/supabase'
-import type { AiRoadmap, Goal } from '@/types'
-import { Trash2, X } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import Modal from '@/components/Modal';
+import { useToast } from '@/components/Toast';
+import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles';
+import { insertWithUser, supabase } from '@/lib/supabase';
+import type { AiRoadmap, Goal } from '@/types';
+import { Trash2, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
 interface Preset {
-  name?: string
-  description?: string
-  tags?: string[]
+  name?: string;
+  description?: string;
+  tags?: string[];
 }
 
 interface Props {
-  mode: 'add' | 'edit'
-  goal?: Goal
-  preset?: Preset
-  tagPool?: string[]
-  adoptedRoadmap?: AiRoadmap | null
-  onClose: () => void
-  onSaved: () => void
+  mode: 'add' | 'edit';
+  goal?: Goal;
+  preset?: Preset;
+  tagPool?: string[];
+  adoptedRoadmap?: AiRoadmap | null;
+  onClose: () => void;
+  onSaved: () => void;
 }
 
 export default function GoalModal({
@@ -34,12 +34,12 @@ export default function GoalModal({
   onClose,
   onSaved,
 }: Props) {
-  const t = useTranslations('goals')
-  const tCommon = useTranslations('common')
-  const tStatus = useTranslations('status')
-  const tPriority = useTranslations('priority')
-  const tToast = useTranslations('toast')
-  const { show } = useToast()
+  const t = useTranslations('goals');
+  const tCommon = useTranslations('common');
+  const tStatus = useTranslations('status');
+  const tPriority = useTranslations('priority');
+  const tToast = useTranslations('toast');
+  const { show } = useToast();
 
   const [form, setForm] = useState({
     name: goal?.name ?? preset?.name ?? '',
@@ -49,12 +49,12 @@ export default function GoalModal({
     is_focus: goal?.is_focus ?? false,
     tags: goal?.tags ?? preset?.tags ?? ([] as string[]),
     stage_level: goal?.stage_level ?? (null as number | null),
-  })
-  const [saving, setSaving] = useState(false)
-  const [tagSearch, setTagSearch] = useState('')
-  const [tagDropdownOpen, setTagDropdownOpen] = useState(false)
+  });
+  const [saving, setSaving] = useState(false);
+  const [tagSearch, setTagSearch] = useState('');
+  const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
 
-  const tagPool = tagPoolProp ?? preset?.tags ?? []
+  const tagPool = tagPoolProp ?? preset?.tags ?? [];
 
   const filteredTags = tagSearch.trim()
     ? tagPool.filter(
@@ -62,19 +62,19 @@ export default function GoalModal({
           tag.toLowerCase().includes(tagSearch.toLowerCase()) &&
           !form.tags.includes(tag)
       )
-    : []
+    : [];
 
   const addTag = (tag: string) => {
-    const trimmed = tag.trim()
-    if (!trimmed || form.tags.includes(trimmed)) return
-    setForm({ ...form, tags: [...form.tags, trimmed] })
-    setTagSearch('')
-    setTagDropdownOpen(false)
-  }
+    const trimmed = tag.trim();
+    if (!trimmed || form.tags.includes(trimmed)) return;
+    setForm({ ...form, tags: [...form.tags, trimmed] });
+    setTagSearch('');
+    setTagDropdownOpen(false);
+  };
 
   const save = async () => {
-    if (!form.name.trim()) return
-    setSaving(true)
+    if (!form.name.trim()) return;
+    setSaving(true);
     const payload = {
       name: form.name.trim(),
       description: form.description || null,
@@ -84,39 +84,39 @@ export default function GoalModal({
       tags: form.tags,
       stage_level: form.stage_level,
       roadmap_id: form.stage_level && adoptedRoadmap ? adoptedRoadmap.id : null,
-    }
+    };
     try {
       if (form.is_focus)
         await supabase
           .from('goals')
           .update({ is_focus: false })
-          .neq('id', goal?.id ?? '')
-      if (mode === 'add') await insertWithUser('goals', payload)
+          .neq('id', goal?.id ?? '');
+      if (mode === 'add') await insertWithUser('goals', payload);
       else if (goal)
-        await supabase.from('goals').update(payload).eq('id', goal.id)
+        await supabase.from('goals').update(payload).eq('id', goal.id);
       show(mode === 'add' ? tToast('goalAdded') : tToast('goalEdited'), {
         type: 'success',
-      })
-      onSaved()
-      onClose()
+      });
+      onSaved();
+      onClose();
     } catch {
-      show(tToast('saveFailed'), { type: 'error' })
+      show(tToast('saveFailed'), { type: 'error' });
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const remove = async () => {
-    if (!goal) return
+    if (!goal) return;
     try {
-      await supabase.from('goals').delete().eq('id', goal.id)
-      show(tToast('goalDeleted'), { type: 'info' })
-      onSaved()
-      onClose()
+      await supabase.from('goals').delete().eq('id', goal.id);
+      show(tToast('goalDeleted'), { type: 'info' });
+      onSaved();
+      onClose();
     } catch {
-      show(tToast('deleteFailed'), { type: 'error' })
+      show(tToast('deleteFailed'), { type: 'error' });
     }
-  }
+  };
 
   return (
     <Modal
@@ -133,7 +133,7 @@ export default function GoalModal({
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') save()
+              if (e.key === 'Enter') save();
             }}
           />
         </div>
@@ -210,7 +210,7 @@ export default function GoalModal({
           {form.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-2">
               {form.tags.map((tag) => {
-                const isCustom = !tagPool.includes(tag)
+                const isCustom = !tagPool.includes(tag);
                 return (
                   <span
                     key={tag}
@@ -237,7 +237,7 @@ export default function GoalModal({
                       <X size={10} />
                     </button>
                   </span>
-                )
+                );
               })}
             </div>
           )}
@@ -248,15 +248,15 @@ export default function GoalModal({
               placeholder={tCommon('tagSearchPlaceholder')}
               value={tagSearch}
               onChange={(e) => {
-                setTagSearch(e.target.value)
-                setTagDropdownOpen(true)
+                setTagSearch(e.target.value);
+                setTagDropdownOpen(true);
               }}
               onFocus={() => setTagDropdownOpen(true)}
               onBlur={() => setTimeout(() => setTagDropdownOpen(false), 150)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && tagSearch.trim()) {
-                  e.preventDefault()
-                  addTag(tagSearch)
+                  e.preventDefault();
+                  addTag(tagSearch);
                 }
               }}
             />
@@ -332,5 +332,5 @@ export default function GoalModal({
         </div>
       </div>
     </Modal>
-  )
+  );
 }

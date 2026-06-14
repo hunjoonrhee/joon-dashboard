@@ -1,55 +1,55 @@
-'use client'
+'use client';
 
-import { createContext, useCallback, useContext, useState } from 'react'
+import { createContext, useCallback, useContext, useState } from 'react';
 
-type ToastType = 'success' | 'error' | 'info'
+type ToastType = 'success' | 'error' | 'info';
 
 interface Toast {
-  id: number
-  message: string
-  type: ToastType
-  sub?: string
+  id: number;
+  message: string;
+  type: ToastType;
+  sub?: string;
 }
 
 interface ToastContextValue {
-  show: (message: string, options?: { type?: ToastType; sub?: string }) => void
+  show: (message: string, options?: { type?: ToastType; sub?: string }) => void;
 }
 
-const ToastContext = createContext<ToastContextValue>({ show: () => {} })
+const ToastContext = createContext<ToastContextValue>({ show: () => {} });
 
 export function useToast() {
-  return useContext(ToastContext)
+  return useContext(ToastContext);
 }
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const [toasts, setToasts] = useState<Toast[]>([])
-  let nextId = 0
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  let nextId = 0;
 
   const show = useCallback(
     (message: string, options?: { type?: ToastType; sub?: string }) => {
-      const id = ++nextId
+      const id = ++nextId;
       setToasts((prev) => [
         ...prev,
         { id, message, type: options?.type ?? 'success', sub: options?.sub },
-      ])
+      ]);
       setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id))
-      }, 3000)
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, 3000);
     },
     []
-  )
+  );
 
-  const icons = { success: '✓', error: '✕', info: 'ℹ' }
+  const icons = { success: '✓', error: '✕', info: 'ℹ' };
   const colors = {
     success: 'bg-green-50 border-green-200 text-green-800',
     error: 'bg-red-50 border-red-200 text-red-800',
     info: 'bg-indigo-50 border-indigo-200 text-indigo-800',
-  }
+  };
   const iconColors = {
     success: 'bg-green-400',
     error: 'bg-red-400',
     info: 'bg-indigo-400',
-  }
+  };
 
   return (
     <ToastContext.Provider value={{ show }}>
@@ -77,5 +77,5 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         ))}
       </div>
     </ToastContext.Provider>
-  )
+  );
 }

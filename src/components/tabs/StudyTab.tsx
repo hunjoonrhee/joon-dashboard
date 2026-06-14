@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
-import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
-import { supabase } from '@/lib/supabase'
-import { insertWithUser } from '@/lib/supabase'
-import type { Session, StudyForm } from '@/types'
-import { Trash2 } from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
-import { useState } from 'react'
-import Modal from '../Modal'
-import SessionList from './study/SessionList'
-import TilList from './study/TilList'
+import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles';
+import { supabase } from '@/lib/supabase';
+import { insertWithUser } from '@/lib/supabase';
+import type { Session, StudyForm } from '@/types';
+import { Trash2 } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useState } from 'react';
+import Modal from '../Modal';
+import SessionList from './study/SessionList';
+import TilList from './study/TilList';
 
 interface Props {
-  sessions: Session[]
-  onRefresh: () => void
+  sessions: Session[];
+  onRefresh: () => void;
 }
 
 const emptyForm: StudyForm = {
@@ -22,57 +22,57 @@ const emptyForm: StudyForm = {
   duration_minutes: '',
   tags: '',
   til: '',
-}
+};
 
 export default function StudyTab({ sessions, onRefresh }: Props) {
-  const t = useTranslations('study')
-  const tCommon = useTranslations('common')
-  const locale = useLocale()
-  const [subTab, setSubTab] = useState<'sessions' | 'til'>('sessions')
-  const [modal, setModal] = useState<'add' | 'edit' | null>(null)
-  const [selected, setSelected] = useState<Session | null>(null)
-  const [form, setForm] = useState<StudyForm>(emptyForm)
-  const [saving, setSaving] = useState(false)
+  const t = useTranslations('study');
+  const tCommon = useTranslations('common');
+  const locale = useLocale();
+  const [subTab, setSubTab] = useState<'sessions' | 'til'>('sessions');
+  const [modal, setModal] = useState<'add' | 'edit' | null>(null);
+  const [selected, setSelected] = useState<Session | null>(null);
+  const [form, setForm] = useState<StudyForm>(emptyForm);
+  const [saving, setSaving] = useState(false);
   const [selectedDate, setSelectedDate] = useState<
     'today' | 'yesterday' | 'custom'
-  >('today')
+  >('today');
   const [selectedDuration, setSelectedDuration] = useState<
     '30' | '60' | '90' | 'custom'
-  >('60')
+  >('60');
 
   const getDateValue = () => {
-    if (selectedDate === 'today') return new Date().toISOString().split('T')[0]
+    if (selectedDate === 'today') return new Date().toISOString().split('T')[0];
     if (selectedDate === 'yesterday') {
-      const d = new Date()
-      d.setDate(d.getDate() - 1)
-      return d.toISOString().split('T')[0]
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return d.toISOString().split('T')[0];
     }
-    return form.date
-  }
+    return form.date;
+  };
 
   const getDurationValue = () => {
-    if (selectedDuration !== 'custom') return selectedDuration
-    return form.duration_minutes
-  }
+    if (selectedDuration !== 'custom') return selectedDuration;
+    return form.duration_minutes;
+  };
 
   const openAdd = () => {
-    setSelected(null)
-    setForm(emptyForm)
-    setSelectedDate('today')
-    setSelectedDuration('60')
-    setModal('add')
-  }
+    setSelected(null);
+    setForm(emptyForm);
+    setSelectedDate('today');
+    setSelectedDuration('60');
+    setModal('add');
+  };
 
   const openEdit = (session: Session) => {
-    setSelected(session)
+    setSelected(session);
     setForm({
       date: session.date,
       title: session.title,
       duration_minutes: session.duration_minutes?.toString() ?? '',
       tags: session.tags.join(', '),
       til: session.til ?? '',
-    })
-    setSelectedDate('custom')
+    });
+    setSelectedDate('custom');
     setSelectedDuration(
       session.duration_minutes === 30
         ? '30'
@@ -81,17 +81,17 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
           : session.duration_minutes === 90
             ? '90'
             : 'custom'
-    )
-    setModal('edit')
-  }
+    );
+    setModal('edit');
+  };
   const close = () => {
-    setModal(null)
-    setSelected(null)
-    setForm(emptyForm)
-  }
+    setModal(null);
+    setSelected(null);
+    setForm(emptyForm);
+  };
 
   const save = async () => {
-    setSaving(true)
+    setSaving(true);
     const payload = {
       date: getDateValue(),
       title: form.title,
@@ -103,38 +103,38 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
         .map((t) => t.trim())
         .filter(Boolean),
       til: form.til || null,
-    }
+    };
     if (modal === 'add') {
-      await insertWithUser('sessions', payload)
+      await insertWithUser('sessions', payload);
     } else if (selected) {
-      await supabase.from('sessions').update(payload).eq('id', selected.id)
+      await supabase.from('sessions').update(payload).eq('id', selected.id);
     }
-    setSaving(false)
-    close()
-    onRefresh()
-  }
+    setSaving(false);
+    close();
+    onRefresh();
+  };
 
   const remove = async () => {
-    if (!selected) return
-    await supabase.from('sessions').delete().eq('id', selected.id)
-    close()
-    onRefresh()
-  }
+    if (!selected) return;
+    await supabase.from('sessions').delete().eq('id', selected.id);
+    close();
+    onRefresh();
+  };
 
   const grouped = sessions.reduce(
     (acc, s) => {
       const month = new Date(s.date).toLocaleDateString(
         locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
         { year: 'numeric', month: 'long' }
-      )
-      if (!acc[month]) acc[month] = []
-      acc[month].push(s)
-      return acc
+      );
+      if (!acc[month]) acc[month] = [];
+      acc[month].push(s);
+      return acc;
     },
     {} as Record<string, Session[]>
-  )
+  );
 
-  const tilSessions = sessions.filter((s) => s.til)
+  const tilSessions = sessions.filter((s) => s.til);
 
   return (
     <>
@@ -277,5 +277,5 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
         </Modal>
       )}
     </>
-  )
+  );
 }

@@ -1,21 +1,21 @@
-'use client'
+'use client';
 
-import { inputCls, labelCls, saveBtnCls } from '@/lib/styles'
-import type { StudyForm } from '@/types'
-import { de, enUS, ko } from 'date-fns/locale'
-import { useLocale } from 'next-intl'
-import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker.css'
+import { inputCls, labelCls, saveBtnCls } from '@/lib/styles';
+import type { StudyForm } from '@/types';
+import { de, enUS, ko } from 'date-fns/locale';
+import { useLocale } from 'next-intl';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 interface Props {
-  form: StudyForm
-  selectedDate: 'today' | 'yesterday' | 'custom'
-  selectedDuration: '30' | '60' | '90' | 'custom'
-  saving: boolean
-  onFormChange: (form: StudyForm) => void
-  onDateChange: (d: 'today' | 'yesterday' | 'custom') => void
-  onDurationChange: (d: '30' | '60' | '90' | 'custom') => void
-  onSave: () => void
+  form: StudyForm;
+  selectedDate: 'today' | 'yesterday' | 'custom';
+  selectedDuration: '30' | '60' | '90' | 'custom';
+  saving: boolean;
+  onFormChange: (form: StudyForm) => void;
+  onDateChange: (d: 'today' | 'yesterday' | 'custom') => void;
+  onDurationChange: (d: '30' | '60' | '90' | 'custom') => void;
+  onSave: () => void;
 }
 
 export default function AddForm({
@@ -28,25 +28,25 @@ export default function AddForm({
   onDurationChange,
   onSave,
 }: Props) {
-  const locale = useLocale()
+  const locale = useLocale();
 
-  const dateFnsLocale = locale === 'ko' ? ko : locale === 'de' ? de : enUS
+  const dateFnsLocale = locale === 'ko' ? ko : locale === 'de' ? de : enUS;
 
   const dateFormat =
     locale === 'ko'
       ? 'yyyy.MM.dd'
       : locale === 'de'
         ? 'dd.MM.yyyy'
-        : 'MM/dd/yyyy'
+        : 'MM/dd/yyyy';
   const getDateObj = () => {
-    if (selectedDate === 'today') return new Date()
+    if (selectedDate === 'today') return new Date();
     if (selectedDate === 'yesterday') {
-      const d = new Date()
-      d.setDate(d.getDate() - 1)
-      return d
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return d;
     }
-    return form.date ? new Date(form.date) : new Date()
-  }
+    return form.date ? new Date(form.date) : new Date();
+  };
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4">
@@ -90,7 +90,7 @@ export default function AddForm({
                   onFormChange({
                     ...form,
                     date: date.toISOString().split('T')[0],
-                  })
+                  });
                 }
               }}
               locale={dateFnsLocale}
@@ -158,5 +158,5 @@ export default function AddForm({
         </button>
       </div>
     </div>
-  )
+  );
 }

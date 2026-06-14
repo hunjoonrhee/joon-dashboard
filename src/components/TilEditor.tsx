@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
-import { useRef, useState } from 'react'
-import ReactMarkdown from 'react-markdown'
-import rehypeRaw from 'rehype-raw'
+import { useTranslations } from 'next-intl';
+import { useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 
 interface Props {
-  value: string
-  onChange: (v: string) => void
-  minHeight?: string
+  value: string;
+  onChange: (v: string) => void;
+  minHeight?: string;
 }
 
-type Tab = 'write' | 'preview'
+type Tab = 'write' | 'preview';
 
 const TOOLBAR = [
   { label: 'B', syntax: '**', wrap: true, title: 'Bold' },
@@ -24,11 +24,14 @@ const TOOLBAR = [
   { label: '1.', syntax: '1. ', wrap: false, title: 'Ordered list' },
   { label: '`', syntax: '`', wrap: true, title: 'Inline code' },
   { label: '```', syntax: '```\n', wrap: false, title: 'Code block' },
-]
+];
 
 // 백틱 인라인 코드를 <code> 태그로 수동 변환
 function preprocessMarkdown(text: string): string {
-  return text.replace(/`([^`\n]+)`/g, '<code class="til-inline-code">$1</code>')
+  return text.replace(
+    /`([^`\n]+)`/g,
+    '<code class="til-inline-code">$1</code>'
+  );
 }
 
 export default function TilEditor({
@@ -36,40 +39,40 @@ export default function TilEditor({
   onChange,
   minHeight = '240px',
 }: Props) {
-  const t = useTranslations('til')
-  const [tab, setTab] = useState<Tab>('write')
-  const ref = useRef<HTMLTextAreaElement>(null)
+  const t = useTranslations('til');
+  const [tab, setTab] = useState<Tab>('write');
+  const ref = useRef<HTMLTextAreaElement>(null);
 
   const applyFormat = (syntax: string, wrap: boolean) => {
-    const ta = ref.current
-    if (!ta) return
-    const start = ta.selectionStart
-    const end = ta.selectionEnd
-    const selected = value.slice(start, end)
+    const ta = ref.current;
+    if (!ta) return;
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const selected = value.slice(start, end);
 
-    let newVal: string
-    let newStart: number
-    let newEnd: number
+    let newVal: string;
+    let newStart: number;
+    let newEnd: number;
 
     if (wrap) {
       newVal =
-        value.slice(0, start) + syntax + selected + syntax + value.slice(end)
-      newStart = start + syntax.length
-      newEnd = end + syntax.length
+        value.slice(0, start) + syntax + selected + syntax + value.slice(end);
+      newStart = start + syntax.length;
+      newEnd = end + syntax.length;
     } else {
-      newVal = value.slice(0, start) + syntax + selected + value.slice(end)
-      newStart = start + syntax.length
-      newEnd = newStart + selected.length
+      newVal = value.slice(0, start) + syntax + selected + value.slice(end);
+      newStart = start + syntax.length;
+      newEnd = newStart + selected.length;
     }
 
-    onChange(newVal)
+    onChange(newVal);
     setTimeout(() => {
-      ta.focus()
-      ta.setSelectionRange(newStart, newEnd)
-    }, 0)
-  }
+      ta.focus();
+      ta.setSelectionRange(newStart, newEnd);
+    }, 0);
+  };
 
-  const processed = preprocessMarkdown(value)
+  const processed = preprocessMarkdown(value);
 
   return (
     <div className="flex flex-col border border-gray-200 rounded-xl overflow-hidden">
@@ -159,5 +162,5 @@ export default function TilEditor({
         </div>
       )}
     </div>
-  )
+  );
 }

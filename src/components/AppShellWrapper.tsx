@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { usePathname } from 'next/navigation'
-import AppShell from './AppShell'
-import UserProvider from './UserProvider'
+import { usePathname } from 'next/navigation';
+import AppShell from './AppShell';
+import UserProvider from './UserProvider';
 
 const PUBLIC_PATTERNS = [
   /\/login$/,
@@ -11,23 +11,23 @@ const PUBLIC_PATTERNS = [
   /\/verify/,
   /\/onboarding/,
   /^\/(ko|de|en)$/,
-]
+];
 
 export default function AppShellWrapper({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const pathname = usePathname()
-  const isPublic = PUBLIC_PATTERNS.some((p) => p.test(pathname))
+  const pathname = usePathname();
+  const isPublic = PUBLIC_PATTERNS.some((p) => p.test(pathname));
 
   if (isPublic) {
-    return <>{children}</>
+    return <>{children}</>;
   }
 
   return (
     <UserProvider>
       <AppShell>{children}</AppShell>
     </UserProvider>
-  )
+  );
 }

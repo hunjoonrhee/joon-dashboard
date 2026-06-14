@@ -1,48 +1,48 @@
-'use client'
+'use client';
 
-import { getCurrentUserId, supabase } from '@/lib/supabase'
-import type { Goal, Topic } from '@/types'
-import { ArrowLeft, Check, Pencil, Plus, Trash2, X } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { getCurrentUserId, supabase } from '@/lib/supabase';
+import type { Goal, Topic } from '@/types';
+import { ArrowLeft, Check, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 const priorityStyle: Record<Goal['priority'], string> = {
   urgent: 'bg-red-100 text-red-700',
   high: 'bg-orange-100 text-orange-700',
   medium: 'bg-blue-100 text-blue-700',
   low: 'bg-gray-100 text-gray-500',
-}
+};
 
 const statusStyle: Record<Goal['status'], string> = {
   in_progress: 'bg-amber-100 text-amber-700',
   completed: 'bg-green-100 text-green-700',
   planned: 'bg-gray-100 text-gray-500',
-}
+};
 
 export default function GoalDetail() {
-  const { id } = useParams()
-  const router = useRouter()
-  const t = useTranslations('goals')
-  const tCommon = useTranslations('common')
-  const tStatus = useTranslations('status')
-  const tPriority = useTranslations('priority')
+  const { id } = useParams();
+  const router = useRouter();
+  const t = useTranslations('goals');
+  const tCommon = useTranslations('common');
+  const tStatus = useTranslations('status');
+  const tPriority = useTranslations('priority');
 
-  const [goal, setGoal] = useState<Goal | null>(null)
-  const [topics, setTopics] = useState<Topic[]>([])
-  const [loading, setLoading] = useState(true)
-  const [newTopic, setNewTopic] = useState('')
-  const [newCategory, setNewCategory] = useState('')
-  const [addingTopic, setAddingTopic] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [editingInfo, setEditingInfo] = useState(false)
+  const [goal, setGoal] = useState<Goal | null>(null);
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newTopic, setNewTopic] = useState('');
+  const [newCategory, setNewCategory] = useState('');
+  const [addingTopic, setAddingTopic] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [editingInfo, setEditingInfo] = useState(false);
   const [infoDraft, setInfoDraft] = useState({
     name: '',
     description: '',
     status: 'in_progress' as Goal['status'],
     priority: 'medium' as Goal['priority'],
     is_focus: false,
-  })
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,37 +53,37 @@ export default function GoalDetail() {
           .select('*')
           .eq('goal_id', id)
           .order('created_at'),
-      ])
+      ]);
       if (g) {
-        setGoal(g)
+        setGoal(g);
         setInfoDraft({
           name: g.name,
           description: g.description ?? '',
           status: g.status,
           priority: g.priority,
           is_focus: g.is_focus,
-        })
+        });
       }
-      if (tp) setTopics(tp)
-      setLoading(false)
-    }
-    fetchData()
-  }, [id])
+      if (tp) setTopics(tp);
+      setLoading(false);
+    };
+    fetchData();
+  }, [id]);
 
   const saveInfo = async () => {
-    if (!goal) return
-    setSaving(true)
+    if (!goal) return;
+    setSaving(true);
     if (infoDraft.is_focus) {
       await supabase
         .from('goals')
         .update({ is_focus: false })
-        .neq('id', goal.id)
+        .neq('id', goal.id);
     }
-    await supabase.from('goals').update(infoDraft).eq('id', goal.id)
-    setGoal({ ...goal, ...infoDraft })
-    setSaving(false)
-    setEditingInfo(false)
-  }
+    await supabase.from('goals').update(infoDraft).eq('id', goal.id);
+    setGoal({ ...goal, ...infoDraft });
+    setSaving(false);
+    setEditingInfo(false);
+  };
 
   const cancelInfo = () => {
     setInfoDraft({
@@ -92,14 +92,14 @@ export default function GoalDetail() {
       status: goal?.status ?? 'in_progress',
       priority: goal?.priority ?? 'medium',
       is_focus: goal?.is_focus ?? false,
-    })
-    setEditingInfo(false)
-  }
+    });
+    setEditingInfo(false);
+  };
 
   const addTopic = async () => {
-    if (!newTopic.trim() || !goal) return
-    setSaving(true)
-    const userId = await getCurrentUserId()
+    if (!newTopic.trim() || !goal) return;
+    setSaving(true);
+    const userId = await getCurrentUserId();
     const { data } = await supabase
       .from('topics')
       .insert({
@@ -110,61 +110,61 @@ export default function GoalDetail() {
         user_id: userId,
       })
       .select()
-      .single()
-    if (data) setTopics((prev) => [...prev, data])
-    setNewTopic('')
-    setNewCategory('')
-    setAddingTopic(false)
-    setSaving(false)
-  }
+      .single();
+    if (data) setTopics((prev) => [...prev, data]);
+    setNewTopic('');
+    setNewCategory('');
+    setAddingTopic(false);
+    setSaving(false);
+  };
 
   const toggleTopic = async (topic: Topic) => {
     await supabase
       .from('topics')
       .update({ completed: !topic.completed })
-      .eq('id', topic.id)
+      .eq('id', topic.id);
     setTopics((prev) =>
       prev.map((tp) =>
         tp.id === topic.id ? { ...tp, completed: !tp.completed } : tp
       )
-    )
-  }
+    );
+  };
 
   const removeTopic = async (topic: Topic) => {
-    await supabase.from('topics').delete().eq('id', topic.id)
-    setTopics((prev) => prev.filter((tp) => tp.id !== topic.id))
-  }
+    await supabase.from('topics').delete().eq('id', topic.id);
+    setTopics((prev) => prev.filter((tp) => tp.id !== topic.id));
+  };
 
-  const categories = [...new Set(topics.map((tp) => tp.category))]
+  const categories = [...new Set(topics.map((tp) => tp.category))];
 
   const getPct = (cat: string) => {
-    const filtered = topics.filter((tp) => tp.category === cat)
-    if (filtered.length === 0) return 0
+    const filtered = topics.filter((tp) => tp.category === cat);
+    if (filtered.length === 0) return 0;
     return Math.round(
       (filtered.filter((tp) => tp.completed).length / filtered.length) * 100
-    )
-  }
+    );
+  };
 
   const totalPct =
     topics.length === 0
       ? 0
       : Math.round(
           (topics.filter((tp) => tp.completed).length / topics.length) * 100
-        )
+        );
 
   if (loading)
     return (
       <main className="min-h-screen flex items-center justify-center">
         <p className="text-gray-400 text-sm">{tCommon('loadingDots')}</p>
       </main>
-    )
+    );
 
   if (!goal)
     return (
       <main className="min-h-screen flex items-center justify-center">
         <p className="text-gray-400 text-sm">{t('empty')}</p>
       </main>
-    )
+    );
 
   return (
     <main className="mx-auto px-4 py-4 max-w-6xl">
@@ -369,7 +369,7 @@ export default function GoalDetail() {
                 value={newTopic}
                 onChange={(e) => setNewTopic(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') addTopic()
+                  if (e.key === 'Enter') addTopic();
                 }}
               />
               <input
@@ -412,8 +412,8 @@ export default function GoalDetail() {
           ) : (
             <div className="flex flex-col gap-4">
               {categories.map((cat) => {
-                const pct = getPct(cat)
-                const catTopics = topics.filter((tp) => tp.category === cat)
+                const pct = getPct(cat);
+                const catTopics = topics.filter((tp) => tp.category === cat);
                 return (
                   <div key={cat}>
                     <div className="flex justify-between text-xs text-gray-600 mb-1">
@@ -459,12 +459,12 @@ export default function GoalDetail() {
                       ))}
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           )}
         </div>
       </div>
     </main>
-  )
+  );
 }

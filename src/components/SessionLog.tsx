@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import { supabase } from '@/lib/supabase'
-import { insertWithUser } from '@/lib/supabase'
-import { getTagColor } from '@/lib/tagColor'
-import type { Session } from '@/types'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import Modal from './Modal'
+import { supabase } from '@/lib/supabase';
+import { insertWithUser } from '@/lib/supabase';
+import { getTagColor } from '@/lib/tagColor';
+import type { Session } from '@/types';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import Modal from './Modal';
 
 interface Props {
-  sessions: Session[]
-  onRefresh: () => void
+  sessions: Session[];
+  onRefresh: () => void;
 }
 
 const emptyForm = {
@@ -20,40 +20,40 @@ const emptyForm = {
   duration_minutes: '',
   tags: '',
   til: '',
-}
+};
 
 export default function SessionLog({ sessions, onRefresh }: Props) {
-  const [modal, setModal] = useState<'add' | 'edit' | null>(null)
-  const [selected, setSelected] = useState<Session | null>(null)
-  const [form, setForm] = useState(emptyForm)
-  const [saving, setSaving] = useState(false)
-  const router = useRouter()
+  const [modal, setModal] = useState<'add' | 'edit' | null>(null);
+  const [selected, setSelected] = useState<Session | null>(null);
+  const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+  const router = useRouter();
 
   const open = (type: 'add' | 'edit', session?: Session) => {
     if (type === 'edit' && session) {
-      setSelected(session)
+      setSelected(session);
       setForm({
         date: session.date,
         title: session.title,
         duration_minutes: session.duration_minutes?.toString() ?? '',
         tags: session.tags.join(', '),
         til: session.til ?? '',
-      })
+      });
     } else {
-      setSelected(null)
-      setForm(emptyForm)
+      setSelected(null);
+      setForm(emptyForm);
     }
-    setModal(type)
-  }
+    setModal(type);
+  };
 
   const close = () => {
-    setModal(null)
-    setSelected(null)
-    setForm(emptyForm)
-  }
+    setModal(null);
+    setSelected(null);
+    setForm(emptyForm);
+  };
 
   const save = async () => {
-    setSaving(true)
+    setSaving(true);
     const payload = {
       date: form.date,
       title: form.title,
@@ -65,25 +65,25 @@ export default function SessionLog({ sessions, onRefresh }: Props) {
         .map((t) => t.trim())
         .filter(Boolean),
       til: form.til || null,
-    }
+    };
     if (modal === 'add') {
-      await insertWithUser('sessions', payload)
+      await insertWithUser('sessions', payload);
     } else if (selected) {
-      await supabase.from('sessions').update(payload).eq('id', selected.id)
+      await supabase.from('sessions').update(payload).eq('id', selected.id);
     }
-    setSaving(false)
-    close()
-    onRefresh()
-  }
+    setSaving(false);
+    close();
+    onRefresh();
+  };
 
   const remove = async () => {
-    if (!selected) return
-    await supabase.from('sessions').delete().eq('id', selected.id)
-    close()
-    onRefresh()
-  }
+    if (!selected) return;
+    await supabase.from('sessions').delete().eq('id', selected.id);
+    close();
+    onRefresh();
+  };
 
-  const recent = sessions.slice(0, 5)
+  const recent = sessions.slice(0, 5);
 
   return (
     <>
@@ -227,5 +227,5 @@ export default function SessionLog({ sessions, onRefresh }: Props) {
         </Modal>
       )}
     </>
-  )
+  );
 }

@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import { useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl';
 
 export default function VerifyPage() {
-  const t = useTranslations('verify')
+  const t = useTranslations('verify');
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
@@ -16,5 +16,5 @@ export default function VerifyPage() {
         <p className="text-xs text-gray-600">{t('spam')}</p>
       </div>
     </div>
-  )
+  );
 }

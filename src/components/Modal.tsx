@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { X } from 'lucide-react'
+import { X } from 'lucide-react';
 
 interface Props {
-  title: string
-  onClose: () => void
-  children: React.ReactNode
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
 }
 
 export default function Modal({ title, onClose, children }: Props) {
@@ -30,5 +30,5 @@ export default function Modal({ title, onClose, children }: Props) {
         {children}
       </div>
     </div>
-  )
+  );
 }

@@ -1,32 +1,32 @@
-'use client'
+'use client';
 
-import { getTagColor } from '@/lib/tagColor'
-import type { Session } from '@/types'
-import { Pencil, Plus } from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
+import { getTagColor } from '@/lib/tagColor';
+import type { Session } from '@/types';
+import { Pencil, Plus } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 interface Props {
-  sessions: Session[]
-  grouped: Record<string, Session[]>
-  onAdd: () => void
-  onEdit: (s: Session) => void
+  sessions: Session[];
+  grouped: Record<string, Session[]>;
+  onAdd: () => void;
+  onEdit: (s: Session) => void;
 }
 
 function TilBadge({ sessionId }: { sessionId: string }) {
-  const router = useRouter()
-  const locale = useLocale()
+  const router = useRouter();
+  const locale = useLocale();
   return (
     <button
       onClick={(e) => {
-        e.stopPropagation()
-        router.push(`/${locale}/til/${sessionId}`)
+        e.stopPropagation();
+        router.push(`/${locale}/til/${sessionId}`);
       }}
       className="text-xs px-2 py-0.5 rounded bg-green-50 text-green-600 font-medium hover:bg-green-100 transition-colors"
     >
       TIL
     </button>
-  )
+  );
 }
 
 export default function SessionList({
@@ -35,9 +35,9 @@ export default function SessionList({
   onAdd,
   onEdit,
 }: Props) {
-  const t = useTranslations('study')
-  const router = useRouter()
-  const locale = useLocale()
+  const t = useTranslations('study');
+  const router = useRouter();
+  const locale = useLocale();
 
   if (sessions.length === 0) {
     return (
@@ -52,7 +52,7 @@ export default function SessionList({
           + {t('addFirst')}
         </button>
       </div>
-    )
+    );
   }
 
   return (
@@ -104,8 +104,8 @@ export default function SessionList({
                 {s.til && <TilBadge sessionId={s.id} />}
                 <button
                   onClick={(e) => {
-                    e.stopPropagation()
-                    onEdit(s)
+                    e.stopPropagation();
+                    onEdit(s);
                   }}
                   className="text-gray-400 hover:text-indigo-500 transition-colors"
                 >
@@ -117,5 +117,5 @@ export default function SessionList({
         </div>
       ))}
     </div>
-  )
+  );
 }

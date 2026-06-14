@@ -1,43 +1,43 @@
-'use client'
+'use client';
 
-import { supabase } from '@/lib/supabase'
-import { insertWithUser } from '@/lib/supabase'
-import type { Goal } from '@/types'
-import { Pencil, Plus, Star, Trash2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import Modal from './Modal'
+import { supabase } from '@/lib/supabase';
+import { insertWithUser } from '@/lib/supabase';
+import type { Goal } from '@/types';
+import { Pencil, Plus, Star, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import Modal from './Modal';
 
 interface Props {
-  goals: Goal[]
-  onRefresh: () => void
+  goals: Goal[];
+  onRefresh: () => void;
 }
 
 const statusLabel: Record<Goal['status'], string> = {
   in_progress: '진행 중',
   completed: '완료',
   planned: '예정',
-}
+};
 
 const statusStyle: Record<Goal['status'], string> = {
   in_progress: 'bg-amber-100 text-amber-700',
   completed: 'bg-green-100 text-green-700',
   planned: 'bg-gray-100 text-gray-500',
-}
+};
 
 const priorityLabel: Record<Goal['priority'], string> = {
   urgent: 'Urgent',
   high: 'High',
   medium: 'Medium',
   low: 'Low',
-}
+};
 
 const priorityStyle: Record<Goal['priority'], string> = {
   urgent: 'bg-red-100 text-red-700',
   high: 'bg-orange-100 text-orange-700',
   medium: 'bg-blue-100 text-blue-700',
   low: 'bg-gray-100 text-gray-500',
-}
+};
 
 const emptyForm = {
   name: '',
@@ -45,69 +45,69 @@ const emptyForm = {
   status: 'in_progress' as Goal['status'],
   priority: 'medium' as Goal['priority'],
   is_focus: false,
-}
+};
 
 export default function GoalList({ goals, onRefresh }: Props) {
-  const [modal, setModal] = useState<'add' | 'edit' | null>(null)
-  const [selected, setSelected] = useState<Goal | null>(null)
-  const [form, setForm] = useState(emptyForm)
-  const [saving, setSaving] = useState(false)
-  const router = useRouter()
+  const [modal, setModal] = useState<'add' | 'edit' | null>(null);
+  const [selected, setSelected] = useState<Goal | null>(null);
+  const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+  const router = useRouter();
 
   const open = (type: 'add' | 'edit', goal?: Goal) => {
     if (type === 'edit' && goal) {
-      setSelected(goal)
+      setSelected(goal);
       setForm({
         name: goal.name,
         description: goal.description ?? '',
         status: goal.status,
         priority: goal.priority,
         is_focus: goal.is_focus,
-      })
+      });
     } else {
-      setSelected(null)
-      setForm(emptyForm)
+      setSelected(null);
+      setForm(emptyForm);
     }
-    setModal(type)
-  }
+    setModal(type);
+  };
 
   const close = () => {
-    setModal(null)
-    setSelected(null)
-    setForm(emptyForm)
-  }
+    setModal(null);
+    setSelected(null);
+    setForm(emptyForm);
+  };
 
   const save = async () => {
-    setSaving(true)
+    setSaving(true);
     const payload = {
       name: form.name,
       description: form.description || null,
       status: form.status,
       priority: form.priority,
       is_focus: form.is_focus,
-    }
+    };
     if (form.is_focus) {
       await supabase
         .from('goals')
         .update({ is_focus: false })
-        .neq('id', selected?.id ?? '')
+        .neq('id', selected?.id ?? '');
     }
     if (modal === 'add') {
-      await insertWithUser('goals', payload)
+      await insertWithUser('goals', payload);
     } else if (selected) {
-      await supabase.from('goals').update(payload).eq('id', selected.id)
+      await supabase.from('goals').update(payload).eq('id', selected.id);
     }
-    setSaving(false)
-    close()
-    onRefresh()
-  }
+    setSaving(false);
+    close();
+    onRefresh();
+  };
 
   const remove = async () => {
-    if (!selected) return
-    await supabase.from('goals').delete().eq('id', selected.id)
-    close()
-    onRefresh()
-  }
+    if (!selected) return;
+    await supabase.from('goals').delete().eq('id', selected.id);
+    close();
+    onRefresh();
+  };
 
   return (
     <>
@@ -289,5 +289,5 @@ export default function GoalList({ goals, onRefresh }: Props) {
         </Modal>
       )}
     </>
-  )
+  );
 }

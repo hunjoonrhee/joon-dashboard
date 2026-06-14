@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import { goalStatusStyle, priorityStyle } from '@/lib/statusConfig'
-import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
-import { supabase } from '@/lib/supabase'
-import { insertWithUser } from '@/lib/supabase'
-import type { Goal, Topic } from '@/types'
+import { goalStatusStyle, priorityStyle } from '@/lib/statusConfig';
+import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles';
+import { supabase } from '@/lib/supabase';
+import { insertWithUser } from '@/lib/supabase';
+import type { Goal, Topic } from '@/types';
 import {
   ChevronDown,
   ChevronRight,
@@ -12,16 +12,16 @@ import {
   Plus,
   Star,
   Trash2,
-} from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import Modal from '../Modal'
+} from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import Modal from '../Modal';
 
 interface Props {
-  goals: Goal[]
-  topics: Topic[]
-  onRefresh: () => void
+  goals: Goal[];
+  topics: Topic[];
+  onRefresh: () => void;
 }
 
 const emptyForm = {
@@ -30,84 +30,84 @@ const emptyForm = {
   status: 'in_progress' as Goal['status'],
   priority: 'medium' as Goal['priority'],
   is_focus: false,
-}
+};
 
 export default function GoalsTab({ goals, topics, onRefresh }: Props) {
-  const router = useRouter()
-  const t = useTranslations('goals')
-  const tCommon = useTranslations('common')
-  const tStatus = useTranslations('status')
-  const tPriority = useTranslations('priority')
-  const [modal, setModal] = useState<'add' | 'edit' | null>(null)
-  const [selected, setSelected] = useState<Goal | null>(null)
-  const [form, setForm] = useState(emptyForm)
-  const [saving, setSaving] = useState(false)
-  const [openGoals, setOpenGoals] = useState<Record<string, boolean>>({})
+  const router = useRouter();
+  const t = useTranslations('goals');
+  const tCommon = useTranslations('common');
+  const tStatus = useTranslations('status');
+  const tPriority = useTranslations('priority');
+  const [modal, setModal] = useState<'add' | 'edit' | null>(null);
+  const [selected, setSelected] = useState<Goal | null>(null);
+  const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+  const [openGoals, setOpenGoals] = useState<Record<string, boolean>>({});
 
   const open = (type: 'add' | 'edit', goal?: Goal) => {
     if (type === 'edit' && goal) {
-      setSelected(goal)
+      setSelected(goal);
       setForm({
         name: goal.name,
         description: goal.description ?? '',
         status: goal.status,
         priority: goal.priority,
         is_focus: goal.is_focus,
-      })
+      });
     } else {
-      setSelected(null)
-      setForm(emptyForm)
+      setSelected(null);
+      setForm(emptyForm);
     }
-    setModal(type)
-  }
+    setModal(type);
+  };
 
   const close = () => {
-    setModal(null)
-    setSelected(null)
-    setForm(emptyForm)
-  }
+    setModal(null);
+    setSelected(null);
+    setForm(emptyForm);
+  };
 
   const save = async () => {
-    setSaving(true)
+    setSaving(true);
     const payload = {
       name: form.name,
       description: form.description || null,
       status: form.status,
       priority: form.priority,
       is_focus: form.is_focus,
-    }
+    };
     if (form.is_focus) {
       await supabase
         .from('goals')
         .update({ is_focus: false })
-        .neq('id', selected?.id ?? '')
+        .neq('id', selected?.id ?? '');
     }
     if (modal === 'add') {
-      await insertWithUser('goals', payload)
+      await insertWithUser('goals', payload);
     } else if (selected) {
-      await supabase.from('goals').update(payload).eq('id', selected.id)
+      await supabase.from('goals').update(payload).eq('id', selected.id);
     }
-    setSaving(false)
-    close()
-    onRefresh()
-  }
+    setSaving(false);
+    close();
+    onRefresh();
+  };
 
   const remove = async () => {
-    if (!selected) return
-    await supabase.from('goals').delete().eq('id', selected.id)
-    close()
-    onRefresh()
-  }
+    if (!selected) return;
+    await supabase.from('goals').delete().eq('id', selected.id);
+    close();
+    onRefresh();
+  };
 
   const toggleGoal = (id: string) =>
-    setOpenGoals((prev) => ({ ...prev, [id]: !prev[id] }))
+    setOpenGoals((prev) => ({ ...prev, [id]: !prev[id] }));
   const getTopics = (goalId: string) =>
-    topics.filter((t) => t.goal_id === goalId)
+    topics.filter((t) => t.goal_id === goalId);
   const getPct = (goalId: string) => {
-    const t = getTopics(goalId)
-    if (t.length === 0) return 0
-    return Math.round((t.filter((t) => t.completed).length / t.length) * 100)
-  }
+    const t = getTopics(goalId);
+    if (t.length === 0) return 0;
+    return Math.round((t.filter((t) => t.completed).length / t.length) * 100);
+  };
 
   return (
     <>
@@ -130,9 +130,9 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
           ) : (
             <div className="flex flex-col gap-2">
               {goals.map((g) => {
-                const pct = getPct(g.id)
-                const goalTopics = getTopics(g.id)
-                const isOpen = openGoals[g.id] ?? false
+                const pct = getPct(g.id);
+                const goalTopics = getTopics(g.id);
+                const isOpen = openGoals[g.id] ?? false;
                 return (
                   <div
                     key={g.id}
@@ -229,7 +229,7 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
                       </div>
                     )}
                   </div>
-                )
+                );
               })}
             </div>
           )}
@@ -338,5 +338,5 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
         </Modal>
       )}
     </>
-  )
+  );
 }

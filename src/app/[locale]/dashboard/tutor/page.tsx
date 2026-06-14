@@ -1,128 +1,142 @@
-'use client'
+'use client';
 
-import { useEffect, useRef, useState } from 'react'
-import { useLocale, useTranslations } from 'next-intl'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { insertWithUser } from '@/lib/supabase'
+import { useEffect, useRef, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { insertWithUser } from '@/lib/supabase';
 
 interface QuizData {
-  question: string
-  options: string[]
-  correct: number
+  question: string;
+  options: string[];
+  correct: number;
 }
 
 interface SummaryData {
-  concepts: string[]
-  tags: string[]
+  concepts: string[];
+  tags: string[];
 }
 
 interface Message {
-  role: 'user' | 'model'
-  parts: { text: string }[]
-  quiz?: QuizData
-  summary?: SummaryData
-  selectedOption?: number
+  role: 'user' | 'model';
+  parts: { text: string }[];
+  quiz?: QuizData;
+  summary?: SummaryData;
+  selectedOption?: number;
 }
 
-type PageState = 'session' | 'gate' | 'complete'
+type PageState = 'session' | 'gate' | 'complete';
 
 export default function TutorPage() {
-  const t = useTranslations('tutor')
-  const locale = useLocale()
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const t = useTranslations('tutor');
+  const locale = useLocale();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const topic = searchParams.get('topic') ?? ''
-  const isGate = searchParams.get('gate') === 'true'
+  const topic = searchParams.get('topic') ?? '';
+  const isGate = searchParams.get('gate') === 'true';
 
-  const [pageState, setPageState] = useState<PageState>(isGate ? 'gate' : 'session')
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [elapsed, setElapsed] = useState(0)
-  const [sessionSummary, setSessionSummary] = useState<SummaryData | null>(null)
-  const [savedRecord, setSavedRecord] = useState<{ title: string; date: string; duration: number; tags: string[] } | null>(null)
+  const [pageState, setPageState] = useState<PageState>(
+    isGate ? 'gate' : 'session'
+  );
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const [sessionSummary, setSessionSummary] = useState<SummaryData | null>(
+    null
+  );
+  const [savedRecord, setSavedRecord] = useState<{
+    title: string;
+    date: string;
+    duration: number;
+    tags: string[];
+  } | null>(null);
 
-  const chatEndRef = useRef<HTMLDivElement>(null)
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const startedRef = useRef(false)
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startedRef = useRef(false);
 
   // 타이머
   useEffect(() => {
-    if (pageState !== 'session') return
-    timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000)
-    return () => { if (timerRef.current) clearInterval(timerRef.current) }
-  }, [pageState])
+    if (pageState !== 'session') return;
+    timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [pageState]);
 
   // 첫 AI 메시지 로드
   useEffect(() => {
-    if (pageState !== 'session' || !topic || startedRef.current) return
-    startedRef.current = true
-    sendToAI([])
-  }, [pageState, topic])
+    if (pageState !== 'session' || !topic || startedRef.current) return;
+    startedRef.current = true;
+    sendToAI([]);
+  }, [pageState, topic]);
 
   // 스크롤
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const sendToAI = async (history: Message[], userText?: string) => {
-    setLoading(true)
-    const contents = history.map((m) => ({ role: m.role, parts: m.parts }))
+    setLoading(true);
+    const contents = history.map((m) => ({ role: m.role, parts: m.parts }));
     try {
       const res = await fetch('/api/tutor/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic, messages: contents, locale }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       const aiMsg: Message = {
         role: 'model',
         parts: [{ text: data.text }],
         quiz: data.quiz ?? undefined,
         summary: data.summary ?? undefined,
-      }
-      setMessages((prev) => [...prev, aiMsg])
+      };
+      setMessages((prev) => [...prev, aiMsg]);
       if (data.summary) {
-        setSessionSummary(data.summary)
+        setSessionSummary(data.summary);
       }
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: 'model', parts: [{ text: '오류가 발생했어요. 다시 시도해주세요.' }] },
-      ])
+        {
+          role: 'model',
+          parts: [{ text: '오류가 발생했어요. 다시 시도해주세요.' }],
+        },
+      ]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleSend = async () => {
-    const text = input.trim()
-    if (!text || loading) return
-    setInput('')
-    const userMsg: Message = { role: 'user', parts: [{ text }] }
-    const next = [...messages, userMsg]
-    setMessages(next)
-    await sendToAI(next, text)
-  }
+    const text = input.trim();
+    if (!text || loading) return;
+    setInput('');
+    const userMsg: Message = { role: 'user', parts: [{ text }] };
+    const next = [...messages, userMsg];
+    setMessages(next);
+    await sendToAI(next, text);
+  };
 
   const handleQuizSelect = async (msgIdx: number, optIdx: number) => {
     setMessages((prev) =>
       prev.map((m, i) => (i === msgIdx ? { ...m, selectedOption: optIdx } : m))
-    )
-    const answerText = messages[msgIdx].quiz?.options[optIdx] ?? ''
-    const userMsg: Message = { role: 'user', parts: [{ text: answerText }] }
-    const next = [...messages, userMsg]
-    setMessages(next)
-    await sendToAI(next)
-  }
+    );
+    const answerText = messages[msgIdx].quiz?.options[optIdx] ?? '';
+    const userMsg: Message = { role: 'user', parts: [{ text: answerText }] };
+    const next = [...messages, userMsg];
+    setMessages(next);
+    await sendToAI(next);
+  };
 
   const handleEndSession = async () => {
-    if (timerRef.current) clearInterval(timerRef.current)
-    const durationMin = Math.max(1, Math.round(elapsed / 60))
-    const today = new Date().toISOString().split('T')[0]
-    const tags = sessionSummary?.tags ?? [topic]
-    const title = `${topic} — AI 튜터`
+    if (timerRef.current) clearInterval(timerRef.current);
+    const durationMin = Math.max(1, Math.round(elapsed / 60));
+    const today = new Date().toISOString().split('T')[0];
+    const tags = sessionSummary?.tags ?? [topic];
+    const title = `${topic} — AI 튜터`;
 
     try {
       await insertWithUser('sessions', {
@@ -131,16 +145,16 @@ export default function TutorPage() {
         duration: durationMin,
         tags,
         memo: `AI 튜터 세션 (${durationMin}분)`,
-      })
+      });
     } catch (e) {
-      console.error('세션 저장 실패:', e)
+      console.error('세션 저장 실패:', e);
     }
 
-    setSavedRecord({ title, date: today, duration: durationMin, tags })
-    setPageState('complete')
-  }
+    setSavedRecord({ title, date: today, duration: durationMin, tags });
+    setPageState('complete');
+  };
 
-  const elapsedMin = Math.floor(elapsed / 60)
+  const elapsedMin = Math.floor(elapsed / 60);
 
   // ── Pro 게이트 ──
   if (pageState === 'gate') {
@@ -150,11 +164,23 @@ export default function TutorPage() {
           <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center mx-auto mb-4 text-2xl">
             ✨
           </div>
-          <h1 className="text-base font-bold text-gray-900 mb-2">{t('proGateTitle')}</h1>
-          <p className="text-xs text-gray-500 leading-relaxed mb-5">{t('proGateSub')}</p>
+          <h1 className="text-base font-bold text-gray-900 mb-2">
+            {t('proGateTitle')}
+          </h1>
+          <p className="text-xs text-gray-500 leading-relaxed mb-5">
+            {t('proGateSub')}
+          </p>
           <ul className="text-left flex flex-col gap-2 mb-6">
-            {[t('proFeature1'), t('proFeature2'), t('proFeature3'), t('proFeature4')].map((f, i) => (
-              <li key={i} className="flex items-center gap-2 text-xs text-gray-600">
+            {[
+              t('proFeature1'),
+              t('proFeature2'),
+              t('proFeature3'),
+              t('proFeature4'),
+            ].map((f, i) => (
+              <li
+                key={i}
+                className="flex items-center gap-2 text-xs text-gray-600"
+              >
                 <span className="text-indigo-500">✓</span> {f}
               </li>
             ))}
@@ -171,7 +197,7 @@ export default function TutorPage() {
           </button>
         </div>
       </main>
-    )
+    );
   }
 
   // ── 세션 완료 ──
@@ -182,7 +208,9 @@ export default function TutorPage() {
           <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-4 flex items-start gap-3">
             <span className="text-xl">🏆</span>
             <div>
-              <p className="text-sm font-bold text-emerald-800">{t('sessionComplete')}</p>
+              <p className="text-sm font-bold text-emerald-800">
+                {t('sessionComplete')}
+              </p>
               <p className="text-xs text-emerald-600 mt-0.5">
                 {t('sessionSummary', { duration: savedRecord?.duration ?? 0 })}
               </p>
@@ -196,22 +224,39 @@ export default function TutorPage() {
               </p>
               <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 mb-4 flex flex-col gap-2">
                 <div className="flex justify-between">
-                  <span className="text-xs text-gray-400">{t('recordTitle')}</span>
-                  <span className="text-xs font-medium text-gray-700">{savedRecord.title}</span>
+                  <span className="text-xs text-gray-400">
+                    {t('recordTitle')}
+                  </span>
+                  <span className="text-xs font-medium text-gray-700">
+                    {savedRecord.title}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-xs text-gray-400">{t('recordDate')}</span>
-                  <span className="text-xs font-medium text-gray-700">{savedRecord.date}</span>
+                  <span className="text-xs text-gray-400">
+                    {t('recordDate')}
+                  </span>
+                  <span className="text-xs font-medium text-gray-700">
+                    {savedRecord.date}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-xs text-gray-400">{t('recordDuration')}</span>
-                  <span className="text-xs font-medium text-gray-700">{t('minutes', { n: savedRecord.duration })}</span>
+                  <span className="text-xs text-gray-400">
+                    {t('recordDuration')}
+                  </span>
+                  <span className="text-xs font-medium text-gray-700">
+                    {t('minutes', { n: savedRecord.duration })}
+                  </span>
                 </div>
                 <div className="border-t border-gray-100 pt-2">
-                  <p className="text-xs text-gray-400 mb-1">{t('recordTags')}</p>
+                  <p className="text-xs text-gray-400 mb-1">
+                    {t('recordTags')}
+                  </p>
                   <div className="flex flex-wrap gap-1">
                     {savedRecord.tags.map((tag) => (
-                      <span key={tag} className="text-[10px] px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full">
+                      <span
+                        key={tag}
+                        className="text-[10px] px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full"
+                      >
                         {tag}
                       </span>
                     ))}
@@ -244,7 +289,7 @@ export default function TutorPage() {
           </div>
         </div>
       </main>
-    )
+    );
   }
 
   // ── 튜터 세션 ──
@@ -287,7 +332,9 @@ export default function TutorPage() {
                   <div className="flex flex-col gap-2 max-w-[85%]">
                     {msg.parts[0].text && (
                       <div className="bg-gray-50 border border-gray-100 rounded-2xl rounded-tl-sm px-4 py-3">
-                        <p className="text-[10px] font-semibold text-indigo-500 mb-1">AI 튜터</p>
+                        <p className="text-[10px] font-semibold text-indigo-500 mb-1">
+                          AI 튜터
+                        </p>
                         <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
                           {msg.parts[0].text}
                         </p>
@@ -298,34 +345,41 @@ export default function TutorPage() {
                         <p className="text-[10px] font-semibold text-amber-600 mb-2 uppercase tracking-wider">
                           {t('quizLabel')}
                         </p>
-                        <p className="text-sm text-amber-900 font-medium mb-3">{msg.quiz.question}</p>
+                        <p className="text-sm text-amber-900 font-medium mb-3">
+                          {msg.quiz.question}
+                        </p>
                         <div className="flex flex-col gap-1.5">
                           {msg.quiz.options.map((opt, optIdx) => {
-                            const selected = msg.selectedOption !== undefined
-                            const isSelected = msg.selectedOption === optIdx
-                            const isCorrect = optIdx === msg.quiz!.correct
-                            let cls = 'text-xs px-3 py-2 rounded-lg border cursor-pointer transition-colors text-left '
+                            const selected = msg.selectedOption !== undefined;
+                            const isSelected = msg.selectedOption === optIdx;
+                            const isCorrect = optIdx === msg.quiz!.correct;
+                            let cls =
+                              'text-xs px-3 py-2 rounded-lg border cursor-pointer transition-colors text-left ';
                             if (!selected) {
-                              cls += 'bg-white border-amber-200 text-amber-800 hover:bg-amber-100'
+                              cls +=
+                                'bg-white border-amber-200 text-amber-800 hover:bg-amber-100';
                             } else if (isCorrect) {
-                              cls += 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                              cls +=
+                                'bg-emerald-50 border-emerald-200 text-emerald-800';
                             } else if (isSelected) {
-                              cls += 'bg-red-50 border-red-200 text-red-700'
+                              cls += 'bg-red-50 border-red-200 text-red-700';
                             } else {
-                              cls += 'bg-white border-gray-100 text-gray-400'
+                              cls += 'bg-white border-gray-100 text-gray-400';
                             }
                             return (
                               <button
                                 key={optIdx}
                                 className={cls}
-                                onClick={() => !selected && handleQuizSelect(i, optIdx)}
+                                onClick={() =>
+                                  !selected && handleQuizSelect(i, optIdx)
+                                }
                                 disabled={selected}
                               >
                                 {isCorrect && selected && '✓ '}
                                 {isSelected && !isCorrect && '✗ '}
                                 {opt}
                               </button>
-                            )
+                            );
                           })}
                         </div>
                       </div>
@@ -335,7 +389,9 @@ export default function TutorPage() {
                 {msg.role === 'user' && (
                   <div className="flex justify-end">
                     <div className="bg-indigo-500 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-[75%]">
-                      <p className="text-sm leading-relaxed">{msg.parts[0].text}</p>
+                      <p className="text-sm leading-relaxed">
+                        {msg.parts[0].text}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -344,15 +400,26 @@ export default function TutorPage() {
 
             {loading && (
               <div className="flex gap-1 px-4 py-3 bg-gray-50 rounded-2xl rounded-tl-sm w-fit">
-                <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <span
+                  className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce"
+                  style={{ animationDelay: '0ms' }}
+                />
+                <span
+                  className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce"
+                  style={{ animationDelay: '150ms' }}
+                />
+                <span
+                  className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce"
+                  style={{ animationDelay: '300ms' }}
+                />
               </div>
             )}
 
             {sessionSummary && (
               <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 text-center">
-                <p className="text-xs font-semibold text-emerald-700 mb-1">🎉 세션 마무리 준비됐어요</p>
+                <p className="text-xs font-semibold text-emerald-700 mb-1">
+                  🎉 세션 마무리 준비됐어요
+                </p>
                 <button
                   onClick={handleEndSession}
                   className="mt-1 px-4 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-medium hover:bg-emerald-600 transition-colors"
@@ -371,7 +438,9 @@ export default function TutorPage() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+              onKeyDown={(e) =>
+                e.key === 'Enter' && !e.shiftKey && handleSend()
+              }
               placeholder={t('inputPlaceholder')}
               className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-indigo-300 focus:bg-white transition-colors"
             />
@@ -391,11 +460,15 @@ export default function TutorPage() {
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
               {t('progress')}
             </p>
-            <p className="text-xs font-semibold text-gray-700 mb-2 truncate">{topic}</p>
+            <p className="text-xs font-semibold text-gray-700 mb-2 truncate">
+              {topic}
+            </p>
             <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-indigo-400 rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(100, (messages.filter((m) => m.role === 'model').length / 6) * 100)}%` }}
+                style={{
+                  width: `${Math.min(100, (messages.filter((m) => m.role === 'model').length / 6) * 100)}%`,
+                }}
               />
             </div>
           </div>
@@ -406,7 +479,10 @@ export default function TutorPage() {
               </p>
               <div className="flex flex-wrap gap-1">
                 {sessionSummary.concepts.map((c) => (
-                  <span key={c} className="text-[10px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100">
+                  <span
+                    key={c}
+                    className="text-[10px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100"
+                  >
                     ✓ {c}
                   </span>
                 ))}
@@ -424,5 +500,5 @@ export default function TutorPage() {
         </div>
       </div>
     </main>
-  )
+  );
 }

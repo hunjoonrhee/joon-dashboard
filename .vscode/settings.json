@@ -20,7 +20,12 @@
   },
 
   // ESLint가 검사해야 하는 파일 타입
-  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
 
   "eslint.alwaysShowStatus": true,
 

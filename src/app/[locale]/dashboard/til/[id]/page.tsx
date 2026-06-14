@@ -1,25 +1,25 @@
-'use client'
+'use client';
 
-import TilEditor from '@/components/TilEditor'
-import { supabase } from '@/lib/supabase'
-import { getTagColor } from '@/lib/tagColor'
-import type { Session } from '@/types'
-import { ArrowLeft, Check, Loader2 } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import TilEditor from '@/components/TilEditor';
+import { supabase } from '@/lib/supabase';
+import { getTagColor } from '@/lib/tagColor';
+import type { Session } from '@/types';
+import { ArrowLeft, Check, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function TilPage() {
-  const params = useParams()
-  const router = useRouter()
-  const t = useTranslations('til')
-  const id = params.id as string
+  const params = useParams();
+  const router = useRouter();
+  const t = useTranslations('til');
+  const id = params.id as string;
 
-  const [session, setSession] = useState<Session | null>(null)
-  const [til, setTil] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [session, setSession] = useState<Session | null>(null);
+  const [til, setTil] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     supabase
@@ -29,34 +29,34 @@ export default function TilPage() {
       .single()
       .then(({ data }: { data: Session | null }) => {
         if (data) {
-          setSession(data as Session)
-          setTil(data.til ?? '')
+          setSession(data as Session);
+          setTil(data.til ?? '');
         }
-        setLoading(false)
-      })
-  }, [id])
+        setLoading(false);
+      });
+  }, [id]);
 
   const save = async () => {
-    if (!session) return
-    setSaving(true)
+    if (!session) return;
+    setSaving(true);
     await supabase
       .from('sessions')
       .update({ til: til.trim() || null })
-      .eq('id', id)
-    setSaving(false)
-    setSaved(true)
+      .eq('id', id);
+    setSaving(false);
+    setSaved(true);
     setTimeout(() => {
-      setSaved(false)
-      router.push(`/sessions/${id}`)
-    }, 1000)
-  }
+      setSaved(false);
+      router.push(`/sessions/${id}`);
+    }, 1000);
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 size={20} className="animate-spin text-gray-300" />
       </div>
-    )
+    );
   }
 
   if (!session) {
@@ -64,7 +64,7 @@ export default function TilPage() {
       <div className="flex items-center justify-center min-h-screen">
         <p className="text-sm text-gray-400">{t('notFound')}</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -126,5 +126,5 @@ export default function TilPage() {
       {/* 저장 단축키 안내 */}
       <p className="text-xs text-gray-300 mt-2 text-right">{t('saveHint')}</p>
     </div>
-  )
+  );
 }

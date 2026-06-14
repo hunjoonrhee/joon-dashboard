@@ -1,10 +1,10 @@
-import { create } from 'zustand'
+import { create } from 'zustand';
 
 interface ModalStore {
-  studyModalOpen: boolean
-  studyModalInitialTitle: string
-  openStudyModal: (title?: string) => void
-  closeStudyModal: () => void
+  studyModalOpen: boolean;
+  studyModalInitialTitle: string;
+  openStudyModal: (title?: string) => void;
+  closeStudyModal: () => void;
 }
 
 export const useModalStore = create<ModalStore>((set) => ({
@@ -14,4 +14,4 @@ export const useModalStore = create<ModalStore>((set) => ({
     set({ studyModalOpen: true, studyModalInitialTitle: title }),
   closeStudyModal: () =>
     set({ studyModalOpen: false, studyModalInitialTitle: '' }),
-}))
+}));

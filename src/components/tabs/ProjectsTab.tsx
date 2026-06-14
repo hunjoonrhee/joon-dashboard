@@ -1,31 +1,31 @@
-'use client'
+'use client';
 
-import { useToast } from '@/components/Toast'
-import { supabase } from '@/lib/supabase'
-import { insertWithUser } from '@/lib/supabase'
-import type { Project, ProjectTask } from '@/types'
-import { Plus } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
-import ProjectItem from './projects/ProjectItem'
-import ProjectModal from './projects/ProjectModal'
-import TaskModal from './projects/TaskModal'
-import ProjectSkillModal from './projects/ProjectSkillModal'
+import { useToast } from '@/components/Toast';
+import { supabase } from '@/lib/supabase';
+import { insertWithUser } from '@/lib/supabase';
+import type { Project, ProjectTask } from '@/types';
+import { Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import ProjectItem from './projects/ProjectItem';
+import ProjectModal from './projects/ProjectModal';
+import TaskModal from './projects/TaskModal';
+import ProjectSkillModal from './projects/ProjectSkillModal';
 
 interface Props {
-  projects: Project[]
-  projectTasks: ProjectTask[]
-  onRefresh: () => void
-  triggerAdd?: boolean
-  onTriggerAddDone?: () => void
+  projects: Project[];
+  projectTasks: ProjectTask[];
+  onRefresh: () => void;
+  triggerAdd?: boolean;
+  onTriggerAddDone?: () => void;
 }
 
 const emptyProjectForm = {
   name: '',
   description: '',
   status: 'in_progress' as Project['status'],
-}
-const emptyTaskForm = { name: '', status: 'planned' as ProjectTask['status'] }
+};
+const emptyTaskForm = { name: '', status: 'planned' as ProjectTask['status'] };
 
 export default function ProjectsTab({
   projects,
@@ -34,9 +34,9 @@ export default function ProjectsTab({
   triggerAdd,
   onTriggerAddDone,
 }: Props) {
-  const t = useTranslations('projects')
-  const tToast = useTranslations('toast')
-  const { show } = useToast()
+  const t = useTranslations('projects');
+  const tToast = useTranslations('toast');
+  const { show } = useToast();
 
   const [openProjects, setOpenProjects] = useState<Record<string, boolean>>(
     Object.fromEntries(
@@ -44,39 +44,42 @@ export default function ProjectsTab({
         .filter((p) => p.status === 'in_progress')
         .map((p) => [p.id, true])
     )
-  )
-  const [projectModal, setProjectModal] = useState<'add' | 'edit' | null>(null)
-  const [taskModal, setTaskModal] = useState<'add' | 'edit' | null>(null)
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
-  const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null)
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
-  const [projectForm, setProjectForm] = useState(emptyProjectForm)
-  const [taskForm, setTaskForm] = useState(emptyTaskForm)
-  const [saving, setSaving] = useState(false)
+  );
+  const [projectModal, setProjectModal] = useState<'add' | 'edit' | null>(null);
+  const [taskModal, setTaskModal] = useState<'add' | 'edit' | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    null
+  );
+  const [projectForm, setProjectForm] = useState(emptyProjectForm);
+  const [taskForm, setTaskForm] = useState(emptyTaskForm);
+  const [saving, setSaving] = useState(false);
   const [skillModal, setSkillModal] = useState<{
-    projectId: string
-    projectName: string
-  } | null>(null)
+    projectId: string;
+    projectName: string;
+  } | null>(null);
 
   useEffect(() => {
     if (triggerAdd) {
-      openProjectModal('add')
-      onTriggerAddDone?.()
+      openProjectModal('add');
+      onTriggerAddDone?.();
     }
-  }, [triggerAdd])
+  }, [triggerAdd]);
 
   const getTasks = (projectId: string) =>
-    projectTasks.filter((t) => t.project_id === projectId)
+    projectTasks.filter((t) => t.project_id === projectId);
   const getPct = (projectId: string) => {
-    const tasks = getTasks(projectId)
-    if (tasks.length === 0) return 0
+    const tasks = getTasks(projectId);
+    if (tasks.length === 0) return 0;
     return Math.round(
-      (tasks.filter((t) => t.status === 'completed').length / tasks.length) * 100
-    )
-  }
+      (tasks.filter((t) => t.status === 'completed').length / tasks.length) *
+        100
+    );
+  };
 
   const openProjectModal = (type: 'add' | 'edit', project?: Project) => {
-    setSelectedProject(project ?? null)
+    setSelectedProject(project ?? null);
     setProjectForm(
       project
         ? {
@@ -85,126 +88,132 @@ export default function ProjectsTab({
             status: project.status,
           }
         : emptyProjectForm
-    )
-    setProjectModal(type)
-  }
+    );
+    setProjectModal(type);
+  };
 
   const openTaskModal = (
     type: 'add' | 'edit',
     projectId: string,
     task?: ProjectTask
   ) => {
-    setSelectedProjectId(projectId)
-    setSelectedTask(task ?? null)
-    setTaskForm(task ? { name: task.name, status: task.status } : emptyTaskForm)
-    setTaskModal(type)
-  }
+    setSelectedProjectId(projectId);
+    setSelectedTask(task ?? null);
+    setTaskForm(
+      task ? { name: task.name, status: task.status } : emptyTaskForm
+    );
+    setTaskModal(type);
+  };
 
   const closeProjectModal = () => {
-    setProjectModal(null)
-    setSelectedProject(null)
-    setProjectForm(emptyProjectForm)
-  }
+    setProjectModal(null);
+    setSelectedProject(null);
+    setProjectForm(emptyProjectForm);
+  };
   const closeTaskModal = () => {
-    setTaskModal(null)
-    setSelectedTask(null)
-    setSelectedProjectId(null)
-    setTaskForm(emptyTaskForm)
-  }
+    setTaskModal(null);
+    setSelectedTask(null);
+    setSelectedProjectId(null);
+    setTaskForm(emptyTaskForm);
+  };
 
   const saveProject = async () => {
-    setSaving(true)
+    setSaving(true);
     const payload = {
       name: projectForm.name,
       description: projectForm.description || null,
       status: projectForm.status,
-    }
+    };
     try {
       if (projectModal === 'add') {
         await supabase
           .from('projects')
-          .insert({ ...payload, order_index: projects.length, user_id: await (await import('@/lib/supabase')).getCurrentUserId() })
-        show(tToast('projectAdded'), { type: 'success' })
+          .insert({
+            ...payload,
+            order_index: projects.length,
+            user_id: await (await import('@/lib/supabase')).getCurrentUserId(),
+          });
+        show(tToast('projectAdded'), { type: 'success' });
       } else if (selectedProject) {
         await supabase
           .from('projects')
           .update(payload)
-          .eq('id', selectedProject.id)
-        show(tToast('projectEdited'), { type: 'success' })
+          .eq('id', selectedProject.id);
+        show(tToast('projectEdited'), { type: 'success' });
         if (
           payload.status === 'completed' &&
           selectedProject.status !== 'completed'
         ) {
-          closeProjectModal()
-          onRefresh()
+          closeProjectModal();
+          onRefresh();
           setSkillModal({
             projectId: selectedProject.id,
             projectName: selectedProject.name,
-          })
-          setSaving(false)
-          return
+          });
+          setSaving(false);
+          return;
         }
       }
-      closeProjectModal()
-      onRefresh()
+      closeProjectModal();
+      onRefresh();
     } catch {
-      show(tToast('saveFailed'), { type: 'error' })
+      show(tToast('saveFailed'), { type: 'error' });
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const removeProject = async () => {
-    if (!selectedProject) return
+    if (!selectedProject) return;
     try {
-      await supabase.from('projects').delete().eq('id', selectedProject.id)
-      show(tToast('projectDeleted'), { type: 'info' })
-      closeProjectModal()
-      onRefresh()
+      await supabase.from('projects').delete().eq('id', selectedProject.id);
+      show(tToast('projectDeleted'), { type: 'info' });
+      closeProjectModal();
+      onRefresh();
     } catch {
-      show(tToast('deleteFailed'), { type: 'error' })
+      show(tToast('deleteFailed'), { type: 'error' });
     }
-  }
+  };
 
   const saveTask = async () => {
-    if (!selectedProjectId) return
-    setSaving(true)
-    const payload = { name: taskForm.name, status: taskForm.status }
+    if (!selectedProjectId) return;
+    setSaving(true);
+    const payload = { name: taskForm.name, status: taskForm.status };
     try {
       if (taskModal === 'add') {
         await insertWithUser('project_tasks', {
           ...payload,
           project_id: selectedProjectId,
           order_index: getTasks(selectedProjectId).length,
-        })
-        show(tToast('taskAdded'), { type: 'success' })
+        });
+        show(tToast('taskAdded'), { type: 'success' });
       } else if (selectedTask) {
         await supabase
           .from('project_tasks')
           .update(payload)
-          .eq('id', selectedTask.id)
-        show(tToast('taskEdited'), { type: 'success' })
+          .eq('id', selectedTask.id);
+        show(tToast('taskEdited'), { type: 'success' });
       }
-      closeTaskModal()
-      onRefresh()
+      closeTaskModal();
+      onRefresh();
     } catch {
-      show(tToast('saveFailed'), { type: 'error' })
+      show(tToast('saveFailed'), { type: 'error' });
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const removeTask = async () => {
-    if (!selectedTask) return
+    if (!selectedTask) return;
     try {
-      await supabase.from('project_tasks').delete().eq('id', selectedTask.id)
-      show(tToast('taskDeleted'), { type: 'info' })
-      closeTaskModal()
-      onRefresh()
+      await supabase.from('project_tasks').delete().eq('id', selectedTask.id);
+      show(tToast('taskDeleted'), { type: 'info' });
+      closeTaskModal();
+      onRefresh();
     } catch {
-      show(tToast('deleteFailed'), { type: 'error' })
+      show(tToast('deleteFailed'), { type: 'error' });
     }
-  }
+  };
 
   return (
     <>
@@ -265,11 +274,11 @@ export default function ProjectsTab({
           projectName={skillModal.projectName}
           onClose={() => setSkillModal(null)}
           onSaved={() => {
-            setSkillModal(null)
-            onRefresh()
+            setSkillModal(null);
+            onRefresh();
           }}
         />
       )}
     </>
-  )
+  );
 }

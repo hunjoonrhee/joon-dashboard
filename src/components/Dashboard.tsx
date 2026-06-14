@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase';
 import type {
   Goal,
   Project,
@@ -9,35 +9,35 @@ import type {
   Setting,
   TodayItem,
   Topic,
-} from '@/types'
-import { Settings } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import GoalsTab from './tabs/GoalsTab'
-import HomeTab from './tabs/HomeTab'
-import ProjectsTab from './tabs/ProjectsTab'
-import StudyTab from './tabs/StudyTab'
+} from '@/types';
+import { Settings } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import GoalsTab from './tabs/GoalsTab';
+import HomeTab from './tabs/HomeTab';
+import ProjectsTab from './tabs/ProjectsTab';
+import StudyTab from './tabs/StudyTab';
 
-type Tab = 'home' | 'study' | 'goals' | 'projects'
+type Tab = 'home' | 'study' | 'goals' | 'projects';
 
 export default function Dashboard() {
-  const router = useRouter()
-  const [tab, setTab] = useState<Tab>('home')
-  const [sessions, setSessions] = useState<Session[]>([])
-  const [topics, setTopics] = useState<Topic[]>([])
-  const [goals, setGoals] = useState<Goal[]>([])
-  const [settings, setSettings] = useState<Record<string, string>>({})
-  const [todayItems, setTodayItems] = useState<TodayItem[]>([])
-  const [projects, setProjects] = useState<Project[]>([])
-  const [projectTasks, setProjectTasks] = useState<ProjectTask[]>([])
-  const [loading, setLoading] = useState(true)
-  const [refreshKey, setRefreshKey] = useState(0)
+  const router = useRouter();
+  const [tab, setTab] = useState<Tab>('home');
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [settings, setSettings] = useState<Record<string, string>>({});
+  const [todayItems, setTodayItems] = useState<TodayItem[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [projectTasks, setProjectTasks] = useState<ProjectTask[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const refresh = () => setRefreshKey((k) => k + 1)
+  const refresh = () => setRefreshKey((k) => k + 1);
 
   useEffect(() => {
     const fetchData = async () => {
-      const today = new Date().toISOString().split('T')[0]
+      const today = new Date().toISOString().split('T')[0];
       const [s, t, g, st, ti, p, pt] = await Promise.all([
         supabase
           .from('sessions')
@@ -53,37 +53,37 @@ export default function Dashboard() {
           .order('created_at'),
         supabase.from('projects').select('*').order('order_index'),
         supabase.from('project_tasks').select('*').order('order_index'),
-      ])
-      if (s.data) setSessions(s.data)
-      if (t.data) setTopics(t.data)
-      if (g.data) setGoals(g.data)
+      ]);
+      if (s.data) setSessions(s.data);
+      if (t.data) setTopics(t.data);
+      if (g.data) setGoals(g.data);
       if (st.data) {
-        const map: Record<string, string> = {}
+        const map: Record<string, string> = {};
         st.data.forEach((s: Setting) => {
-          map[s.key] = s.value
-        })
-        setSettings(map)
+          map[s.key] = s.value;
+        });
+        setSettings(map);
       }
-      if (ti.data) setTodayItems(ti.data)
-      if (p.data) setProjects(p.data)
-      if (pt.data) setProjectTasks(pt.data)
-      setLoading(false)
-    }
-    fetchData()
-  }, [refreshKey])
+      if (ti.data) setTodayItems(ti.data);
+      if (p.data) setProjects(p.data);
+      if (pt.data) setProjectTasks(pt.data);
+      setLoading(false);
+    };
+    fetchData();
+  }, [refreshKey]);
 
   useEffect(() => {
-    const handleFocus = () => setRefreshKey((k) => k + 1)
-    window.addEventListener('focus', handleFocus)
-    return () => window.removeEventListener('focus', handleFocus)
-  }, [])
+    const handleFocus = () => setRefreshKey((k) => k + 1);
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
 
   if (loading)
     return (
       <main className="min-h-screen flex items-center justify-center">
         <p className="text-gray-400 text-sm">불러오는 중...</p>
       </main>
-    )
+    );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -159,5 +159,5 @@ export default function Dashboard() {
         )}
       </div>
     </div>
-  )
+  );
 }

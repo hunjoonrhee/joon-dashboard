@@ -1,21 +1,21 @@
-'use client'
+'use client';
 
-import { useToast } from '@/components/Toast'
-import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles'
-import { supabase, insertWithUser } from '@/lib/supabase'
-import { useQueryClient } from '@tanstack/react-query'
-import { de, enUS, ko } from 'date-fns/locale'
-import { X } from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
-import { useEffect, useRef, useState } from 'react'
-import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker.css'
-import { useUser } from './UserProvider'
+import { useToast } from '@/components/Toast';
+import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles';
+import { supabase, insertWithUser } from '@/lib/supabase';
+import { useQueryClient } from '@tanstack/react-query';
+import { de, enUS, ko } from 'date-fns/locale';
+import { X } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useEffect, useRef, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { useUser } from './UserProvider';
 
 interface Props {
-  onClose: () => void
-  onSaved: () => void
-  initialTitle?: string
+  onClose: () => void;
+  onSaved: () => void;
+  initialTitle?: string;
 }
 
 export default function AddSessionModal({
@@ -23,38 +23,37 @@ export default function AddSessionModal({
   onSaved,
   initialTitle,
 }: Props) {
-  const locale = useLocale()
-  const { show } = useToast()
-  const queryClient = useQueryClient()
-  const t = useTranslations('common')
-  const tStudy = useTranslations('study')
-  const tToast = useTranslations('toast')
+  const locale = useLocale();
+  const { show } = useToast();
+  const queryClient = useQueryClient();
+  const t = useTranslations('common');
+  const tStudy = useTranslations('study');
+  const tToast = useTranslations('toast');
 
-  const [title, setTitle] = useState(initialTitle ?? '')
-  const [til, setTil] = useState('')
+  const [title, setTitle] = useState(initialTitle ?? '');
+  const [til, setTil] = useState('');
   const [selectedDate, setSelectedDate] = useState<
     'today' | 'yesterday' | 'custom'
-  >('today')
-  const [customDate, setCustomDate] = useState<Date>(new Date())
+  >('today');
+  const [customDate, setCustomDate] = useState<Date>(new Date());
   const [selectedDuration, setSelectedDuration] = useState<
     '30' | '60' | '90' | 'custom'
-  >('60')
-  const [customDuration, setCustomDuration] = useState('')
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [tagPool, setTagPool] = useState<string[]>([])
-  const [tagSearch, setTagSearch] = useState('')
-  const [tagDropdownOpen, setTagDropdownOpen] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  >('60');
+  const [customDuration, setCustomDuration] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [tagPool, setTagPool] = useState<string[]>([]);
+  const [tagSearch, setTagSearch] = useState('');
+  const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-
-  const dateFnsLocale = locale === 'ko' ? ko : locale === 'de' ? de : enUS
+  const dateFnsLocale = locale === 'ko' ? ko : locale === 'de' ? de : enUS;
   const dateFormat =
     locale === 'ko'
       ? 'yyyy.MM.dd'
       : locale === 'de'
         ? 'dd.MM.yyyy'
-        : 'MM/dd/yyyy'
+        : 'MM/dd/yyyy';
 
   useEffect(() => {
     const load = async () => {
@@ -62,38 +61,38 @@ export default function AddSessionModal({
         .from('settings')
         .select('value')
         .eq('key', 'adopted_roadmap_id')
-        .single()
-      if (!setting?.value) return
+        .single();
+      if (!setting?.value) return;
       const { data: roadmap } = await supabase
         .from('ai_roadmaps')
         .select('stages')
         .eq('id', setting.value)
-        .single()
-      if (!roadmap?.stages) return
+        .single();
+      if (!roadmap?.stages) return;
       const tags = [
         ...new Set(
           roadmap.stages.flatMap((s: { skills: { tags: string[] }[] }) =>
             s.skills.flatMap((sk) => sk.tags)
           )
         ),
-      ] as string[]
-      setTagPool(tags.sort())
-    }
-    load()
-  }, [])
+      ] as string[];
+      setTagPool(tags.sort());
+    };
+    load();
+  }, []);
 
   const getDateValue = () => {
-    if (selectedDate === 'today') return new Date().toISOString().split('T')[0]
+    if (selectedDate === 'today') return new Date().toISOString().split('T')[0];
     if (selectedDate === 'yesterday') {
-      const d = new Date()
-      d.setDate(d.getDate() - 1)
-      return d.toISOString().split('T')[0]
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return d.toISOString().split('T')[0];
     }
-    return customDate.toISOString().split('T')[0]
-  }
+    return customDate.toISOString().split('T')[0];
+  };
 
   const getDurationValue = () =>
-    selectedDuration !== 'custom' ? selectedDuration : customDuration
+    selectedDuration !== 'custom' ? selectedDuration : customDuration;
 
   const filteredTags = tagSearch.trim()
     ? tagPool.filter(
@@ -101,22 +100,22 @@ export default function AddSessionModal({
           tag.toLowerCase().includes(tagSearch.toLowerCase()) &&
           !selectedTags.includes(tag)
       )
-    : []
+    : [];
 
   const addTag = (tag: string) => {
-    const trimmed = tag.trim()
-    if (!trimmed || selectedTags.includes(trimmed)) return
-    setSelectedTags((prev) => [...prev, trimmed])
-    setTagSearch('')
-    setTagDropdownOpen(false)
-  }
+    const trimmed = tag.trim();
+    if (!trimmed || selectedTags.includes(trimmed)) return;
+    setSelectedTags((prev) => [...prev, trimmed]);
+    setTagSearch('');
+    setTagDropdownOpen(false);
+  };
 
   const removeTag = (tag: string) =>
-    setSelectedTags((prev) => prev.filter((t) => t !== tag))
+    setSelectedTags((prev) => prev.filter((t) => t !== tag));
 
   const save = async () => {
-    if (!title.trim()) return
-    setSaving(true)
+    if (!title.trim()) return;
+    setSaving(true);
     try {
       await insertWithUser('sessions', {
         date: getDateValue(),
@@ -126,27 +125,27 @@ export default function AddSessionModal({
           : null,
         tags: selectedTags,
         til: til.trim() || null,
-      })
-      const matchedTags = selectedTags.filter((tag) => tagPool.includes(tag))
+      });
+      const matchedTags = selectedTags.filter((tag) => tagPool.includes(tag));
       if (matchedTags.length > 0) {
         show(tToast('studySaved'), {
           type: 'success',
           sub: tToast('studySavedGap', {
             tags: matchedTags.slice(0, 2).join(', '),
           }),
-        })
+        });
       } else {
-        show(tToast('studySaved'), { type: 'success' })
+        show(tToast('studySaved'), { type: 'success' });
       }
-      queryClient.invalidateQueries({ queryKey: ['sessions'] })
-      onSaved()
-      onClose()
+      queryClient.invalidateQueries({ queryKey: ['sessions'] });
+      onSaved();
+      onClose();
     } catch {
-      show(tToast('saveFailed'), { type: 'error' })
+      show(tToast('saveFailed'), { type: 'error' });
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   return (
     <div
@@ -188,7 +187,7 @@ export default function AddSessionModal({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') save()
+              if (e.key === 'Enter') save();
             }}
           />
         </div>
@@ -214,7 +213,7 @@ export default function AddSessionModal({
             <DatePicker
               selected={customDate}
               onChange={(date: Date | null) => {
-                if (date) setCustomDate(date)
+                if (date) setCustomDate(date);
               }}
               locale={dateFnsLocale}
               dateFormat={dateFormat}
@@ -258,7 +257,7 @@ export default function AddSessionModal({
           {selectedTags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-2">
               {selectedTags.map((tag) => {
-                const isCustom = !tagPool.includes(tag)
+                const isCustom = !tagPool.includes(tag);
                 return (
                   <span
                     key={tag}
@@ -276,7 +275,7 @@ export default function AddSessionModal({
                       <X size={10} />
                     </button>
                   </span>
-                )
+                );
               })}
             </div>
           )}
@@ -287,15 +286,15 @@ export default function AddSessionModal({
               placeholder={t('tagSearchPlaceholder')}
               value={tagSearch}
               onChange={(e) => {
-                setTagSearch(e.target.value)
-                setTagDropdownOpen(true)
+                setTagSearch(e.target.value);
+                setTagDropdownOpen(true);
               }}
               onFocus={() => setTagDropdownOpen(true)}
               onBlur={() => setTimeout(() => setTagDropdownOpen(false), 150)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && tagSearch.trim()) {
-                  e.preventDefault()
-                  addTag(tagSearch)
+                  e.preventDefault();
+                  addTag(tagSearch);
                 }
               }}
             />
@@ -358,5 +357,5 @@ export default function AddSessionModal({
         </div>
       </div>
     </div>
-  )
+  );
 }

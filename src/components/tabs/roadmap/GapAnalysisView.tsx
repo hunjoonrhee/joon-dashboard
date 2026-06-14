@@ -1,23 +1,23 @@
-'use client'
+'use client';
 
-import { supabase } from '@/lib/supabase'
-import type { AiRoadmap } from '@/types'
-import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase';
+import type { AiRoadmap } from '@/types';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 
 interface Props {
-  adoptedRoadmap: AiRoadmap | null
-  studiedTags: Set<string>
-  onGoToAi: () => void
+  adoptedRoadmap: AiRoadmap | null;
+  studiedTags: Set<string>;
+  onGoToAi: () => void;
 }
 
-type TrustSource = 'cert' | 'practical' | 'study' | 'none'
+type TrustSource = 'cert' | 'practical' | 'study' | 'none';
 
 interface SkillWithSource {
-  name: string
-  tags: string[]
-  source: TrustSource
-  matchedTags: string[]
+  name: string;
+  tags: string[];
+  source: TrustSource;
+  matchedTags: string[];
 }
 
 export default function GapAnalysisView({
@@ -25,33 +25,33 @@ export default function GapAnalysisView({
   studiedTags,
   onGoToAi,
 }: Props) {
-  const t = useTranslations('roadmap')
-  const [certTags, setCertTags] = useState<Set<string>>(new Set())
-  const [practicalTags, setPracticalTags] = useState<Set<string>>(new Set())
+  const t = useTranslations('roadmap');
+  const [certTags, setCertTags] = useState<Set<string>>(new Set());
+  const [practicalTags, setPracticalTags] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const load = async () => {
       const [certsRes, projectSkillsRes] = await Promise.all([
         supabase.from('certifications').select('tags'),
         supabase.from('project_skills').select('tags'),
-      ])
+      ]);
       if (certsRes.data) {
         const tags = new Set<string>(
           (certsRes.data as { tags: string[] }[]).flatMap((c) => c.tags)
-        )
-        setCertTags(tags)
+        );
+        setCertTags(tags);
       }
       if (projectSkillsRes.data) {
         const tags = new Set<string>(
           (projectSkillsRes.data as { tags: string[] }[]).flatMap(
             (ps) => ps.tags
           )
-        )
-        setPracticalTags(tags)
+        );
+        setPracticalTags(tags);
       }
-    }
-    load()
-  }, [])
+    };
+    load();
+  }, []);
 
   if (!adoptedRoadmap) {
     return (
@@ -67,67 +67,67 @@ export default function GapAnalysisView({
           {t('generateFirst')}
         </button>
       </div>
-    )
+    );
   }
 
   const getSource = (
     tags: string[]
   ): { source: TrustSource; matchedTags: string[] } => {
-    const certMatched = tags.filter((tag) => certTags.has(tag))
+    const certMatched = tags.filter((tag) => certTags.has(tag));
     if (certMatched.length > 0)
-      return { source: 'cert', matchedTags: certMatched }
-    const practicalMatched = tags.filter((tag) => practicalTags.has(tag))
+      return { source: 'cert', matchedTags: certMatched };
+    const practicalMatched = tags.filter((tag) => practicalTags.has(tag));
     if (practicalMatched.length > 0)
-      return { source: 'practical', matchedTags: practicalMatched }
-    const studyMatched = tags.filter((tag) => studiedTags.has(tag))
+      return { source: 'practical', matchedTags: practicalMatched };
+    const studyMatched = tags.filter((tag) => studiedTags.has(tag));
     if (studyMatched.length > 0)
-      return { source: 'study', matchedTags: studyMatched }
-    return { source: 'none', matchedTags: [] }
-  }
+      return { source: 'study', matchedTags: studyMatched };
+    return { source: 'none', matchedTags: [] };
+  };
 
   const getWeight = (source: TrustSource) => {
-    if (source === 'cert') return 1.0
-    if (source === 'practical') return 1.0
-    if (source === 'study') return 0.6
-    return 0
-  }
+    if (source === 'cert') return 1.0;
+    if (source === 'practical') return 1.0;
+    if (source === 'study') return 0.6;
+    return 0;
+  };
 
   const allSkills = adoptedRoadmap.stages.flatMap((s) =>
     s.skills.map((sk): SkillWithSource => {
-      const { source, matchedTags } = getSource(sk.tags)
-      return { name: sk.name, tags: sk.tags, source, matchedTags }
+      const { source, matchedTags } = getSource(sk.tags);
+      return { name: sk.name, tags: sk.tags, source, matchedTags };
     })
-  )
+  );
 
   const totalWeight = allSkills.reduce(
     (sum, sk) => sum + getWeight(sk.source),
     0
-  )
-  const maxWeight = allSkills.length
+  );
+  const maxWeight = allSkills.length;
   const gapPct =
-    maxWeight === 0 ? 0 : Math.round((totalWeight / maxWeight) * 100)
+    maxWeight === 0 ? 0 : Math.round((totalWeight / maxWeight) * 100);
 
   const sourceLabel = (source: TrustSource) => {
     if (source === 'cert')
       return {
         label: t('sourceCert'),
         color: 'bg-green-50 text-green-600 border-green-100',
-      }
+      };
     if (source === 'practical')
       return {
         label: t('sourcePractical'),
         color: 'bg-amber-50 text-amber-600 border-amber-100',
-      }
+      };
     if (source === 'study')
       return {
         label: t('sourceStudy'),
         color: 'bg-indigo-50 text-indigo-500 border-indigo-100',
-      }
+      };
     return {
       label: t('sourceNone'),
       color: 'bg-gray-50 text-gray-400 border-gray-100',
-    }
-  }
+    };
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -175,7 +175,7 @@ export default function GapAnalysisView({
             { source: 'study' as TrustSource, icon: '📖' },
             { source: 'none' as TrustSource, icon: '○' },
           ].map(({ source, icon }) => {
-            const { label, color } = sourceLabel(source)
+            const { label, color } = sourceLabel(source);
             return (
               <span
                 key={source}
@@ -184,7 +184,7 @@ export default function GapAnalysisView({
                 <span>{icon}</span>
                 {label}
               </span>
-            )
+            );
           })}
         </div>
       </div>
@@ -192,17 +192,17 @@ export default function GapAnalysisView({
       {/* 단계별 갭 */}
       {adoptedRoadmap.stages.map((stage) => {
         const stageSkills = stage.skills.map((sk): SkillWithSource => {
-          const { source, matchedTags } = getSource(sk.tags)
-          return { name: sk.name, tags: sk.tags, source, matchedTags }
-        })
+          const { source, matchedTags } = getSource(sk.tags);
+          return { name: sk.name, tags: sk.tags, source, matchedTags };
+        });
         const stageWeight = stageSkills.reduce(
           (sum, sk) => sum + getWeight(sk.source),
           0
-        )
+        );
         const stagePct =
           stageSkills.length === 0
             ? 0
-            : Math.round((stageWeight / stageSkills.length) * 100)
+            : Math.round((stageWeight / stageSkills.length) * 100);
 
         return (
           <div
@@ -231,7 +231,7 @@ export default function GapAnalysisView({
             </div>
             <div className="px-4 py-2 flex flex-col gap-0">
               {stageSkills.map((skill, i) => {
-                const { label, color } = sourceLabel(skill.source)
+                const { label, color } = sourceLabel(skill.source);
                 return (
                   <div
                     key={i}
@@ -265,16 +265,16 @@ export default function GapAnalysisView({
                       {label}
                     </span>
                   </div>
-                )
+                );
               })}
             </div>
           </div>
-        )
+        );
       })}
 
       <div className="bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 text-xs text-gray-400">
         {t('gapNote')}
       </div>
     </div>
-  )
+  );
 }

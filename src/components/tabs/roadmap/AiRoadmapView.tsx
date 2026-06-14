@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import { useUser } from '@/components/UserProvider'
-import GoalModal from '@/components/tabs/roadmap/GoalModal'
-import { supabase } from '@/lib/supabase'
-import type { AiRoadmap, RoadmapStage } from '@/types'
+import { useUser } from '@/components/UserProvider';
+import GoalModal from '@/components/tabs/roadmap/GoalModal';
+import { supabase } from '@/lib/supabase';
+import type { AiRoadmap, RoadmapStage } from '@/types';
 import {
   Check,
   ChevronDown,
@@ -13,15 +13,15 @@ import {
   Sparkles,
   Trash2,
   Trophy,
-} from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+} from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 
 interface Props {
-  adoptedRoadmap: AiRoadmap | null
-  settings: Record<string, string>
-  onAdopt: (roadmap: AiRoadmap) => void
-  onRefresh?: () => void
+  adoptedRoadmap: AiRoadmap | null;
+  settings: Record<string, string>;
+  onAdopt: (roadmap: AiRoadmap) => void;
+  onRefresh?: () => void;
 }
 
 export default function AiRoadmapView({
@@ -30,16 +30,16 @@ export default function AiRoadmapView({
   onAdopt,
   onRefresh,
 }: Props) {
-  const t = useTranslations('roadmap')
-  const locale = useLocale()
-  const user = useUser()
-  const [roadmaps, setRoadmaps] = useState<AiRoadmap[]>([])
-  const [showForm, setShowForm] = useState(false)
-  const [goal, setGoal] = useState(settings.big_goal ?? '')
-  const [careerLevel, setCareerLevel] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const t = useTranslations('roadmap');
+  const locale = useLocale();
+  const user = useUser();
+  const [roadmaps, setRoadmaps] = useState<AiRoadmap[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [goal, setGoal] = useState(settings.big_goal ?? '');
+  const [careerLevel, setCareerLevel] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     supabase
@@ -47,44 +47,44 @@ export default function AiRoadmapView({
       .select('*')
       .order('created_at', { ascending: false })
       .then(({ data }: { data: AiRoadmap[] | null }) => {
-        if (data) setRoadmaps(data as AiRoadmap[])
-      })
-  }, [])
+        if (data) setRoadmaps(data as AiRoadmap[]);
+      });
+  }, []);
 
   const generate = async () => {
-    if (!goal.trim() || !careerLevel.trim()) return
-    setLoading(true)
-    setError(null)
+    if (!goal.trim() || !careerLevel.trim()) return;
+    setLoading(true);
+    setError(null);
     try {
       const res = await fetch('/api/roadmap/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ goal, careerLevel, locale, userId: user?.id }),
-      })
-      if (!res.ok) throw new Error()
-      const data: AiRoadmap = await res.json()
-      setRoadmaps((prev) => [data, ...prev])
-      setExpandedId(data.id)
-      setShowForm(false)
-      setCareerLevel('')
+      });
+      if (!res.ok) throw new Error();
+      const data: AiRoadmap = await res.json();
+      setRoadmaps((prev) => [data, ...prev]);
+      setExpandedId(data.id);
+      setShowForm(false);
+      setCareerLevel('');
     } catch {
-      setError(t('generationFailed'))
+      setError(t('generationFailed'));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleAdopt = async (roadmap: AiRoadmap) => {
-    onAdopt(roadmap)
-  }
+    onAdopt(roadmap);
+  };
 
   const handleDelete = async (id: string) => {
-    await supabase.from('ai_roadmaps').delete().eq('id', id)
-    setRoadmaps((prev) => prev.filter((r) => r.id !== id))
-    if (expandedId === id) setExpandedId(null)
-  }
+    await supabase.from('ai_roadmaps').delete().eq('id', id);
+    setRoadmaps((prev) => prev.filter((r) => r.id !== id));
+    if (expandedId === id) setExpandedId(null);
+  };
 
-  const isAdopted = (id: string) => adoptedRoadmap?.id === id
+  const isAdopted = (id: string) => adoptedRoadmap?.id === id;
 
   return (
     <div className="flex flex-col gap-3">
@@ -163,8 +163,8 @@ export default function AiRoadmapView({
       )}
 
       {roadmaps.map((roadmap) => {
-        const adopted = isAdopted(roadmap.id)
-        const expanded = expandedId === roadmap.id
+        const adopted = isAdopted(roadmap.id);
+        const expanded = expandedId === roadmap.id;
         return (
           <div
             key={roadmap.id}
@@ -205,8 +205,8 @@ export default function AiRoadmapView({
                 {!adopted && (
                   <button
                     onClick={(e) => {
-                      e.stopPropagation()
-                      handleAdopt(roadmap)
+                      e.stopPropagation();
+                      handleAdopt(roadmap);
                     }}
                     className="text-xs px-2.5 py-1 rounded-lg bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 font-medium transition-colors"
                   >
@@ -215,8 +215,8 @@ export default function AiRoadmapView({
                 )}
                 <button
                   onClick={(e) => {
-                    e.stopPropagation()
-                    handleDelete(roadmap.id)
+                    e.stopPropagation();
+                    handleDelete(roadmap.id);
                   }}
                   className="text-gray-300 hover:text-red-400 transition-colors p-1"
                 >
@@ -243,10 +243,10 @@ export default function AiRoadmapView({
               </div>
             )}
           </div>
-        )
+        );
       })}
     </div>
-  )
+  );
 }
 
 function StageCard({
@@ -254,14 +254,14 @@ function StageCard({
   isLast,
   onRefresh,
 }: {
-  stage: RoadmapStage
-  isLast: boolean
-  onRefresh?: () => void
+  stage: RoadmapStage;
+  isLast: boolean;
+  onRefresh?: () => void;
 }) {
-  const t = useTranslations('roadmap')
-  const [open, setOpen] = useState(false)
-  const [goalModal, setGoalModal] = useState(false)
-  const allTags = stage.skills.flatMap((sk) => sk.tags)
+  const t = useTranslations('roadmap');
+  const [open, setOpen] = useState(false);
+  const [goalModal, setGoalModal] = useState(false);
+  const allTags = stage.skills.flatMap((sk) => sk.tags);
 
   return (
     <>
@@ -339,11 +339,11 @@ function StageCard({
           }}
           onClose={() => setGoalModal(false)}
           onSaved={() => {
-            setGoalModal(false)
-            onRefresh?.()
+            setGoalModal(false);
+            onRefresh?.();
           }}
         />
       )}
     </>
-  )
+  );
 }

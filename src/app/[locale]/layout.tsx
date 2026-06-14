@@ -1,26 +1,26 @@
-import AppShellWrapper from '@/components/AppShellWrapper'
-import QueryProvider from '@/components/QueryProvider'
-import { routing } from '@/i18n/routing'
-import { NextIntlClientProvider } from 'next-intl'
-import { getMessages } from 'next-intl/server'
-import { notFound } from 'next/navigation'
+import AppShellWrapper from '@/components/AppShellWrapper';
+import QueryProvider from '@/components/QueryProvider';
+import { routing } from '@/i18n/routing';
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
+import { notFound } from 'next/navigation';
 
-type Locale = (typeof routing.locales)[number]
+type Locale = (typeof routing.locales)[number];
 
 export default async function LocaleLayout({
   children,
   params,
 }: {
-  children: React.ReactNode
-  params: Promise<{ locale: string }>
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params
+  const { locale } = await params;
 
   if (!routing.locales.includes(locale as Locale)) {
-    notFound()
+    notFound();
   }
 
-  const messages = await getMessages()
+  const messages = await getMessages();
 
   return (
     <NextIntlClientProvider messages={messages}>
@@ -28,5 +28,5 @@ export default async function LocaleLayout({
         <AppShellWrapper>{children}</AppShellWrapper>
       </QueryProvider>
     </NextIntlClientProvider>
-  )
+  );
 }
