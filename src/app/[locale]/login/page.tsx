@@ -76,6 +76,8 @@ export default function LoginPage() {
       .eq('user_id', data.user.id)
       .single();
 
+    console.log('setting:', setting, 'user:', data.user.id);
+
     if (setting?.value === 'true') {
       router.push(`/${locale}/dashboard`);
     } else {

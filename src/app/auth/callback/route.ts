@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
         .from('settings')
         .upsert(
           { key: 'name', value: nickname, user_id: data.user.id },
-          { onConflict: 'key' }
+          { onConflict: 'key,user_id' }
         );
 
       // /try에서 온 경우 sessionStorage에 ob_stages가 있으면 온보딩 3단계로

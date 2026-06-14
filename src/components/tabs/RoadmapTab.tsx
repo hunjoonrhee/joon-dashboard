@@ -141,17 +141,17 @@ export default function RoadmapTab({
         upsertWithUser(
           'settings',
           { key: 'adopted_roadmap_id', value: roadmap.id },
-          { onConflict: 'key' }
+          { onConflict: 'key,user_id' }
         ),
         upsertWithUser(
           'settings',
           { key: 'big_goal', value: roadmap.goal },
-          { onConflict: 'key' }
+          { onConflict: 'key,user_id' }
         ),
         upsertWithUser(
           'settings',
           { key: 'big_goal_sub', value: roadmap.career_level },
-          { onConflict: 'key' }
+          { onConflict: 'key,user_id' }
         ),
       ]);
 

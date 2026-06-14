@@ -1,8 +1,7 @@
 'use client';
 
+import { supabase as supabaseClient, upsertWithUser } from '@/lib/supabase';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
-import { supabase as supabaseClient } from '@/lib/supabase';
-import { upsertWithUser } from '@/lib/supabase';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -108,7 +107,7 @@ export default function Onboarding3() {
           await upsertWithUser(
             'settings',
             { key: 'adopted_roadmap_id', value: roadmap.id },
-            { onConflict: 'key' }
+            { onConflict: 'key,user_id' }
           );
         }
       }
@@ -117,17 +116,17 @@ export default function Onboarding3() {
         upsertWithUser(
           'settings',
           { key: 'onboarding_completed', value: 'true' },
-          { onConflict: 'key' }
+          { onConflict: 'key,user_id' }
         ),
         upsertWithUser(
           'settings',
           { key: 'big_goal', value: goal },
-          { onConflict: 'key' }
+          { onConflict: 'key,user_id' }
         ),
         upsertWithUser(
           'settings',
           { key: 'big_goal_sub', value: ob_level },
-          { onConflict: 'key' }
+          { onConflict: 'key,user_id' }
         ),
       ]);
 

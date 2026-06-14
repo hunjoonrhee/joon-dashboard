@@ -1,8 +1,7 @@
 'use client';
 
 import { useToast } from '@/components/Toast';
-import { supabase } from '@/lib/supabase';
-import { insertWithUser, upsertWithUser } from '@/lib/supabase';
+import { supabase, upsertWithUser } from '@/lib/supabase';
 import type { Certification, Setting } from '@/types';
 import { ArrowLeft, Check, Trash2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -71,7 +70,11 @@ export default function SettingsPage() {
     setSaving(true);
     await Promise.all(
       Object.entries(form).map(([key, value]) =>
-        upsertWithUser('settings', { key, value }, { onConflict: 'key' })
+        upsertWithUser(
+          'settings',
+          { key, value },
+          { onConflict: 'key,user_id' }
+        )
       )
     );
     setSaving(false);

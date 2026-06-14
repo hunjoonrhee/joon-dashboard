@@ -63,23 +63,24 @@ export async function middleware(request: NextRequest) {
 
   // 로그인 상태 + 랜딩/로그인/회원가입 접근 → 온보딩 완료 여부 확인
   if (user && (isLoginPage || isSignupPage)) {
-    const { data: setting } = await supabase
-      .from('settings')
-      .select('value')
-      .eq('key', 'onboarding_completed')
-      .eq('user_id', user.id) // 추가
-      .single();
+    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+    // const { data: setting } = await supabase
+    //   .from('settings')
+    //   .select('value')
+    //   .eq('key', 'onboarding_completed')
+    //   .eq('user_id', user.id) // 추가
+    //   .single();
 
-    console.log('setting:', setting);
-    if (setting?.value === 'true') {
-      return NextResponse.redirect(
-        new URL(`/${locale}/dashboard`, request.url)
-      );
-    } else {
-      return NextResponse.redirect(
-        new URL(`/${locale}/onboarding/1`, request.url)
-      );
-    }
+    // console.log('setting:', setting);
+    // if (setting?.value === 'true') {
+    //   return NextResponse.redirect(
+    //     new URL(`/${locale}/dashboard`, request.url)
+    //   );
+    // } else {
+    //   return NextResponse.redirect(
+    //     new URL(`/${locale}/onboarding/1`, request.url)
+    //   );
+    // }
   }
 
   return handleI18n(request);
