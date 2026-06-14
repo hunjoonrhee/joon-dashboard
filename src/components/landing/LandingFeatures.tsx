@@ -23,12 +23,8 @@ export default function LandingFeatures() {
   return (
     <section className="max-w-3xl mx-auto px-6 py-20">
       <div className="text-center mb-12">
-        <p className="text-xs font-bold tracking-widest uppercase text-indigo-400 mb-3">
-          {t('featEyebrow')}
-        </p>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-          {t('featTitle')}
-        </h2>
+        <p className="text-xs font-bold tracking-widest uppercase text-indigo-400 mb-3">{t('featEyebrow')}</p>
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">{t('featTitle')}</h2>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

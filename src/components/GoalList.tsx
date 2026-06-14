@@ -114,10 +114,7 @@ export default function GoalList({ goals, onRefresh }: Props) {
       <div className="bg-white rounded-xl border border-gray-200 p-4">
         <div className="flex items-center justify-between mb-3">
           <p className="text-sm font-medium text-gray-700">진행 중인 목표들</p>
-          <button
-            onClick={() => open('add')}
-            className="text-indigo-500 hover:text-indigo-700 transition-colors"
-          >
+          <button onClick={() => open('add')} className="text-indigo-500 hover:text-indigo-700 transition-colors">
             <Plus size={18} />
           </button>
         </div>
@@ -126,41 +123,22 @@ export default function GoalList({ goals, onRefresh }: Props) {
         ) : (
           <div className="flex flex-col divide-y divide-gray-100">
             {goals.map((g) => (
-              <div
-                key={g.id}
-                className="flex items-center justify-between py-2.5"
-              >
+              <div key={g.id} className="flex items-center justify-between py-2.5">
                 <div
                   className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer"
                   onClick={() => router.push(`/goals/${g.id}`)}
                 >
-                  {g.is_focus && (
-                    <Star
-                      size={13}
-                      className="text-indigo-500 flex-shrink-0"
-                      fill="currentColor"
-                    />
-                  )}
+                  {g.is_focus && <Star size={13} className="text-indigo-500 flex-shrink-0" fill="currentColor" />}
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate">
-                      {g.name}
-                    </p>
-                    {g.description && (
-                      <p className="text-xs text-gray-500 mt-0.5 truncate">
-                        {g.description}
-                      </p>
-                    )}
+                    <p className="text-sm font-medium text-gray-800 truncate">{g.name}</p>
+                    {g.description && <p className="text-xs text-gray-500 mt-0.5 truncate">{g.description}</p>}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full ${priorityStyle[g.priority]}`}
-                  >
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${priorityStyle[g.priority]}`}>
                     {priorityLabel[g.priority]}
                   </span>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full ${statusStyle[g.status]}`}
-                  >
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${statusStyle[g.status]}`}>
                     {statusLabel[g.status]}
                   </span>
                   <button
@@ -177,15 +155,10 @@ export default function GoalList({ goals, onRefresh }: Props) {
       </div>
 
       {modal && (
-        <Modal
-          title={modal === 'add' ? '목표 추가' : '목표 수정'}
-          onClose={close}
-        >
+        <Modal title={modal === 'add' ? '목표 추가' : '목표 수정'} onClose={close}>
           <div className="flex flex-col gap-3">
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">
-                목표 이름
-              </label>
+              <label className="text-xs text-gray-500 mb-1 block">목표 이름</label>
               <input
                 type="text"
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
@@ -201,16 +174,12 @@ export default function GoalList({ goals, onRefresh }: Props) {
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
                 placeholder="예: 6월 재시험"
                 value={form.description}
-                onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
               />
             </div>
             <div className="flex gap-3">
               <div className="flex-1">
-                <label className="text-xs text-gray-500 mb-1 block">
-                  우선순위
-                </label>
+                <label className="text-xs text-gray-500 mb-1 block">우선순위</label>
                 <select
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
                   value={form.priority}
@@ -250,9 +219,7 @@ export default function GoalList({ goals, onRefresh }: Props) {
                 type="checkbox"
                 id="is_focus"
                 checked={form.is_focus}
-                onChange={(e) =>
-                  setForm({ ...form, is_focus: e.target.checked })
-                }
+                onChange={(e) => setForm({ ...form, is_focus: e.target.checked })}
               />
               <label htmlFor="is_focus" className="text-sm text-gray-600">
                 현재 집중 목표로 설정
@@ -261,20 +228,14 @@ export default function GoalList({ goals, onRefresh }: Props) {
           </div>
           <div className="flex justify-between pt-1">
             {modal === 'edit' ? (
-              <button
-                onClick={remove}
-                className="text-red-400 hover:text-red-600 transition-colors"
-              >
+              <button onClick={remove} className="text-red-400 hover:text-red-600 transition-colors">
                 <Trash2 size={16} />
               </button>
             ) : (
               <div />
             )}
             <div className="flex gap-2">
-              <button
-                onClick={close}
-                className="text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5"
-              >
+              <button onClick={close} className="text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5">
                 취소
               </button>
               <button

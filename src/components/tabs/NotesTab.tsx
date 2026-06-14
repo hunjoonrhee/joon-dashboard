@@ -6,11 +6,7 @@ import { insertWithUser } from '@/lib/supabase';
 import type { Note } from '@/types';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import {
-  NoteEditorPanel,
-  NoteEmptyPanel,
-  NoteViewPanel,
-} from './notes/NoteEditor';
+import { NoteEditorPanel, NoteEmptyPanel, NoteViewPanel } from './notes/NoteEditor';
 import NoteList from './notes/NoteList';
 
 interface Props {
@@ -125,11 +121,7 @@ export default function NotesTab({ notes, onRefresh }: Props) {
       onDelete={!isNew ? remove : undefined}
     />
   ) : selected ? (
-    <NoteViewPanel
-      note={selected}
-      onEdit={() => setIsEditing(true)}
-      onDelete={remove}
-    />
+    <NoteViewPanel note={selected} onEdit={() => setIsEditing(true)} onDelete={remove} />
   ) : (
     <NoteEmptyPanel onNew={newNote} />
   );
@@ -137,21 +129,13 @@ export default function NotesTab({ notes, onRefresh }: Props) {
   return (
     <>
       <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6">
-        <NoteList
-          notes={notes}
-          selectedId={selected?.id ?? null}
-          onSelect={selectNote}
-          onNew={newNote}
-        />
+        <NoteList notes={notes} selectedId={selected?.id ?? null} onSelect={selectNote} onNew={newNote} />
         {rightPanel}
       </div>
       <div className="lg:hidden flex flex-col gap-4">
         {isEditing ? (
           <>
-            <button
-              onClick={cancelEdit}
-              className="text-xs text-gray-400 text-left"
-            >
+            <button onClick={cancelEdit} className="text-xs text-gray-400 text-left">
               {tNotes('backToList')}
             </button>
             <NoteEditorPanel
@@ -171,25 +155,13 @@ export default function NotesTab({ notes, onRefresh }: Props) {
           </>
         ) : selected ? (
           <>
-            <button
-              onClick={() => setSelected(null)}
-              className="text-xs text-gray-400 text-left"
-            >
+            <button onClick={() => setSelected(null)} className="text-xs text-gray-400 text-left">
               {tNotes('backToList')}
             </button>
-            <NoteViewPanel
-              note={selected}
-              onEdit={() => setIsEditing(true)}
-              onDelete={remove}
-            />
+            <NoteViewPanel note={selected} onEdit={() => setIsEditing(true)} onDelete={remove} />
           </>
         ) : (
-          <NoteList
-            notes={notes}
-            selectedId={null}
-            onSelect={selectNote}
-            onNew={newNote}
-          />
+          <NoteList notes={notes} selectedId={null} onSelect={selectNote} onNew={newNote} />
         )}
       </div>
     </>

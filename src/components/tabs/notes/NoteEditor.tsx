@@ -70,17 +70,11 @@ export function NoteEditorPanel({
       <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {!isNew && onDelete && (
-            <button
-              onClick={onDelete}
-              className="text-gray-300 hover:text-red-400 transition-colors"
-            >
+            <button onClick={onDelete} className="text-gray-300 hover:text-red-400 transition-colors">
               <Trash2 size={15} />
             </button>
           )}
-          <button
-            onClick={onCancel}
-            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-          >
+          <button onClick={onCancel} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
             {tCommon('cancel')}
           </button>
         </div>
@@ -107,10 +101,10 @@ export function NoteViewPanel({ note, onEdit, onDelete }: ViewProps) {
   const locale = useLocale();
 
   const dateLabel = (d: string) =>
-    new Date(d).toLocaleDateString(
-      locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
-      { month: 'long', day: 'numeric' }
-    );
+    new Date(d).toLocaleDateString(locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US', {
+      month: 'long',
+      day: 'numeric',
+    });
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col min-h-[500px]">
@@ -118,25 +112,17 @@ export function NoteViewPanel({ note, onEdit, onDelete }: ViewProps) {
         <div>
           <div className="flex items-center gap-1.5 mb-1">
             {note.mood && <span className="text-lg">{note.mood}</span>}
-            <h2 className="text-lg font-bold text-gray-800">
-              {note.title || t('untitled')}
-            </h2>
+            <h2 className="text-lg font-bold text-gray-800">{note.title || t('untitled')}</h2>
           </div>
           <p className="text-xs text-gray-400">
             {dateLabel(note.updated_at)} {t('edited')}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={onEdit}
-            className="text-gray-400 hover:text-indigo-500 transition-colors"
-          >
+          <button onClick={onEdit} className="text-gray-400 hover:text-indigo-500 transition-colors">
             <Pencil size={15} />
           </button>
-          <button
-            onClick={onDelete}
-            className="text-gray-300 hover:text-red-400 transition-colors"
-          >
+          <button onClick={onDelete} className="text-gray-300 hover:text-red-400 transition-colors">
             <Trash2 size={15} />
           </button>
         </div>
@@ -157,9 +143,7 @@ export function NoteEmptyPanel({ onNew }: { onNew: () => void }) {
     >
       <div className="text-center">
         <div className="text-3xl mb-2">✍️</div>
-        <p className="text-sm text-gray-400 whitespace-pre-line">
-          {t('selectOrNew')}
-        </p>
+        <p className="text-sm text-gray-400 whitespace-pre-line">{t('selectOrNew')}</p>
       </div>
     </div>
   );

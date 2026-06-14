@@ -14,9 +14,7 @@ export default function LandingFooter() {
   return (
     <footer className="border-t border-white/6 py-8 px-6 max-w-3xl mx-auto flex items-center justify-between flex-wrap gap-4">
       <div className="flex items-center gap-2">
-        <div className="w-5 h-5 bg-indigo-500 rounded-md flex items-center justify-center text-xs">
-          🧭
-        </div>
+        <div className="w-5 h-5 bg-indigo-500 rounded-md flex items-center justify-center text-xs">🧭</div>
         <span className="text-sm font-bold text-white">Growpath</span>
       </div>
       <div className="flex gap-5">

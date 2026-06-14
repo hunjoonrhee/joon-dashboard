@@ -535,6 +535,13 @@
     "recordDate": "Datum",
     "recordDuration": "Dauer",
     "recordTags": "Tags (automatisch)",
-    "minutes": "{n} Min."
+    "minutes": "{n} Min.",
+    "aiTutorLabel": "KI-Tutor",
+    "sessionReadyTitle": "🎉 Sitzung fast abgeschlossen",
+    "endAndSave": "{endSession} & Protokoll speichern",
+    "errorMessage": "Ein Fehler ist aufgetreten. Bitte erneut versuchen.",
+    "quizCorrect": "Richtig: {answer}",
+    "quizWrong": "Falsch: {answer}. Richtige Antwort: {correct}.",
+    "backBtn": "← Zurück"
   }
 }

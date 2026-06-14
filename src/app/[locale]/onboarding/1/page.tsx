@@ -63,14 +63,8 @@ export default function Onboarding1() {
               }`}
             >
               <div className="text-2xl mb-2">{d.icon}</div>
-              <div className="text-sm font-semibold text-white mb-0.5">
-                {d.label}
-              </div>
-              <div
-                className={`text-xs ${selected === d.key ? 'text-indigo-300' : 'text-gray-500'}`}
-              >
-                {d.sub}
-              </div>
+              <div className="text-sm font-semibold text-white mb-0.5">{d.label}</div>
+              <div className={`text-xs ${selected === d.key ? 'text-indigo-300' : 'text-gray-500'}`}>{d.sub}</div>
             </button>
           ))}
         </div>

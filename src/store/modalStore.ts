@@ -10,8 +10,6 @@ interface ModalStore {
 export const useModalStore = create<ModalStore>((set) => ({
   studyModalOpen: false,
   studyModalInitialTitle: '',
-  openStudyModal: (title = '') =>
-    set({ studyModalOpen: true, studyModalInitialTitle: title }),
-  closeStudyModal: () =>
-    set({ studyModalOpen: false, studyModalInitialTitle: '' }),
+  openStudyModal: (title = '') => set({ studyModalOpen: true, studyModalInitialTitle: title }),
+  closeStudyModal: () => set({ studyModalOpen: false, studyModalInitialTitle: '' }),
 }));

@@ -58,9 +58,7 @@ export default function Sidebar() {
         className="flex items-center gap-2.5 px-5 h-[57px] border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
         onClick={() => navigate('/dashboard')}
       >
-        <div className="w-7 h-7 bg-indigo-500 rounded-lg flex items-center justify-center text-sm">
-          🧭
-        </div>
+        <div className="w-7 h-7 bg-indigo-500 rounded-lg flex items-center justify-center text-sm">🧭</div>
         <span className="text-sm font-bold text-gray-800">Growpath</span>
       </div>
 
@@ -76,11 +74,7 @@ export default function Sidebar() {
             }`}
           >
             <span className="text-base w-5 text-center">{item.icon}</span>
-            <span
-              className={`text-sm font-medium ${isActive(item.path) ? 'font-semibold' : ''}`}
-            >
-              {t(item.key)}
-            </span>
+            <span className={`text-sm font-medium ${isActive(item.path) ? 'font-semibold' : ''}`}>{t(item.key)}</span>
           </button>
         ))}
       </nav>
@@ -91,12 +85,8 @@ export default function Sidebar() {
             {name.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
-            <div className="text-sm font-semibold text-gray-800 truncate">
-              {name}
-            </div>
-            {role && (
-              <div className="text-xs text-gray-400 truncate">{role}</div>
-            )}
+            <div className="text-sm font-semibold text-gray-800 truncate">{name}</div>
+            {role && <div className="text-xs text-gray-400 truncate">{role}</div>}
           </div>
         </div>
 

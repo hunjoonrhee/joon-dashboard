@@ -37,9 +37,7 @@ function FeatureList({
     <ul className="flex flex-col gap-2.5 mb-6">
       {features.map((f) => (
         <li key={f.labelKey} className="flex items-center gap-2 text-xs text-gray-400">
-          <span className={f.included ? 'text-green-400' : 'text-gray-600'}>
-            {f.included ? '✓' : '✗'}
-          </span>
+          <span className={f.included ? 'text-green-400' : 'text-gray-600'}>{f.included ? '✓' : '✗'}</span>
           {t(f.labelKey)}
         </li>
       ))}
@@ -55,20 +53,14 @@ export default function LandingPricing() {
   return (
     <section className="max-w-3xl mx-auto px-6 py-20">
       <div className="text-center mb-12">
-        <p className="text-xs font-bold tracking-widest uppercase text-indigo-400 mb-3">
-          {t('pricingEyebrow')}
-        </p>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-          {t('pricingTitle')}
-        </h2>
+        <p className="text-xs font-bold tracking-widest uppercase text-indigo-400 mb-3">{t('pricingEyebrow')}</p>
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">{t('pricingTitle')}</h2>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {/* Free */}
         <div className="bg-gray-900 border border-white/6 rounded-2xl p-6">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">
-            {t('freeTier')}
-          </p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">{t('freeTier')}</p>
           <div className="mb-1">
             <span className="text-3xl font-extrabold text-white">{t('freePrice')}</span>
             <span className="text-sm text-gray-500">{t('freePer')}</span>
@@ -88,9 +80,7 @@ export default function LandingPricing() {
           <div className="absolute -top-px left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[10px] font-bold px-3 py-1 rounded-b-lg">
             {t('proPopular')}
           </div>
-          <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-4">
-            {t('proTier')}
-          </p>
+          <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-4">{t('proTier')}</p>
           <div className="mb-1">
             <span className="text-3xl font-extrabold text-white">{t('proPrice')}</span>
             <span className="text-sm text-gray-500">{t('proPer')}</span>

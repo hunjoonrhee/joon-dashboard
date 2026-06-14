@@ -57,9 +57,7 @@ export default function SessionLog({ sessions, onRefresh }: Props) {
     const payload = {
       date: form.date,
       title: form.title,
-      duration_minutes: form.duration_minutes
-        ? parseInt(form.duration_minutes)
-        : null,
+      duration_minutes: form.duration_minutes ? parseInt(form.duration_minutes) : null,
       tags: form.tags
         .split(',')
         .map((t) => t.trim())
@@ -89,13 +87,8 @@ export default function SessionLog({ sessions, onRefresh }: Props) {
     <>
       <div className="bg-white rounded-xl border border-gray-200 p-4">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-sm font-medium text-gray-700">
-            최근 공부/코딩 기록
-          </p>
-          <button
-            onClick={() => open('add')}
-            className="text-indigo-500 hover:text-indigo-700 transition-colors"
-          >
+          <p className="text-sm font-medium text-gray-700">최근 공부/코딩 기록</p>
+          <button onClick={() => open('add')} className="text-indigo-500 hover:text-indigo-700 transition-colors">
             <Plus size={18} />
           </button>
         </div>
@@ -104,10 +97,7 @@ export default function SessionLog({ sessions, onRefresh }: Props) {
         ) : (
           <div className="flex flex-col divide-y divide-gray-100">
             {recent.map((s) => (
-              <div
-                key={s.id}
-                className="flex items-start justify-between py-2.5"
-              >
+              <div key={s.id} className="flex items-start justify-between py-2.5">
                 <div className="flex items-start gap-2.5 flex-1 min-w-0">
                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 flex-shrink-0" />
                   <div className="min-w-0">
@@ -123,10 +113,7 @@ export default function SessionLog({ sessions, onRefresh }: Props) {
                     </p>
                     <div className="flex gap-1 flex-wrap mt-1">
                       {s.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className={`text-xs px-2 py-0.5 rounded-full ${getTagColor(tag)}`}
-                        >
+                        <span key={tag} className={`text-xs px-2 py-0.5 rounded-full ${getTagColor(tag)}`}>
                           {tag}
                         </span>
                       ))}
@@ -146,10 +133,7 @@ export default function SessionLog({ sessions, onRefresh }: Props) {
       </div>
 
       {modal && (
-        <Modal
-          title={modal === 'add' ? '기록 추가' : '기록 수정'}
-          onClose={close}
-        >
+        <Modal title={modal === 'add' ? '기록 추가' : '기록 수정'} onClose={close}>
           <div className="flex flex-col gap-3">
             <div>
               <label className="text-xs text-gray-500 mb-1 block">날짜</label>
@@ -171,23 +155,17 @@ export default function SessionLog({ sessions, onRefresh }: Props) {
               />
             </div>
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">
-                시간 (분)
-              </label>
+              <label className="text-xs text-gray-500 mb-1 block">시간 (분)</label>
               <input
                 type="number"
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
                 placeholder="60"
                 value={form.duration_minutes}
-                onChange={(e) =>
-                  setForm({ ...form, duration_minutes: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, duration_minutes: e.target.value })}
               />
             </div>
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">
-                태그 (쉼표로 구분)
-              </label>
+              <label className="text-xs text-gray-500 mb-1 block">태그 (쉼표로 구분)</label>
               <input
                 type="text"
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
@@ -199,20 +177,14 @@ export default function SessionLog({ sessions, onRefresh }: Props) {
           </div>
           <div className="flex justify-between pt-1">
             {modal === 'edit' ? (
-              <button
-                onClick={remove}
-                className="text-red-400 hover:text-red-600 transition-colors"
-              >
+              <button onClick={remove} className="text-red-400 hover:text-red-600 transition-colors">
                 <Trash2 size={16} />
               </button>
             ) : (
               <div />
             )}
             <div className="flex gap-2">
-              <button
-                onClick={close}
-                className="text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5"
-              >
+              <button onClick={close} className="text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5">
                 취소
               </button>
               <button

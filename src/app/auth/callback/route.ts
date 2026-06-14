@@ -45,8 +45,7 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    const { error, data } =
-      await supabaseWithResponse.auth.exchangeCodeForSession(code);
+    const { error, data } = await supabaseWithResponse.auth.exchangeCodeForSession(code);
 
     if (!error && data.user) {
       // 온보딩 완료 여부 확인
@@ -71,10 +70,7 @@ export async function GET(request: NextRequest) {
 
       await supabaseWithResponse
         .from('settings')
-        .upsert(
-          { key: 'name', value: nickname, user_id: data.user.id },
-          { onConflict: 'key,user_id' }
-        );
+        .upsert({ key: 'name', value: nickname, user_id: data.user.id }, { onConflict: 'key,user_id' });
 
       // /try에서 온 경우 sessionStorage에 ob_stages가 있으면 온보딩 3단계로
       // (sessionStorage는 서버에서 읽을 수 없으므로 클라이언트에서 처리)

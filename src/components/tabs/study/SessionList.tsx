@@ -29,12 +29,7 @@ function TilBadge({ sessionId }: { sessionId: string }) {
   );
 }
 
-export default function SessionList({
-  sessions,
-  grouped,
-  onAdd,
-  onEdit,
-}: Props) {
+export default function SessionList({ sessions, grouped, onAdd, onEdit }: Props) {
   const t = useTranslations('study');
   const router = useRouter();
   const locale = useLocale();
@@ -58,13 +53,8 @@ export default function SessionList({
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-          {t('sessionListTitle')}
-        </p>
-        <button
-          onClick={onAdd}
-          className="text-indigo-500 hover:text-indigo-700 transition-colors"
-        >
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t('sessionListTitle')}</p>
+        <button onClick={onAdd} className="text-indigo-500 hover:text-indigo-700 transition-colors">
           <Plus size={16} />
         </button>
       </div>
@@ -80,21 +70,12 @@ export default function SessionList({
               onClick={() => router.push(`/${locale}/sessions/${s.id}`)}
             >
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate">
-                  {s.title}
-                </p>
+                <p className="text-sm font-medium text-gray-800 truncate">{s.title}</p>
                 <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                   <span className="text-xs text-gray-400">{s.date}</span>
-                  {s.duration_minutes && (
-                    <span className="text-xs text-gray-400">
-                      · {s.duration_minutes}분
-                    </span>
-                  )}
+                  {s.duration_minutes && <span className="text-xs text-gray-400">· {s.duration_minutes}분</span>}
                   {s.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className={`text-xs px-1.5 py-0.5 rounded-full ${getTagColor(tag)}`}
-                    >
+                    <span key={tag} className={`text-xs px-1.5 py-0.5 rounded-full ${getTagColor(tag)}`}>
                       {tag}
                     </span>
                   ))}

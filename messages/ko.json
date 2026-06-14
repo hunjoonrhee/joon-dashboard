@@ -535,6 +535,13 @@
     "recordDate": "날짜",
     "recordDuration": "시간",
     "recordTags": "태그 (자동)",
-    "minutes": "{n}분"
+    "minutes": "{n}분",
+    "aiTutorLabel": "AI 튜터",
+    "sessionReadyTitle": "🎉 세션 마무리 준비됐어요",
+    "endAndSave": "{endSession} & 기록 저장",
+    "errorMessage": "오류가 발생했어요. 다시 시도해주세요.",
+    "quizCorrect": "정답: {answer}",
+    "quizWrong": "오답 선택: {answer}. 정답은 {correct}입니다.",
+    "backBtn": "← 뒤로"
   }
 }

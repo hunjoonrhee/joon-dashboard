@@ -3,15 +3,7 @@
 import AddSessionModal from '@/components/AddSessionModal';
 import { calcMaxStreak, calcStreak } from '@/lib/streak';
 import { supabase } from '@/lib/supabase';
-import type {
-  AiRoadmap,
-  Goal,
-  Note,
-  ProjectTask,
-  Session,
-  TodayItem,
-  Topic,
-} from '@/types';
+import type { AiRoadmap, Goal, Note, ProjectTask, Session, TodayItem, Topic } from '@/types';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import CoachCard from '../CoachCard';
@@ -65,32 +57,20 @@ export default function HomeTab({
   const maxStreak = calcMaxStreak(sessions);
 
   const focusGoals = goals.filter((g) => g.is_focus);
-  const totalTopics = topics.filter((t) =>
-    focusGoals.some((g) => g.id === t.goal_id)
-  );
+  const totalTopics = topics.filter((t) => focusGoals.some((g) => g.id === t.goal_id));
   const completedTopics = totalTopics.filter((t) => t.completed);
-  const overallPct =
-    totalTopics.length === 0
-      ? 0
-      : Math.round((completedTopics.length / totalTopics.length) * 100);
+  const overallPct = totalTopics.length === 0 ? 0 : Math.round((completedTopics.length / totalTopics.length) * 100);
 
   const thisMonth = new Date().getMonth();
-  const monthCount = sessions.filter(
-    (s) => new Date(s.date).getMonth() === thisMonth
-  ).length;
+  const monthCount = sessions.filter((s) => new Date(s.date).getMonth() === thisMonth).length;
 
   // 갭 분석 계산 — 채택된 로드맵 기준 (공부기록 태그 + 목표 태그)
-  const studiedTags = new Set([
-    ...sessions.flatMap((s) => s.tags),
-    ...goals.flatMap((g) => g.tags ?? []),
-  ]);
+  const studiedTags = new Set([...sessions.flatMap((s) => s.tags), ...goals.flatMap((g) => g.tags ?? [])]);
   const gapPct = (() => {
     if (!adoptedRoadmap) return null;
     const allSkills = adoptedRoadmap.stages.flatMap((s) => s.skills);
     if (allSkills.length === 0) return null;
-    const studied = allSkills.filter((sk) =>
-      sk.tags.some((tag) => studiedTags.has(tag))
-    ).length;
+    const studied = allSkills.filter((sk) => sk.tags.some((tag) => studiedTags.has(tag))).length;
     return Math.round((studied / allSkills.length) * 100);
   })();
 
@@ -104,8 +84,7 @@ export default function HomeTab({
     .filter((t) => !todayItems.some((ti) => ti.source_id === t.id))
     .slice(0, 2);
 
-  const getTopicGoalName = (topic: Topic) =>
-    focusGoals.find((g) => g.id === topic.goal_id)?.name ?? '';
+  const getTopicGoalName = (topic: Topic) => focusGoals.find((g) => g.id === topic.goal_id)?.name ?? '';
 
   const weeklyStats = (() => {
     const today = new Date();
@@ -118,15 +97,7 @@ export default function HomeTab({
       return sd >= monday && sd <= today;
     });
     return {
-      hours:
-        Math.round(
-          (weeklySessions.reduce(
-            (sum, s) => sum + (s.duration_minutes ?? 0),
-            0
-          ) /
-            60) *
-            10
-        ) / 10,
+      hours: Math.round((weeklySessions.reduce((sum, s) => sum + (s.duration_minutes ?? 0), 0) / 60) * 10) / 10,
       tilCount: weeklySessions.filter((s) => s.til).length,
     };
   })();
@@ -142,10 +113,7 @@ export default function HomeTab({
       const dateStr = d.toISOString().split('T')[0];
       return {
         label: d
-          .toLocaleDateString(
-            locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
-            { weekday: 'short' }
-          )
+          .toLocaleDateString(locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US', { weekday: 'short' })
           .slice(0, 2),
         hasSession: sessions.some((s) => s.date === dateStr),
         isToday: d.toDateString() === today.toDateString(),
@@ -155,15 +123,9 @@ export default function HomeTab({
 
   const toggleToday = async (item: TodayItem) => {
     const nowCompleted = !item.completed;
-    await supabase
-      .from('today_items')
-      .update({ completed: nowCompleted })
-      .eq('id', item.id);
+    await supabase.from('today_items').update({ completed: nowCompleted }).eq('id', item.id);
     if (nowCompleted && item.source_type === 'topic' && item.source_id) {
-      await supabase
-        .from('topics')
-        .update({ completed: true })
-        .eq('id', item.source_id);
+      await supabase.from('topics').update({ completed: true }).eq('id', item.source_id);
     }
     if (nowCompleted) {
       setCompletedItemName(item.name);
@@ -174,13 +136,9 @@ export default function HomeTab({
 
   const achievements: string[] = [];
   if (completedTopics.length > 0)
-    achievements.push(
-      `🎉 ${focusGoals[0]?.name ?? ''} ${t('achievementTopics', { count: completedTopics.length })}`
-    );
-  if (streak >= 3)
-    achievements.push(`🔥 ${t('achievementStreak', { count: streak })}`);
-  if (monthCount >= 5)
-    achievements.push(`📈 ${t('achievementMonth', { count: monthCount })}`);
+    achievements.push(`🎉 ${focusGoals[0]?.name ?? ''} ${t('achievementTopics', { count: completedTopics.length })}`);
+  if (streak >= 3) achievements.push(`🔥 ${t('achievementStreak', { count: streak })}`);
+  if (monthCount >= 5) achievements.push(`📈 ${t('achievementMonth', { count: monthCount })}`);
 
   return (
     <div className="flex flex-col gap-4">
@@ -202,12 +160,7 @@ export default function HomeTab({
           completedTopicsCount={completedTopics.length}
         />
       </div>
-      <CoachCard
-        sessions={sessions}
-        goals={goals}
-        adoptedRoadmap={adoptedRoadmap}
-        isPro={true}
-      />
+      <CoachCard sessions={sessions} goals={goals} adoptedRoadmap={adoptedRoadmap} isPro={true} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <TodayCard
@@ -218,10 +171,7 @@ export default function HomeTab({
           onToggle={toggleToday}
           onRefresh={onRefresh}
         />
-        <TilPreviewCard
-          sessions={sessions}
-          onAddStudy={() => setShowSessionModal(true)}
-        />
+        <TilPreviewCard sessions={sessions} onAddStudy={() => setShowSessionModal(true)} />
         <NotesPreviewCard notes={notes} />
       </div>
 
@@ -233,17 +183,9 @@ export default function HomeTab({
               className="text-sm font-medium px-3 py-2.5 rounded-xl border"
               style={{
                 background:
-                  i === 0
-                    ? 'rgba(16,185,129,0.08)'
-                    : i === 1
-                      ? 'rgba(249,115,22,0.08)'
-                      : 'rgba(99,102,241,0.08)',
+                  i === 0 ? 'rgba(16,185,129,0.08)' : i === 1 ? 'rgba(249,115,22,0.08)' : 'rgba(99,102,241,0.08)',
                 borderColor:
-                  i === 0
-                    ? 'rgba(16,185,129,0.2)'
-                    : i === 1
-                      ? 'rgba(249,115,22,0.2)'
-                      : 'rgba(99,102,241,0.2)',
+                  i === 0 ? 'rgba(16,185,129,0.2)' : i === 1 ? 'rgba(249,115,22,0.2)' : 'rgba(99,102,241,0.2)',
                 color: i === 0 ? '#065f46' : i === 1 ? '#9a3412' : '#312e81',
               }}
             >

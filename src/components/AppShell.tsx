@@ -35,16 +35,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   const today =
     typeof window !== 'undefined'
-      ? new Date().toLocaleDateString(
-          locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US',
-          { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }
-        )
+      ? new Date().toLocaleDateString(locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          weekday: 'short',
+        })
       : '';
 
-  const headerButtonConfig: Record<
-    string,
-    { label: string; modal: 'study' | 'goal' | 'project' | false }
-  > = {
+  const headerButtonConfig: Record<string, { label: string; modal: 'study' | 'goal' | 'project' | false }> = {
     '': { label: `+ ${tNav('study')}`, modal: 'study' },
     study: { label: `+ ${tNav('study')}`, modal: 'study' },
     notes: { label: `+ ${tCommon('add')} ${tNav('notes')}`, modal: false },
@@ -99,19 +98,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <main className="flex-1 bg-gray-50">{children}</main>
         </div>
 
-        {studyModalOpen && (
-          <AddSessionModal
-            onClose={closeStudyModal}
-            onSaved={closeStudyModal}
-          />
-        )}
+        {studyModalOpen && <AddSessionModal onClose={closeStudyModal} onSaved={closeStudyModal} />}
 
         {showGoalModal && (
-          <GoalModal
-            mode="add"
-            onClose={() => setShowGoalModal(false)}
-            onSaved={() => setShowGoalModal(false)}
-          />
+          <GoalModal mode="add" onClose={() => setShowGoalModal(false)} onSaved={() => setShowGoalModal(false)} />
         )}
       </div>
     </ToastProvider>

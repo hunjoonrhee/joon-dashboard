@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContentt';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent';
 
 const SYSTEM_PROMPT = `You are a personal learning coach AI.
 Analyze the user's study data and provide actionable coaching insights.
@@ -24,7 +23,7 @@ JSON schema:
       "type": "docs" | "youtube" | "book" | "course",
       "title": "string",
       "description": "string (max 15 words)",
-      "url": "string (real URL if known, otherwise empty string)"
+      "searchQuery": "string (e.g. 'Angular Signals official docs angular.dev')"
     }
   ],
   "pace": {
@@ -39,29 +38,27 @@ JSON schema:
   }
 }
 
-For resources: provide 2 to 3 real, specific learning resources for the recommended skill. Prioritize official docs, then well-known YouTube channels, then books. Only include URLs you are confident are correct — otherwise leave url as empty string.`;
+For resources: provide 2-3 learning resources with ONLY title, description and searchQuery.
+DO NOT include any URLs — they cause hallucination errors.
+Instead provide a precise searchQuery the user can use to find the resource on Google.
+Example searchQuery: "Angular Signals official docs angular.dev 2024"
+Example searchQuery: "Fireship NgRx tutorial youtube"
+Example searchQuery: "Clean Architecture Robert Martin book"`;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return NextResponse.json(
-      { error: 'GEMINI_API_KEY not set' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'GEMINI_API_KEY not set' }, { status: 500 });
   }
 
-  const { sessions, adoptedRoadmap, goals, locale } = await req.json();
-  const lang =
-    locale === 'de' ? 'German' : locale === 'en' ? 'English' : 'Korean';
+  const { sessions, adoptedRoadmap, goals, locale, careerLevel } = await req.json();
+  const lang = locale === 'de' ? 'German' : locale === 'en' ? 'English' : 'Korean';
 
-  // 최근 30일 세션 태그 분포 계산
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  const recentSessions = sessions.filter(
-    (s: { date: string }) => new Date(s.date) >= thirtyDaysAgo
-  );
+  const recentSessions = sessions.filter((s: { date: string }) => new Date(s.date) >= thirtyDaysAgo);
   const tagFrequency: Record<string, number> = {};
   recentSessions.forEach((s: { tags: string[] }) => {
     s.tags.forEach((tag: string) => {
@@ -69,39 +66,14 @@ export async function POST(req: NextRequest) {
     });
   });
 
-  // 갭 분석 — 미달성 스킬 추출
   const gapSkills = adoptedRoadmap
-    ? adoptedRoadmap.stages.flatMap(
-        (stage: { skills: { name: string; tags: string[] }[] }) =>
-          stage.skills
-            .filter((sk) => !sk.tags.some((tag: string) => tagFrequency[tag]))
-            .map((sk) => sk.name)
+    ? adoptedRoadmap.stages.flatMap((stage: { skills: { name: string; tags: string[] }[] }) =>
+        stage.skills.filter((sk) => !sk.tags.some((tag: string) => tagFrequency[tag])).map((sk) => sk.name)
       )
     : [];
 
-  // 주간 세션 수 계산
   const weeklyAvg = recentSessions.length / 4.3;
 
-  const userPrompt = `Output language: ${lang}
-
-Study data:
-- Recent 30 days: ${recentSessions.length} sessions
-- Weekly average: ${weeklyAvg.toFixed(1)} sessions/week
-- Tag frequency (last 30 days): ${JSON.stringify(tagFrequency)}
-- Gap skills (not yet studied): ${gapSkills.slice(0, 10).join(', ')}
-- Roadmap goal: ${adoptedRoadmap?.goal ?? 'Not set'}
-- Total roadmap skills: ${adoptedRoadmap?.stages.flatMap((s: { skills: unknown[] }) => s.skills).length ?? 0}
-- Active goals: ${goals
-    .filter((g: { status: string }) => g.status === 'in_progress')
-    .map((g: { name: string }) => g.name)
-    .join(', ')}
-
-Based on this data:
-1. What ONE skill should the user study today and why?
-2. At current pace, how many months to complete the roadmap? What if they study 1 more session/week?
-3. Is there a concerning pattern in their study habits? (e.g. avoiding certain skills, inconsistent pace)`;
-
-  // 데이터 부족 처리
   if (recentSessions.length < 3) {
     const msg =
       lang === 'German'
@@ -111,6 +83,28 @@ Based on this data:
           : '공부 기록이 부족해. 최소 3회 이상 기록하면 분석해줄게.';
     return NextResponse.json({ insufficient: true, insufficientMessage: msg });
   }
+
+  const userPrompt = `Output language: ${lang}
+
+User profile:
+- Career level: ${careerLevel ?? 'Not specified'}
+- Roadmap goal: ${adoptedRoadmap?.goal ?? 'Not set'}
+
+Study data:
+- Recent 30 days: ${recentSessions.length} sessions
+- Weekly average: ${weeklyAvg.toFixed(1)} sessions/week
+- Tag frequency (last 30 days): ${JSON.stringify(tagFrequency)}
+- Gap skills (not yet studied): ${gapSkills.slice(0, 10).join(', ')}
+- Total roadmap skills: ${adoptedRoadmap?.stages.flatMap((s: { skills: unknown[] }) => s.skills).length ?? 0}
+- Active goals: ${goals
+    .filter((g: { status: string }) => g.status === 'in_progress')
+    .map((g: { name: string }) => g.name)
+    .join(', ')}
+
+Based on this data:
+1. What ONE skill should the user study today and why? Consider their career level — don't recommend basics if they're experienced.
+2. At current pace, how many months to complete the roadmap? What if they study 1 more session/week?
+3. Is there a concerning pattern in their study habits?`;
 
   const requestBody = JSON.stringify({
     system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
@@ -135,8 +129,8 @@ Based on this data:
     }
 
     if (!res.ok) {
-      const err = await res.text();
-      console.error('Gemini coach error:', err);
+      const errText = await res.text();
+      console.error('Gemini coach error:', res.status, errText);
       return NextResponse.json({ error: 'Gemini API error' }, { status: 502 });
     }
 
@@ -151,18 +145,12 @@ Based on this data:
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       console.error('No JSON, raw:', raw);
-      return NextResponse.json(
-        { error: 'Invalid AI response', raw: raw.slice(0, 300) },
-        { status: 502 }
-      );
+      return NextResponse.json({ error: 'Invalid AI response' }, { status: 502 });
     }
 
     return NextResponse.json(JSON.parse(jsonMatch[0]));
   } catch (e) {
     console.error('Coach route error:', e);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -1,45 +1,67 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent';
 
-const SYSTEM_PROMPT = `You are a personal 1:1 AI tutor. Your job is to teach the user a specific topic interactively.
+const buildSystemPrompt = (userContext: {
+  careerLevel: string;
+  recentTags: string[];
+  gapSkills: string[];
+  projects: string[];
+  goal: string;
+}) => `You are a personal 1:1 AI tutor. Your job is to teach a specific topic to THIS specific user.
 
-Rules:
-- Teach in a conversational, friendly tone.
-- Start by giving a clear, concise explanation of the topic (max 80 words).
-- After explaining a concept, ask ONE quiz question to check understanding.
-- Format quizzes as JSON inside your response like this:
-  [QUIZ]{"question":"...","options":["A","B","C"],"correct":1}[/QUIZ]
-  (correct is 0-indexed)
-- When the user answers correctly, praise them briefly and move to the next concept.
-- When the user answers incorrectly, explain why and try again.
-- Keep responses under 100 words unless explaining something complex.
-- Output language must match the locale specified.
-- After covering 3-5 concepts, provide a session summary with covered concepts as a JSON block:
-  [SUMMARY]{"concepts":["concept1","concept2"],"tags":["tag1","tag2"]}[/SUMMARY]`;
+User context:
+- Career level: ${userContext.careerLevel}
+- Learning goal: ${userContext.goal}
+- Recently studied: ${userContext.recentTags.slice(0, 10).join(', ')}
+- Skill gaps: ${userContext.gapSkills.slice(0, 8).join(', ')}
+- Active projects: ${userContext.projects.join(', ')}
+
+Teaching rules:
+- NEVER explain basics the user already knows from their career level and recent study tags.
+- Connect new concepts to what they already know (e.g. "You know RxJS — Signals work similarly but...")
+- Reference their actual projects when giving examples (e.g. "In your Growpath project, you could use this by...")
+- Start at the RIGHT level — a 4-year experienced dev doesn't need "what is a variable" explanations.
+- Keep explanations under 80 words unless the topic is complex.
+- After each concept, ask ONE targeted quiz question that matches their level.
+- Format quizzes as JSON: [QUIZ]{"question":"...","options":["A","B","C","D"],"correct":1}[/QUIZ] (0-indexed)
+- When correct: praise briefly and move to the next concept.
+- When incorrect: explain why and give another chance.
+- After covering 3-5 concepts, provide a session summary: [SUMMARY]{"concepts":["concept1","concept2"],"tags":["tag1","tag2"]}[/SUMMARY]
+- Output language must match the locale specified.`;
 
 interface Message {
   role: 'user' | 'model';
   parts: { text: string }[];
 }
 
+interface UserContext {
+  careerLevel: string;
+  recentTags: string[];
+  gapSkills: string[];
+  projects: string[];
+  goal: string;
+}
+
 export async function POST(req: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return NextResponse.json(
-      { error: 'GEMINI_API_KEY not set' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'GEMINI_API_KEY not set' }, { status: 500 });
   }
 
-  const { topic, messages, locale } = await req.json();
-  const lang =
-    locale === 'de' ? 'German' : locale === 'en' ? 'English' : 'Korean';
+  const { topic, messages, locale, userContext } = await req.json();
+  const lang = locale === 'de' ? 'German' : locale === 'en' ? 'English' : 'Korean';
+
+  const context: UserContext = userContext ?? {
+    careerLevel: 'Unknown',
+    recentTags: [],
+    gapSkills: [],
+    projects: [],
+    goal: topic,
+  };
 
   const history: Message[] = messages ?? [];
 
-  // 첫 메시지면 튜터 세션 시작 프롬프트 주입
   const contents: Message[] =
     history.length === 0
       ? [
@@ -47,7 +69,7 @@ export async function POST(req: NextRequest) {
             role: 'user',
             parts: [
               {
-                text: `Output language: ${lang}\n\nTeach me about: ${topic}\n\nStart with a brief explanation, then quiz me.`,
+                text: `Output language: ${lang}\n\nTeach me about: ${topic}\n\nStart with a brief explanation tailored to my level, then quiz me.`,
               },
             ],
           },
@@ -59,15 +81,15 @@ export async function POST(req: NextRequest) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        system_instruction: { parts: [{ text: buildSystemPrompt(context) }] },
         contents,
         generationConfig: { temperature: 0.7, maxOutputTokens: 1024 },
       }),
     });
 
     if (!res.ok) {
-      const err = await res.text();
-      console.error('Gemini tutor error:', err);
+      const errText = await res.text();
+      console.error('Gemini tutor error:', res.status, errText);
       return NextResponse.json({ error: 'Gemini API error' }, { status: 502 });
     }
 
@@ -78,15 +100,12 @@ export async function POST(req: NextRequest) {
       .map((p: { text: string }) => p.text)
       .join('');
 
-    // 퀴즈 파싱
     const quizMatch = raw.match(/\[QUIZ\]([\s\S]*?)\[\/QUIZ\]/);
     const quiz = quizMatch ? JSON.parse(quizMatch[1]) : null;
 
-    // 세션 요약 파싱
     const summaryMatch = raw.match(/\[SUMMARY\]([\s\S]*?)\[\/SUMMARY\]/);
     const summary = summaryMatch ? JSON.parse(summaryMatch[1]) : null;
 
-    // 마커 제거한 순수 텍스트
     const text = raw
       .replace(/\[QUIZ\][\s\S]*?\[\/QUIZ\]/g, '')
       .replace(/\[SUMMARY\][\s\S]*?\[\/SUMMARY\]/g, '')
@@ -95,9 +114,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ text, quiz, summary });
   } catch (e) {
     console.error('Tutor route error:', e);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -33,11 +33,7 @@ export default function SessionDetail() {
     const fetch = async () => {
       const [{ data: s }, { data: items }] = await Promise.all([
         supabase.from('sessions').select('*').eq('id', id).single(),
-        supabase
-          .from('study_items')
-          .select('*')
-          .eq('session_id', id)
-          .order('created_at'),
+        supabase.from('study_items').select('*').eq('session_id', id).order('created_at'),
       ]);
       if (s) {
         setSession(s);
@@ -61,9 +57,7 @@ export default function SessionDetail() {
     const payload = {
       title: infoDraft.title,
       date: infoDraft.date,
-      duration_minutes: infoDraft.duration_minutes
-        ? parseInt(infoDraft.duration_minutes)
-        : null,
+      duration_minutes: infoDraft.duration_minutes ? parseInt(infoDraft.duration_minutes) : null,
       tags: infoDraft.tags
         .split(',')
         .map((t) => t.trim())
@@ -157,10 +151,7 @@ export default function SessionDetail() {
               </button>
             ) : (
               <div className="flex gap-2">
-                <button
-                  onClick={cancelInfo}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
+                <button onClick={cancelInfo} className="text-gray-400 hover:text-gray-600 transition-colors">
                   <X size={15} />
                 </button>
                 <button
@@ -181,29 +172,21 @@ export default function SessionDetail() {
                   type="text"
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
                   value={infoDraft.title}
-                  onChange={(e) =>
-                    setInfoDraft({ ...infoDraft, title: e.target.value })
-                  }
+                  onChange={(e) => setInfoDraft({ ...infoDraft, title: e.target.value })}
                 />
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="text-xs text-gray-500 mb-1 block">
-                    날짜
-                  </label>
+                  <label className="text-xs text-gray-500 mb-1 block">날짜</label>
                   <input
                     type="date"
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
                     value={infoDraft.date}
-                    onChange={(e) =>
-                      setInfoDraft({ ...infoDraft, date: e.target.value })
-                    }
+                    onChange={(e) => setInfoDraft({ ...infoDraft, date: e.target.value })}
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="text-xs text-gray-500 mb-1 block">
-                    시간 (분)
-                  </label>
+                  <label className="text-xs text-gray-500 mb-1 block">시간 (분)</label>
                   <input
                     type="number"
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
@@ -218,39 +201,26 @@ export default function SessionDetail() {
                 </div>
               </div>
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">
-                  태그 (쉼표로 구분)
-                </label>
+                <label className="text-xs text-gray-500 mb-1 block">태그 (쉼표로 구분)</label>
                 <input
                   type="text"
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
                   value={infoDraft.tags}
-                  onChange={(e) =>
-                    setInfoDraft({ ...infoDraft, tags: e.target.value })
-                  }
+                  onChange={(e) => setInfoDraft({ ...infoDraft, tags: e.target.value })}
                 />
               </div>
             </div>
           ) : (
             <>
-              <h1 className="text-lg font-semibold text-gray-800 mb-2">
-                {session.title}
-              </h1>
+              <h1 className="text-lg font-semibold text-gray-800 mb-2">{session.title}</h1>
               <div className="flex items-center gap-3 text-sm text-gray-500">
-                <span>
-                  {new Date(session.date).toLocaleDateString('ko-KR')}
-                </span>
-                {session.duration_minutes && (
-                  <span>· {session.duration_minutes}분</span>
-                )}
+                <span>{new Date(session.date).toLocaleDateString('ko-KR')}</span>
+                {session.duration_minutes && <span>· {session.duration_minutes}분</span>}
               </div>
               {session.tags.length > 0 && (
                 <div className="flex gap-1.5 flex-wrap mt-3">
                   {session.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className={`text-xs px-2 py-0.5 rounded-full ${getTagColor(tag)}`}
-                    >
+                    <span key={tag} className={`text-xs px-2 py-0.5 rounded-full ${getTagColor(tag)}`}>
                       {tag}
                     </span>
                   ))}
@@ -285,24 +255,16 @@ export default function SessionDetail() {
                   if (e.key === 'Escape') setAddingKeyword(false);
                 }}
               />
-              <button
-                onClick={addKeyword}
-                className="text-indigo-500 hover:text-indigo-700"
-              >
+              <button onClick={addKeyword} className="text-indigo-500 hover:text-indigo-700">
                 <Check size={16} />
               </button>
-              <button
-                onClick={() => setAddingKeyword(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
+              <button onClick={() => setAddingKeyword(false)} className="text-gray-400 hover:text-gray-600">
                 <X size={16} />
               </button>
             </div>
           )}
           {studyItems.length === 0 && !addingKeyword ? (
-            <p className="text-sm text-gray-400">
-              + 버튼으로 공부한 항목을 추가해봐.
-            </p>
+            <p className="text-sm text-gray-400">+ 버튼으로 공부한 항목을 추가해봐.</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {studyItems.map((item) => (
@@ -326,9 +288,7 @@ export default function SessionDetail() {
         {/* TIL */}
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-gray-700">
-              TIL — Today I Learned
-            </p>
+            <p className="text-sm font-medium text-gray-700">TIL — Today I Learned</p>
             <button
               onClick={() => router.push(`/til/${id}`)}
               className="text-gray-400 hover:text-indigo-500 transition-colors"

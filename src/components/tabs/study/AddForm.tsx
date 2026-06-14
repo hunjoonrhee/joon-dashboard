@@ -32,12 +32,7 @@ export default function AddForm({
 
   const dateFnsLocale = locale === 'ko' ? ko : locale === 'de' ? de : enUS;
 
-  const dateFormat =
-    locale === 'ko'
-      ? 'yyyy.MM.dd'
-      : locale === 'de'
-        ? 'dd.MM.yyyy'
-        : 'MM/dd/yyyy';
+  const dateFormat = locale === 'ko' ? 'yyyy.MM.dd' : locale === 'de' ? 'dd.MM.yyyy' : 'MM/dd/yyyy';
   const getDateObj = () => {
     if (selectedDate === 'today') return new Date();
     if (selectedDate === 'yesterday') {
@@ -50,9 +45,7 @@ export default function AddForm({
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4">
-      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
-        📝 기록 추가
-      </p>
+      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">📝 기록 추가</p>
       <div className="flex flex-col gap-3">
         <div>
           <label className={labelCls}>오늘 뭐 했어?</label>
@@ -125,9 +118,7 @@ export default function AddForm({
               className={`${inputCls} mt-2`}
               placeholder="분"
               value={form.duration_minutes}
-              onChange={(e) =>
-                onFormChange({ ...form, duration_minutes: e.target.value })
-              }
+              onChange={(e) => onFormChange({ ...form, duration_minutes: e.target.value })}
             />
           )}
         </div>

@@ -96,11 +96,7 @@ function SignupForm() {
       },
     });
     if (error) {
-      setError(
-        error.message.includes('already registered')
-          ? t('emailExists')
-          : error.message
-      );
+      setError(error.message.includes('already registered') ? t('emailExists') : error.message);
       setLoading(null);
       return;
     }
@@ -114,21 +110,14 @@ function SignupForm() {
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div
-            className="inline-flex items-center gap-2 cursor-pointer"
-            onClick={() => router.push(`/${locale}`)}
-          >
-            <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
-              🧭
-            </div>
+          <div className="inline-flex items-center gap-2 cursor-pointer" onClick={() => router.push(`/${locale}`)}>
+            <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">🧭</div>
             <span className="text-lg font-bold text-white">Growpath</span>
           </div>
         </div>
 
         <div className="bg-gray-900 border border-white/7 rounded-2xl p-7">
-          <h2 className="text-lg font-bold text-white mb-1">
-            {t('signupTitle')}
-          </h2>
+          <h2 className="text-lg font-bold text-white mb-1">{t('signupTitle')}</h2>
           <p className="text-sm text-gray-500 mb-6">
             {t('hasAccount')}{' '}
             <button
@@ -217,9 +206,7 @@ function SignupForm() {
                   onChange={(e) => setAgreePrivacy(e.target.checked)}
                   className="w-4 h-4 rounded accent-indigo-500"
                 />
-                <span className="text-xs text-gray-400">
-                  {t('agreePrivacy')}
-                </span>
+                <span className="text-xs text-gray-400">{t('agreePrivacy')}</span>
               </label>
             </div>
           </div>

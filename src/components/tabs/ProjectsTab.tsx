@@ -27,31 +27,19 @@ const emptyProjectForm = {
 };
 const emptyTaskForm = { name: '', status: 'planned' as ProjectTask['status'] };
 
-export default function ProjectsTab({
-  projects,
-  projectTasks,
-  onRefresh,
-  triggerAdd,
-  onTriggerAddDone,
-}: Props) {
+export default function ProjectsTab({ projects, projectTasks, onRefresh, triggerAdd, onTriggerAddDone }: Props) {
   const t = useTranslations('projects');
   const tToast = useTranslations('toast');
   const { show } = useToast();
 
   const [openProjects, setOpenProjects] = useState<Record<string, boolean>>(
-    Object.fromEntries(
-      projects
-        .filter((p) => p.status === 'in_progress')
-        .map((p) => [p.id, true])
-    )
+    Object.fromEntries(projects.filter((p) => p.status === 'in_progress').map((p) => [p.id, true]))
   );
   const [projectModal, setProjectModal] = useState<'add' | 'edit' | null>(null);
   const [taskModal, setTaskModal] = useState<'add' | 'edit' | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    null
-  );
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [projectForm, setProjectForm] = useState(emptyProjectForm);
   const [taskForm, setTaskForm] = useState(emptyTaskForm);
   const [saving, setSaving] = useState(false);
@@ -67,15 +55,11 @@ export default function ProjectsTab({
     }
   }, [triggerAdd]);
 
-  const getTasks = (projectId: string) =>
-    projectTasks.filter((t) => t.project_id === projectId);
+  const getTasks = (projectId: string) => projectTasks.filter((t) => t.project_id === projectId);
   const getPct = (projectId: string) => {
     const tasks = getTasks(projectId);
     if (tasks.length === 0) return 0;
-    return Math.round(
-      (tasks.filter((t) => t.status === 'completed').length / tasks.length) *
-        100
-    );
+    return Math.round((tasks.filter((t) => t.status === 'completed').length / tasks.length) * 100);
   };
 
   const openProjectModal = (type: 'add' | 'edit', project?: Project) => {
@@ -92,16 +76,10 @@ export default function ProjectsTab({
     setProjectModal(type);
   };
 
-  const openTaskModal = (
-    type: 'add' | 'edit',
-    projectId: string,
-    task?: ProjectTask
-  ) => {
+  const openTaskModal = (type: 'add' | 'edit', projectId: string, task?: ProjectTask) => {
     setSelectedProjectId(projectId);
     setSelectedTask(task ?? null);
-    setTaskForm(
-      task ? { name: task.name, status: task.status } : emptyTaskForm
-    );
+    setTaskForm(task ? { name: task.name, status: task.status } : emptyTaskForm);
     setTaskModal(type);
   };
 
@@ -126,24 +104,16 @@ export default function ProjectsTab({
     };
     try {
       if (projectModal === 'add') {
-        await supabase
-          .from('projects')
-          .insert({
-            ...payload,
-            order_index: projects.length,
-            user_id: await (await import('@/lib/supabase')).getCurrentUserId(),
-          });
+        await supabase.from('projects').insert({
+          ...payload,
+          order_index: projects.length,
+          user_id: await (await import('@/lib/supabase')).getCurrentUserId(),
+        });
         show(tToast('projectAdded'), { type: 'success' });
       } else if (selectedProject) {
-        await supabase
-          .from('projects')
-          .update(payload)
-          .eq('id', selectedProject.id);
+        await supabase.from('projects').update(payload).eq('id', selectedProject.id);
         show(tToast('projectEdited'), { type: 'success' });
-        if (
-          payload.status === 'completed' &&
-          selectedProject.status !== 'completed'
-        ) {
+        if (payload.status === 'completed' && selectedProject.status !== 'completed') {
           closeProjectModal();
           onRefresh();
           setSkillModal({
@@ -188,10 +158,7 @@ export default function ProjectsTab({
         });
         show(tToast('taskAdded'), { type: 'success' });
       } else if (selectedTask) {
-        await supabase
-          .from('project_tasks')
-          .update(payload)
-          .eq('id', selectedTask.id);
+        await supabase.from('project_tasks').update(payload).eq('id', selectedTask.id);
         show(tToast('taskEdited'), { type: 'success' });
       }
       closeTaskModal();
@@ -219,9 +186,7 @@ export default function ProjectsTab({
     <>
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-            {t('title')}
-          </p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t('title')}</p>
           <button
             onClick={() => openProjectModal('add')}
             className="text-indigo-500 hover:text-indigo-700 transition-colors"
@@ -236,9 +201,7 @@ export default function ProjectsTab({
             tasks={getTasks(p.id)}
             isOpen={openProjects[p.id] ?? false}
             pct={getPct(p.id)}
-            onToggle={() =>
-              setOpenProjects((prev) => ({ ...prev, [p.id]: !prev[p.id] }))
-            }
+            onToggle={() => setOpenProjects((prev) => ({ ...prev, [p.id]: !prev[p.id] }))}
             onEditProject={() => openProjectModal('edit', p)}
             onAddTask={() => openTaskModal('add', p.id)}
             onEditTask={(task) => openTaskModal('edit', p.id, task)}

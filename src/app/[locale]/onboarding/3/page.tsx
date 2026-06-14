@@ -113,21 +113,9 @@ export default function Onboarding3() {
       }
 
       await Promise.all([
-        upsertWithUser(
-          'settings',
-          { key: 'onboarding_completed', value: 'true' },
-          { onConflict: 'key,user_id' }
-        ),
-        upsertWithUser(
-          'settings',
-          { key: 'big_goal', value: goal },
-          { onConflict: 'key,user_id' }
-        ),
-        upsertWithUser(
-          'settings',
-          { key: 'big_goal_sub', value: ob_level },
-          { onConflict: 'key,user_id' }
-        ),
+        upsertWithUser('settings', { key: 'onboarding_completed', value: 'true' }, { onConflict: 'key,user_id' }),
+        upsertWithUser('settings', { key: 'big_goal', value: goal }, { onConflict: 'key,user_id' }),
+        upsertWithUser('settings', { key: 'big_goal_sub', value: ob_level }, { onConflict: 'key,user_id' }),
       ]);
 
       sessionStorage.removeItem('ob_domain');
@@ -154,9 +142,7 @@ export default function Onboarding3() {
         {loading ? (
           <div className="text-center py-10">
             <div className="text-4xl mb-4 animate-pulse">✦</div>
-            <h2 className="text-lg font-bold text-white mb-2">
-              {t('step3Loading')}
-            </h2>
+            <h2 className="text-lg font-bold text-white mb-2">{t('step3Loading')}</h2>
             <p className="text-sm text-gray-500">{t('step3LoadingSub')}</p>
           </div>
         ) : error ? (
@@ -182,10 +168,7 @@ export default function Onboarding3() {
 
             <div className="flex flex-col gap-2 mb-6 max-h-64 overflow-y-auto">
               {stages.map((stage, i) => (
-                <div
-                  key={i}
-                  className="flex items-start gap-3 p-3 bg-gray-800 rounded-xl border border-white/5"
-                >
+                <div key={i} className="flex items-start gap-3 p-3 bg-gray-800 rounded-xl border border-white/5">
                   <div
                     className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${i === stages.length - 1 ? 'bg-indigo-500 text-white' : 'bg-gray-700 text-gray-400'}`}
                   >
@@ -197,9 +180,7 @@ export default function Onboarding3() {
                     >
                       {stage.title} {i === stages.length - 1 && '🏆'}
                     </p>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      {stage.description}
-                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">{stage.description}</p>
                   </div>
                 </div>
               ))}

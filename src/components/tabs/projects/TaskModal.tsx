@@ -21,24 +21,13 @@ interface Props {
   onClose: () => void;
 }
 
-export default function TaskModal({
-  mode,
-  form,
-  saving,
-  onChange,
-  onSave,
-  onDelete,
-  onClose,
-}: Props) {
+export default function TaskModal({ mode, form, saving, onChange, onSave, onDelete, onClose }: Props) {
   const t = useTranslations('projects');
   const tCommon = useTranslations('common');
   const tStatus = useTranslations('status');
 
   return (
-    <Modal
-      title={mode === 'add' ? t('addTask') : t('editTask')}
-      onClose={onClose}
-    >
+    <Modal title={mode === 'add' ? t('addTask') : t('editTask')} onClose={onClose}>
       <div className="flex flex-col gap-3">
         <div>
           <label className={labelCls}>{t('taskName')}</label>
@@ -70,10 +59,7 @@ export default function TaskModal({
       </div>
       <div className="flex justify-between pt-1">
         {mode === 'edit' && onDelete ? (
-          <button
-            onClick={onDelete}
-            className="text-red-400 hover:text-red-600 transition-colors"
-          >
+          <button onClick={onDelete} className="text-red-400 hover:text-red-600 transition-colors">
             <Trash2 size={16} />
           </button>
         ) : (

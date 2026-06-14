@@ -48,12 +48,8 @@ export default function ResetPasswordPage() {
       <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
         <div className="bg-gray-900 border border-white/7 rounded-2xl p-10 max-w-sm w-full text-center">
           <div className="text-5xl mb-5">🔑</div>
-          <h1 className="text-xl font-bold text-white mb-2">
-            링크를 확인하는 중...
-          </h1>
-          <p className="text-sm text-gray-400">
-            이메일의 링크를 통해 접속해줘.
-          </p>
+          <h1 className="text-xl font-bold text-white mb-2">링크를 확인하는 중...</h1>
+          <p className="text-sm text-gray-400">이메일의 링크를 통해 접속해줘.</p>
         </div>
       </div>
     );

@@ -21,13 +21,7 @@ interface Props {
 
 type RoadmapView = 'my' | 'ai' | 'gap';
 
-export default function RoadmapTab({
-  goals,
-  topics,
-  sessions = [],
-  onRefresh,
-  settings = {},
-}: Props) {
+export default function RoadmapTab({ goals, topics, sessions = [], onRefresh, settings = {} }: Props) {
   const { show } = useToast();
   const tToast = useTranslations('toast');
   const t = useTranslations('roadmap');
@@ -53,21 +47,12 @@ export default function RoadmapTab({
       });
   }, [settings.adopted_roadmap_id]);
 
-  const studiedTags = new Set([
-    ...sessions.flatMap((s) => s.tags),
-    ...goals.flatMap((g) => g.tags ?? []),
-  ]);
+  const studiedTags = new Set([...sessions.flatMap((s) => s.tags), ...goals.flatMap((g) => g.tags ?? [])]);
 
   const finalGoal = settings.big_goal ?? '리드 아키텍트';
 
   const adoptedRoadmapTags = adoptedRoadmap
-    ? [
-        ...new Set(
-          adoptedRoadmap.stages.flatMap((s) =>
-            s.skills.flatMap((sk) => sk.tags)
-          )
-        ),
-      ]
+    ? [...new Set(adoptedRoadmap.stages.flatMap((s) => s.skills.flatMap((sk) => sk.tags)))]
     : [];
 
   const sortedGoals = [...goals].sort((a, b) => {
@@ -86,33 +71,23 @@ export default function RoadmapTab({
     return po[a.priority] - po[b.priority];
   });
 
-  const getTopics = (goalId: string) =>
-    topics.filter((tp) => tp.goal_id === goalId);
-  const getCategories = (goalId: string) => [
-    ...new Set(getTopics(goalId).map((tp) => tp.category)),
-  ];
+  const getTopics = (goalId: string) => topics.filter((tp) => tp.goal_id === goalId);
+  const getCategories = (goalId: string) => [...new Set(getTopics(goalId).map((tp) => tp.category))];
 
   const getPct = (goalId: string) => {
     const tp = getTopics(goalId);
     if (tp.length === 0) return 0;
-    return Math.round(
-      (tp.filter((tp) => tp.completed).length / tp.length) * 100
-    );
+    return Math.round((tp.filter((tp) => tp.completed).length / tp.length) * 100);
   };
 
   const getCatPct = (goalId: string, cat: string) => {
     const tp = getTopics(goalId).filter((tp) => tp.category === cat);
     if (tp.length === 0) return 0;
-    return Math.round(
-      (tp.filter((tp) => tp.completed).length / tp.length) * 100
-    );
+    return Math.round((tp.filter((tp) => tp.completed).length / tp.length) * 100);
   };
 
   const toggleTopic = async (topic: Topic) => {
-    await supabase
-      .from('topics')
-      .update({ completed: !topic.completed })
-      .eq('id', topic.id);
+    await supabase.from('topics').update({ completed: !topic.completed }).eq('id', topic.id);
     onRefresh();
   };
 
@@ -138,21 +113,9 @@ export default function RoadmapTab({
 
       // settings 업데이트
       await Promise.all([
-        upsertWithUser(
-          'settings',
-          { key: 'adopted_roadmap_id', value: roadmap.id },
-          { onConflict: 'key,user_id' }
-        ),
-        upsertWithUser(
-          'settings',
-          { key: 'big_goal', value: roadmap.goal },
-          { onConflict: 'key,user_id' }
-        ),
-        upsertWithUser(
-          'settings',
-          { key: 'big_goal_sub', value: roadmap.career_level },
-          { onConflict: 'key,user_id' }
-        ),
+        upsertWithUser('settings', { key: 'adopted_roadmap_id', value: roadmap.id }, { onConflict: 'key,user_id' }),
+        upsertWithUser('settings', { key: 'big_goal', value: roadmap.goal }, { onConflict: 'key,user_id' }),
+        upsertWithUser('settings', { key: 'big_goal_sub', value: roadmap.career_level }, { onConflict: 'key,user_id' }),
       ]);
 
       setAdoptedRoadmap(roadmap);
@@ -209,9 +172,7 @@ export default function RoadmapTab({
           getCategories={getCategories}
           getPct={getPct}
           getCatPct={getCatPct}
-          onToggleGoal={(id) =>
-            setOpenGoals((prev) => ({ ...prev, [id]: !prev[id] }))
-          }
+          onToggleGoal={(id) => setOpenGoals((prev) => ({ ...prev, [id]: !prev[id] }))}
           onToggleTopic={toggleTopic}
           onEdit={(goal) => setModal({ mode: 'edit', goal })}
           onAdd={() => setModal({ mode: 'add' })}
@@ -227,11 +188,7 @@ export default function RoadmapTab({
         />
       )}
       {view === 'gap' && (
-        <GapAnalysisView
-          adoptedRoadmap={adoptedRoadmap}
-          studiedTags={studiedTags}
-          onGoToAi={() => setView('ai')}
-        />
+        <GapAnalysisView adoptedRoadmap={adoptedRoadmap} studiedTags={studiedTags} onGoToAi={() => setView('ai')} />
       )}
       {modal && (
         <GoalModal

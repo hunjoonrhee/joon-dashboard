@@ -10,7 +10,7 @@ interface CoachResource {
   type: 'docs' | 'youtube' | 'book' | 'course';
   title: string;
   description: string;
-  url: string;
+  searchQuery: string;
 }
 
 interface CoachSuggestion {
@@ -39,13 +39,7 @@ type Status = 'idle' | 'loading' | 'done' | 'error';
 
 const MIN_SESSIONS = 3;
 
-export default function CoachCard({
-  sessions,
-  goals,
-  adoptedRoadmap,
-  onRefresh,
-  isPro = false,
-}: Props) {
+export default function CoachCard({ sessions, goals, adoptedRoadmap, onRefresh, isPro = false }: Props) {
   const t = useTranslations('coach');
   const tTutor = useTranslations('tutor');
   const locale = useLocale();
@@ -74,7 +68,13 @@ export default function CoachCard({
       const res = await window.fetch('/api/coach/suggest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessions, adoptedRoadmap, goals, locale }),
+        body: JSON.stringify({
+          sessions,
+          adoptedRoadmap,
+          goals,
+          locale,
+          careerLevel: adoptedRoadmap?.career_level ?? '',
+        }),
       });
       if (!res.ok) throw new Error();
       const json: CoachSuggestion = await res.json();
@@ -108,9 +108,7 @@ export default function CoachCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-base">🤖</span>
-            <p className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-              {t('title')}
-            </p>
+            <p className="text-xs font-bold text-gray-700 uppercase tracking-wider">{t('title')}</p>
           </div>
           {hasEnoughData && (
             <button
@@ -173,24 +171,14 @@ export default function CoachCard({
 
         {status === 'done' && data && (
           <div className="flex flex-col gap-3">
-            {data.insufficient && (
-              <p className="text-xs text-gray-400 text-center py-2">
-                {data.insufficientMessage}
-              </p>
-            )}
+            {data.insufficient && <p className="text-xs text-gray-400 text-center py-2">{data.insufficientMessage}</p>}
 
             {!data.insufficient && (
               <>
                 <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3">
-                  <p className="text-xs font-semibold text-indigo-600 mb-1">
-                    ⚡ {t('todaySkill')}
-                  </p>
-                  <p className="text-sm font-bold text-indigo-800">
-                    {data.today.skill}
-                  </p>
-                  <p className="text-xs text-indigo-500 mt-0.5">
-                    {data.today.reason}
-                  </p>
+                  <p className="text-xs font-semibold text-indigo-600 mb-1">⚡ {t('todaySkill')}</p>
+                  <p className="text-sm font-bold text-indigo-800">{data.today.skill}</p>
+                  <p className="text-xs text-indigo-500 mt-0.5">{data.today.reason}</p>
                   <div className="flex items-center gap-2 mt-2">
                     <button
                       onClick={handleStartTutor}
@@ -198,9 +186,7 @@ export default function CoachCard({
                     >
                       ▶ {tTutor('startStudy')}
                       {!isPro && (
-                        <span className="ml-1 bg-white/20 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-                          Pro
-                        </span>
+                        <span className="ml-1 bg-white/20 text-white text-[10px] px-1.5 py-0.5 rounded-full">Pro</span>
                       )}
                     </button>
                     <button
@@ -214,39 +200,23 @@ export default function CoachCard({
 
                 {data.resources && data.resources.length > 0 && (
                   <div className="bg-gray-50 border border-gray-100 rounded-xl p-3">
-                    <p className="text-xs font-semibold text-gray-500 mb-2">
-                      📚 {t('resources')}
-                    </p>
+                    <p className="text-xs font-semibold text-gray-500 mb-2">📚 {t('resources')}</p>
                     <div className="flex flex-col gap-2">
                       {data.resources.map((r, i) => (
                         <div key={i} className="flex items-start gap-2">
                           <span className="text-sm flex-shrink-0">
-                            {r.type === 'docs'
-                              ? '📄'
-                              : r.type === 'youtube'
-                                ? '▶'
-                                : r.type === 'book'
-                                  ? '📖'
-                                  : '🎓'}
+                            {r.type === 'docs' ? '📄' : r.type === 'youtube' ? '▶' : r.type === 'book' ? '📖' : '🎓'}
                           </span>
                           <div className="flex-1 min-w-0">
-                            {r.url ? (
-                              <a
-                                href={r.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
-                              >
-                                {r.title}
-                              </a>
-                            ) : (
-                              <p className="text-xs font-medium text-gray-700">
-                                {r.title}
-                              </p>
-                            )}
-                            <p className="text-xs text-gray-400 mt-0.5">
-                              {r.description}
-                            </p>
+                            <a
+                              href={`https://www.google.com/search?q=${encodeURIComponent(r.searchQuery)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
+                            >
+                              {r.title} ↗
+                            </a>
+                            <p className="text-xs text-gray-400 mt-0.5">{r.description}</p>
                           </div>
                         </div>
                       ))}
@@ -255,39 +225,25 @@ export default function CoachCard({
                 )}
 
                 <div className="bg-gray-50 border border-gray-100 rounded-xl p-3">
-                  <p className="text-xs font-semibold text-gray-500 mb-1">
-                    📈 {t('pace')}
-                  </p>
+                  <p className="text-xs font-semibold text-gray-500 mb-1">📈 {t('pace')}</p>
                   <p className="text-xs text-gray-600">{data.pace.message}</p>
                   <div className="flex gap-3 mt-2">
                     <div className="text-center">
-                      <p className="text-base font-bold text-gray-700">
-                        {Math.round(data.pace.currentMonths)}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {t('monthsCurrent')}
-                      </p>
+                      <p className="text-base font-bold text-gray-700">{Math.round(data.pace.currentMonths)}</p>
+                      <p className="text-xs text-gray-400">{t('monthsCurrent')}</p>
                     </div>
                     <div className="text-gray-300 self-center">→</div>
                     <div className="text-center">
-                      <p className="text-base font-bold text-indigo-600">
-                        {Math.round(data.pace.optimizedMonths)}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {t('monthsOptimized')}
-                      </p>
+                      <p className="text-base font-bold text-indigo-600">{Math.round(data.pace.optimizedMonths)}</p>
+                      <p className="text-xs text-gray-400">{t('monthsOptimized')}</p>
                     </div>
                   </div>
                 </div>
 
                 {data.alert.hasAlert && (
                   <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
-                    <p className="text-xs font-semibold text-amber-600 mb-1">
-                      ⚠ {t('alert')}
-                    </p>
-                    <p className="text-xs text-amber-700">
-                      {data.alert.message}
-                    </p>
+                    <p className="text-xs font-semibold text-amber-600 mb-1">⚠ {t('alert')}</p>
+                    <p className="text-xs text-amber-700">{data.alert.message}</p>
                   </div>
                 )}
               </>

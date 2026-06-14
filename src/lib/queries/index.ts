@@ -1,14 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import type {
-  Goal,
-  Note,
-  Project,
-  ProjectTask,
-  Session,
-  Setting,
-  TodayItem,
-  Topic,
-} from '@/types';
+import type { Goal, Note, Project, ProjectTask, Session, Setting, TodayItem, Topic } from '@/types';
 import { useQuery } from '@tanstack/react-query';
 
 // ─── Sessions ───────────────────────────────────────────
@@ -16,10 +7,7 @@ export const useSessions = () =>
   useQuery({
     queryKey: ['sessions'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('sessions')
-        .select('*')
-        .order('date', { ascending: false });
+      const { data } = await supabase.from('sessions').select('*').order('date', { ascending: false });
       return (data ?? []) as Session[];
     },
   });
@@ -64,11 +52,7 @@ export const useTodayItems = () => {
   return useQuery({
     queryKey: ['today_items', today],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('today_items')
-        .select('*')
-        .eq('date', today)
-        .order('created_at');
+      const { data } = await supabase.from('today_items').select('*').eq('date', today).order('created_at');
       return (data ?? []) as TodayItem[];
     },
   });
@@ -79,10 +63,7 @@ export const useProjects = () =>
   useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('projects')
-        .select('*')
-        .order('order_index');
+      const { data } = await supabase.from('projects').select('*').order('order_index');
       return (data ?? []) as Project[];
     },
   });
@@ -92,10 +73,7 @@ export const useProjectTasks = () =>
   useQuery({
     queryKey: ['project_tasks'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('project_tasks')
-        .select('*')
-        .order('order_index');
+      const { data } = await supabase.from('project_tasks').select('*').order('order_index');
       return (data ?? []) as ProjectTask[];
     },
   });
@@ -105,10 +83,7 @@ export const useNotes = (limit?: number) =>
   useQuery({
     queryKey: ['notes', limit],
     queryFn: async () => {
-      let q = supabase
-        .from('notes')
-        .select('*')
-        .order('updated_at', { ascending: false });
+      let q = supabase.from('notes').select('*').order('updated_at', { ascending: false });
       if (limit) q = q.limit(limit);
       const { data } = await q;
       return (data ?? []) as Note[];

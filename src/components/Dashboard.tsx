@@ -1,15 +1,7 @@
 'use client';
 
 import { supabase } from '@/lib/supabase';
-import type {
-  Goal,
-  Project,
-  ProjectTask,
-  Session,
-  Setting,
-  TodayItem,
-  Topic,
-} from '@/types';
+import type { Goal, Project, ProjectTask, Session, Setting, TodayItem, Topic } from '@/types';
 import { Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -39,18 +31,11 @@ export default function Dashboard() {
     const fetchData = async () => {
       const today = new Date().toISOString().split('T')[0];
       const [s, t, g, st, ti, p, pt] = await Promise.all([
-        supabase
-          .from('sessions')
-          .select('*')
-          .order('date', { ascending: false }),
+        supabase.from('sessions').select('*').order('date', { ascending: false }),
         supabase.from('topics').select('*'),
         supabase.from('goals').select('*'),
         supabase.from('settings').select('*'),
-        supabase
-          .from('today_items')
-          .select('*')
-          .eq('date', today)
-          .order('created_at'),
+        supabase.from('today_items').select('*').eq('date', today).order('created_at'),
         supabase.from('projects').select('*').order('order_index'),
         supabase.from('project_tasks').select('*').order('order_index'),
       ]);
@@ -89,12 +74,8 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b border-gray-100 h-13 flex items-center justify-between px-5 sticky top-0 z-10">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-indigo-500 rounded-lg flex items-center justify-center text-white text-sm">
-            🎯
-          </div>
-          <span className="text-sm font-semibold text-gray-800">
-            {settings.name ?? 'Joon'}
-          </span>
+          <div className="w-7 h-7 bg-indigo-500 rounded-lg flex items-center justify-center text-white text-sm">🎯</div>
+          <span className="text-sm font-semibold text-gray-800">{settings.name ?? 'Joon'}</span>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-gray-400">
@@ -117,18 +98,10 @@ export default function Dashboard() {
             key={t}
             onClick={() => setTab(t)}
             className={`py-2.5 px-4 text-xs font-medium border-b-2 transition-colors ${
-              tab === t
-                ? 'text-indigo-500 border-indigo-500'
-                : 'text-gray-400 border-transparent'
+              tab === t ? 'text-indigo-500 border-indigo-500' : 'text-gray-400 border-transparent'
             }`}
           >
-            {t === 'home'
-              ? '홈'
-              : t === 'study'
-                ? '공부 기록'
-                : t === 'goals'
-                  ? '목표'
-                  : '프로젝트'}
+            {t === 'home' ? '홈' : t === 'study' ? '공부 기록' : t === 'goals' ? '목표' : '프로젝트'}
           </button>
         ))}
       </div>
@@ -144,19 +117,9 @@ export default function Dashboard() {
             onRefresh={refresh}
           />
         )}
-        {tab === 'study' && (
-          <StudyTab sessions={sessions} onRefresh={refresh} />
-        )}
-        {tab === 'goals' && (
-          <GoalsTab topics={topics} goals={goals} onRefresh={refresh} />
-        )}
-        {tab === 'projects' && (
-          <ProjectsTab
-            projects={projects}
-            projectTasks={projectTasks}
-            onRefresh={refresh}
-          />
-        )}
+        {tab === 'study' && <StudyTab sessions={sessions} onRefresh={refresh} />}
+        {tab === 'goals' && <GoalsTab topics={topics} goals={goals} onRefresh={refresh} />}
+        {tab === 'projects' && <ProjectsTab projects={projects} projectTasks={projectTasks} onRefresh={refresh} />}
       </div>
     </div>
   );

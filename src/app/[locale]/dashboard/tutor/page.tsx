@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { insertWithUser, supabase } from '@/lib/supabase';
+import type { AiRoadmap } from '@/types';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { insertWithUser } from '@/lib/supabase';
+import { useEffect, useRef, useState } from 'react';
 
 interface QuizData {
   question: string;
@@ -24,7 +25,58 @@ interface Message {
   selectedOption?: number;
 }
 
-type PageState = 'session' | 'gate' | 'complete';
+interface UserContext {
+  careerLevel: string;
+  recentTags: string[];
+  gapSkills: string[];
+  projects: string[];
+  goal: string;
+}
+
+type PageState = 'loading' | 'session' | 'gate' | 'complete';
+
+// 유저 컨텍스트 로드
+async function loadUserContext(topic: string): Promise<UserContext> {
+  try {
+    const [settingsRes, sessionsRes, roadmapRes, projectsRes] = await Promise.all([
+      supabase.from('settings').select('key, value').in('key', ['career_level', 'adopted_roadmap_id']),
+      supabase.from('sessions').select('tags, date').order('date', { ascending: false }).limit(20),
+      supabase.from('ai_roadmaps').select('goal, stages').eq('adopted', true).single(),
+      supabase.from('projects').select('name').eq('status', 'in_progress').limit(5),
+    ]);
+
+    const careerLevel =
+      settingsRes.data?.find((s: { key: string; value: string }) => s.key === 'career_level')?.value ?? 'Not specified';
+
+    const recentTags = [...new Set((sessionsRes.data ?? []).flatMap((s: { tags: string[] }) => s.tags))] as string[];
+
+    const adoptedRoadmap = roadmapRes.data as AiRoadmap | null;
+    const studiedTagSet = new Set(recentTags);
+    const gapSkills = adoptedRoadmap
+      ? adoptedRoadmap.stages.flatMap((stage) =>
+          stage.skills.filter((sk) => !sk.tags.some((tag: string) => studiedTagSet.has(tag))).map((sk) => sk.name)
+        )
+      : [];
+
+    const projects = (projectsRes.data ?? []).map((p: { name: string }) => p.name);
+
+    return {
+      careerLevel,
+      recentTags,
+      gapSkills,
+      projects,
+      goal: adoptedRoadmap?.goal ?? topic,
+    };
+  } catch {
+    return {
+      careerLevel: 'Not specified',
+      recentTags: [],
+      gapSkills: [],
+      projects: [],
+      goal: topic,
+    };
+  }
+}
 
 export default function TutorPage() {
   const t = useTranslations('tutor');
@@ -35,16 +87,13 @@ export default function TutorPage() {
   const topic = searchParams.get('topic') ?? '';
   const isGate = searchParams.get('gate') === 'true';
 
-  const [pageState, setPageState] = useState<PageState>(
-    isGate ? 'gate' : 'session'
-  );
+  const [pageState, setPageState] = useState<PageState>(isGate ? 'gate' : 'loading');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [userContext, setUserContext] = useState<UserContext | null>(null);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const [sessionSummary, setSessionSummary] = useState<SummaryData | null>(
-    null
-  );
+  const [sessionSummary, setSessionSummary] = useState<SummaryData | null>(null);
   const [savedRecord, setSavedRecord] = useState<{
     title: string;
     date: string;
@@ -56,6 +105,15 @@ export default function TutorPage() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startedRef = useRef(false);
 
+  // 컨텍스트 로드 후 세션 시작
+  useEffect(() => {
+    if (isGate || !topic) return;
+    loadUserContext(topic).then((ctx) => {
+      setUserContext(ctx);
+      setPageState('session');
+    });
+  }, [topic, isGate]);
+
   // 타이머
   useEffect(() => {
     if (pageState !== 'session') return;
@@ -65,26 +123,31 @@ export default function TutorPage() {
     };
   }, [pageState]);
 
-  // 첫 AI 메시지 로드
+  // 첫 AI 메시지
   useEffect(() => {
-    if (pageState !== 'session' || !topic || startedRef.current) return;
+    if (pageState !== 'session' || !topic || !userContext || startedRef.current) return;
     startedRef.current = true;
     sendToAI([]);
-  }, [pageState, topic]);
+  }, [pageState, topic, userContext]);
 
   // 스크롤
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const sendToAI = async (history: Message[], userText?: string) => {
+  const sendToAI = async (history: Message[]) => {
     setLoading(true);
     const contents = history.map((m) => ({ role: m.role, parts: m.parts }));
     try {
       const res = await fetch('/api/tutor/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic, messages: contents, locale }),
+        body: JSON.stringify({
+          topic,
+          messages: contents,
+          locale,
+          userContext,
+        }),
       });
       const data = await res.json();
       const aiMsg: Message = {
@@ -94,17 +157,9 @@ export default function TutorPage() {
         summary: data.summary ?? undefined,
       };
       setMessages((prev) => [...prev, aiMsg]);
-      if (data.summary) {
-        setSessionSummary(data.summary);
-      }
+      if (data.summary) setSessionSummary(data.summary);
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'model',
-          parts: [{ text: '오류가 발생했어요. 다시 시도해주세요.' }],
-        },
-      ]);
+      setMessages((prev) => [...prev, { role: 'model', parts: [{ text: t('errorMessage') }] }]);
     } finally {
       setLoading(false);
     }
@@ -117,16 +172,29 @@ export default function TutorPage() {
     const userMsg: Message = { role: 'user', parts: [{ text }] };
     const next = [...messages, userMsg];
     setMessages(next);
-    await sendToAI(next, text);
+    await sendToAI(next);
   };
 
   const handleQuizSelect = async (msgIdx: number, optIdx: number) => {
-    setMessages((prev) =>
-      prev.map((m, i) => (i === msgIdx ? { ...m, selectedOption: optIdx } : m))
-    );
-    const answerText = messages[msgIdx].quiz?.options[optIdx] ?? '';
-    const userMsg: Message = { role: 'user', parts: [{ text: answerText }] };
-    const next = [...messages, userMsg];
+    const quiz = messages[msgIdx].quiz;
+    if (!quiz) return;
+    const answerText = quiz.options[optIdx];
+    const isCorrect = optIdx === quiz.correct;
+    const correctText = quiz.options[quiz.correct];
+
+    const userMsg: Message = {
+      role: 'user',
+      parts: [
+        {
+          text: isCorrect
+            ? t('quizCorrect', { answer: answerText })
+            : t('quizWrong', { answer: answerText, correct: correctText }),
+        },
+      ],
+    };
+
+    const updatedMessages = messages.map((m, i) => (i === msgIdx ? { ...m, selectedOption: optIdx } : m));
+    const next = [...updatedMessages, userMsg];
     setMessages(next);
     await sendToAI(next);
   };
@@ -136,7 +204,7 @@ export default function TutorPage() {
     const durationMin = Math.max(1, Math.round(elapsed / 60));
     const today = new Date().toISOString().split('T')[0];
     const tags = sessionSummary?.tags ?? [topic];
-    const title = `${topic} — AI 튜터`;
+    const title = `${topic} — ${t('aiTutorLabel')}`;
 
     try {
       await insertWithUser('sessions', {
@@ -144,7 +212,7 @@ export default function TutorPage() {
         date: today,
         duration: durationMin,
         tags,
-        memo: `AI 튜터 세션 (${durationMin}분)`,
+        memo: `${t('aiTutorLabel')} (${durationMin}${t('minutes', { n: '' }).replace('', '').trim()})`,
       });
     } catch (e) {
       console.error('세션 저장 실패:', e);
@@ -156,6 +224,18 @@ export default function TutorPage() {
 
   const elapsedMin = Math.floor(elapsed / 60);
 
+  // ── 로딩 ──
+  if (pageState === 'loading') {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-gray-400">준비 중...</p>
+        </div>
+      </main>
+    );
+  }
+
   // ── Pro 게이트 ──
   if (pageState === 'gate') {
     return (
@@ -164,23 +244,11 @@ export default function TutorPage() {
           <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center mx-auto mb-4 text-2xl">
             ✨
           </div>
-          <h1 className="text-base font-bold text-gray-900 mb-2">
-            {t('proGateTitle')}
-          </h1>
-          <p className="text-xs text-gray-500 leading-relaxed mb-5">
-            {t('proGateSub')}
-          </p>
+          <h1 className="text-base font-bold text-gray-900 mb-2">{t('proGateTitle')}</h1>
+          <p className="text-xs text-gray-500 leading-relaxed mb-5">{t('proGateSub')}</p>
           <ul className="text-left flex flex-col gap-2 mb-6">
-            {[
-              t('proFeature1'),
-              t('proFeature2'),
-              t('proFeature3'),
-              t('proFeature4'),
-            ].map((f, i) => (
-              <li
-                key={i}
-                className="flex items-center gap-2 text-xs text-gray-600"
-              >
+            {[t('proFeature1'), t('proFeature2'), t('proFeature3'), t('proFeature4')].map((f) => (
+              <li key={f} className="flex items-center gap-2 text-xs text-gray-600">
                 <span className="text-indigo-500">✓</span> {f}
               </li>
             ))}
@@ -193,7 +261,7 @@ export default function TutorPage() {
             onClick={() => router.back()}
             className="mt-4 text-xs text-gray-400 hover:text-gray-600 transition-colors"
           >
-            ← 뒤로
+            {t('backBtn')}
           </button>
         </div>
       </main>
@@ -208,55 +276,33 @@ export default function TutorPage() {
           <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-4 flex items-start gap-3">
             <span className="text-xl">🏆</span>
             <div>
-              <p className="text-sm font-bold text-emerald-800">
-                {t('sessionComplete')}
-              </p>
+              <p className="text-sm font-bold text-emerald-800">{t('sessionComplete')}</p>
               <p className="text-xs text-emerald-600 mt-0.5">
                 {t('sessionSummary', { duration: savedRecord?.duration ?? 0 })}
               </p>
             </div>
           </div>
-
           {savedRecord && (
             <>
-              <p className="text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1">
-                📝 {t('autoRecord')}
-              </p>
+              <p className="text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1">📝 {t('autoRecord')}</p>
               <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 mb-4 flex flex-col gap-2">
                 <div className="flex justify-between">
-                  <span className="text-xs text-gray-400">
-                    {t('recordTitle')}
-                  </span>
-                  <span className="text-xs font-medium text-gray-700">
-                    {savedRecord.title}
-                  </span>
+                  <span className="text-xs text-gray-400">{t('recordTitle')}</span>
+                  <span className="text-xs font-medium text-gray-700">{savedRecord.title}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-xs text-gray-400">
-                    {t('recordDate')}
-                  </span>
-                  <span className="text-xs font-medium text-gray-700">
-                    {savedRecord.date}
-                  </span>
+                  <span className="text-xs text-gray-400">{t('recordDate')}</span>
+                  <span className="text-xs font-medium text-gray-700">{savedRecord.date}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-xs text-gray-400">
-                    {t('recordDuration')}
-                  </span>
-                  <span className="text-xs font-medium text-gray-700">
-                    {t('minutes', { n: savedRecord.duration })}
-                  </span>
+                  <span className="text-xs text-gray-400">{t('recordDuration')}</span>
+                  <span className="text-xs font-medium text-gray-700">{t('minutes', { n: savedRecord.duration })}</span>
                 </div>
                 <div className="border-t border-gray-100 pt-2">
-                  <p className="text-xs text-gray-400 mb-1">
-                    {t('recordTags')}
-                  </p>
+                  <p className="text-xs text-gray-400 mb-1">{t('recordTags')}</p>
                   <div className="flex flex-wrap gap-1">
                     {savedRecord.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="text-[10px] px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full"
-                      >
+                      <span key={tag} className="text-[10px] px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full">
                         {tag}
                       </span>
                     ))}
@@ -265,7 +311,6 @@ export default function TutorPage() {
               </div>
             </>
           )}
-
           <div className="flex gap-2">
             <button
               onClick={() => router.push(`/${locale}/dashboard`)}
@@ -295,13 +340,9 @@ export default function TutorPage() {
   // ── 튜터 세션 ──
   return (
     <main className="flex flex-col h-[calc(100vh-57px)]">
-      {/* 헤더 */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => router.back()}
-            className="text-gray-400 hover:text-gray-600 text-sm mr-1"
-          >
+          <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-600 text-sm mr-1">
             ←
           </button>
           <span className="text-sm font-bold text-gray-800">
@@ -310,7 +351,7 @@ export default function TutorPage() {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-indigo-500 bg-indigo-50 px-2 py-1 rounded-full font-medium">
-            🕐 {elapsedMin}분
+            🕐 {t('minutes', { n: elapsedMin })}
           </span>
           <button
             onClick={handleEndSession}
@@ -321,9 +362,7 @@ export default function TutorPage() {
         </div>
       </div>
 
-      {/* 채팅 영역 */}
       <div className="flex flex-1 overflow-hidden">
-        {/* 메인 챗 */}
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
             {messages.map((msg, i) => (
@@ -332,12 +371,8 @@ export default function TutorPage() {
                   <div className="flex flex-col gap-2 max-w-[85%]">
                     {msg.parts[0].text && (
                       <div className="bg-gray-50 border border-gray-100 rounded-2xl rounded-tl-sm px-4 py-3">
-                        <p className="text-[10px] font-semibold text-indigo-500 mb-1">
-                          AI 튜터
-                        </p>
-                        <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
-                          {msg.parts[0].text}
-                        </p>
+                        <p className="text-[10px] font-semibold text-indigo-500 mb-1">{t('aiTutorLabel')}</p>
+                        <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">{msg.parts[0].text}</p>
                       </div>
                     )}
                     {msg.quiz && (
@@ -345,34 +380,22 @@ export default function TutorPage() {
                         <p className="text-[10px] font-semibold text-amber-600 mb-2 uppercase tracking-wider">
                           {t('quizLabel')}
                         </p>
-                        <p className="text-sm text-amber-900 font-medium mb-3">
-                          {msg.quiz.question}
-                        </p>
+                        <p className="text-sm text-amber-900 font-medium mb-3">{msg.quiz.question}</p>
                         <div className="flex flex-col gap-1.5">
                           {msg.quiz.options.map((opt, optIdx) => {
                             const selected = msg.selectedOption !== undefined;
                             const isSelected = msg.selectedOption === optIdx;
                             const isCorrect = optIdx === msg.quiz!.correct;
-                            let cls =
-                              'text-xs px-3 py-2 rounded-lg border cursor-pointer transition-colors text-left ';
-                            if (!selected) {
-                              cls +=
-                                'bg-white border-amber-200 text-amber-800 hover:bg-amber-100';
-                            } else if (isCorrect) {
-                              cls +=
-                                'bg-emerald-50 border-emerald-200 text-emerald-800';
-                            } else if (isSelected) {
-                              cls += 'bg-red-50 border-red-200 text-red-700';
-                            } else {
-                              cls += 'bg-white border-gray-100 text-gray-400';
-                            }
+                            let cls = 'text-xs px-3 py-2 rounded-lg border cursor-pointer transition-colors text-left ';
+                            if (!selected) cls += 'bg-white border-amber-200 text-amber-800 hover:bg-amber-100';
+                            else if (isCorrect) cls += 'bg-emerald-50 border-emerald-200 text-emerald-800';
+                            else if (isSelected) cls += 'bg-red-50 border-red-200 text-red-700';
+                            else cls += 'bg-white border-gray-100 text-gray-400';
                             return (
                               <button
                                 key={optIdx}
                                 className={cls}
-                                onClick={() =>
-                                  !selected && handleQuizSelect(i, optIdx)
-                                }
+                                onClick={() => !selected && handleQuizSelect(i, optIdx)}
                                 disabled={selected}
                               >
                                 {isCorrect && selected && '✓ '}
@@ -389,9 +412,7 @@ export default function TutorPage() {
                 {msg.role === 'user' && (
                   <div className="flex justify-end">
                     <div className="bg-indigo-500 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-[75%]">
-                      <p className="text-sm leading-relaxed">
-                        {msg.parts[0].text}
-                      </p>
+                      <p className="text-sm leading-relaxed">{msg.parts[0].text}</p>
                     </div>
                   </div>
                 )}
@@ -417,30 +438,24 @@ export default function TutorPage() {
 
             {sessionSummary && (
               <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 text-center">
-                <p className="text-xs font-semibold text-emerald-700 mb-1">
-                  🎉 세션 마무리 준비됐어요
-                </p>
+                <p className="text-xs font-semibold text-emerald-700 mb-1">{t('sessionReadyTitle')}</p>
                 <button
                   onClick={handleEndSession}
                   className="mt-1 px-4 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-medium hover:bg-emerald-600 transition-colors"
                 >
-                  {t('endSession')} & 기록 저장
+                  {t('endAndSave', { endSession: t('endSession') })}
                 </button>
               </div>
             )}
-
             <div ref={chatEndRef} />
           </div>
 
-          {/* 입력창 */}
           <div className="border-t border-gray-100 px-4 py-3 flex gap-2 flex-shrink-0 bg-white">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) =>
-                e.key === 'Enter' && !e.shiftKey && handleSend()
-              }
+              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
               placeholder={t('inputPlaceholder')}
               className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-indigo-300 focus:bg-white transition-colors"
             />
@@ -454,29 +469,30 @@ export default function TutorPage() {
           </div>
         </div>
 
-        {/* 사이드바 — 개념 진행도 */}
         <div className="w-36 flex-shrink-0 border-l border-gray-100 bg-gray-50 px-3 py-4 hidden md:flex flex-col gap-4">
           <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
-              {t('progress')}
-            </p>
-            <p className="text-xs font-semibold text-gray-700 mb-2 truncate">
-              {topic}
-            </p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">{t('progress')}</p>
+            <p className="text-xs font-semibold text-gray-700 mb-2 truncate">{topic}</p>
             <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-indigo-400 rounded-full transition-all duration-500"
                 style={{
-                  width: `${Math.min(100, (messages.filter((m) => m.role === 'model').length / 6) * 100)}%`,
+                  width: sessionSummary
+                    ? '100%'
+                    : `${Math.min(90, (messages.filter((m) => m.role === 'model').length / 5) * 100)}%`,
                 }}
               />
             </div>
           </div>
+          {userContext && (
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">컨텍스트</p>
+              <p className="text-[10px] text-gray-500 leading-relaxed">{userContext.careerLevel}</p>
+            </div>
+          )}
           {sessionSummary && sessionSummary.concepts.length > 0 && (
             <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
-                {t('concepts')}
-              </p>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">{t('concepts')}</p>
               <div className="flex flex-wrap gap-1">
                 {sessionSummary.concepts.map((c) => (
                   <span

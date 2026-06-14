@@ -35,9 +35,7 @@ export default function Onboarding2() {
 
         <div className="flex flex-col gap-4 mb-6">
           <div>
-            <label className="text-xs text-gray-400 mb-2 block">
-              {t('goalLabel')}
-            </label>
+            <label className="text-xs text-gray-400 mb-2 block">{t('goalLabel')}</label>
             <input
               type="text"
               className={inputCls}
@@ -47,9 +45,7 @@ export default function Onboarding2() {
             />
           </div>
           <div>
-            <label className="text-xs text-gray-400 mb-2 block">
-              {t('levelLabel')}
-            </label>
+            <label className="text-xs text-gray-400 mb-2 block">{t('levelLabel')}</label>
             <input
               type="text"
               className={inputCls}

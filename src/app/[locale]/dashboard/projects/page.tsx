@@ -26,9 +26,7 @@ export default function ProjectsPage() {
       <ProjectsTab
         projects={projects}
         projectTasks={projectTasks}
-        onRefresh={() =>
-          queryClient.invalidateQueries({ queryKey: ['projects'] })
-        }
+        onRefresh={() => queryClient.invalidateQueries({ queryKey: ['projects'] })}
         triggerAdd={triggerAdd}
         onTriggerAddDone={() => setTriggerAdd(false)}
       />

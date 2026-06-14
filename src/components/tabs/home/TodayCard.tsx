@@ -30,12 +30,7 @@ export default function TodayCard({
   const [newItem, setNewItem] = useState('');
   const [newTag, setNewTag] = useState('');
 
-  const addFromSuggestion = async (
-    name: string,
-    tag: string,
-    sourceType: 'topic' | 'task',
-    sourceId: string
-  ) => {
+  const addFromSuggestion = async (name: string, tag: string, sourceType: 'topic' | 'task', sourceId: string) => {
     const today = new Date().toISOString().split('T')[0];
     await insertWithUser('today_items', {
       name,
@@ -67,15 +62,12 @@ export default function TodayCard({
     onRefresh();
   };
 
-  const hasSuggestions =
-    suggestedTopics.length > 0 || suggestedTasks.length > 0;
+  const hasSuggestions = suggestedTopics.length > 0 || suggestedTasks.length > 0;
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-          {t('today')}
-        </p>
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t('today')}</p>
         <button
           onClick={() => setAddingItem(true)}
           className="text-xs text-indigo-500 hover:text-indigo-700 font-medium"
@@ -86,52 +78,35 @@ export default function TodayCard({
 
       {hasSuggestions && (
         <div className="mb-3">
-          <p className="text-xs text-gray-400 mb-1.5 font-medium">
-            {t('suggested')}
-          </p>
+          <p className="text-xs text-gray-400 mb-1.5 font-medium">{t('suggested')}</p>
           {suggestedTopics.map((topic) => (
             <div
               key={topic.id}
               className="flex items-center gap-2 px-2.5 py-1.5 bg-gray-50 border border-gray-100 rounded-lg mb-1 cursor-pointer hover:border-indigo-300 hover:bg-indigo-50 transition-all"
               onClick={() =>
-                addFromSuggestion(
-                  topic.name,
-                  `${getTopicGoalName(topic)} · ${topic.category}`,
-                  'topic',
-                  topic.id
-                )
+                addFromSuggestion(topic.name, `${getTopicGoalName(topic)} · ${topic.category}`, 'topic', topic.id)
               }
             >
               <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-700 truncate font-medium">
-                  {topic.name}
-                </p>
+                <p className="text-xs text-gray-700 truncate font-medium">{topic.name}</p>
                 <p className="text-xs text-gray-400">{topic.category}</p>
               </div>
-              <span className="text-xs text-indigo-500 font-bold flex-shrink-0">
-                +
-              </span>
+              <span className="text-xs text-indigo-500 font-bold flex-shrink-0">+</span>
             </div>
           ))}
           {suggestedTasks.map((task) => (
             <div
               key={task.id}
               className="flex items-center gap-2 px-2.5 py-1.5 bg-gray-50 border border-gray-100 rounded-lg mb-1 cursor-pointer hover:border-green-300 hover:bg-green-50 transition-all"
-              onClick={() =>
-                addFromSuggestion(task.name, 'Project', 'task', task.id)
-              }
+              onClick={() => addFromSuggestion(task.name, 'Project', 'task', task.id)}
             >
               <div className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-700 truncate font-medium">
-                  {task.name}
-                </p>
+                <p className="text-xs text-gray-700 truncate font-medium">{task.name}</p>
                 <p className="text-xs text-gray-400">Project</p>
               </div>
-              <span className="text-xs text-green-500 font-bold flex-shrink-0">
-                +
-              </span>
+              <span className="text-xs text-green-500 font-bold flex-shrink-0">+</span>
             </div>
           ))}
         </div>
@@ -158,16 +133,10 @@ export default function TodayCard({
             onChange={(e) => setNewTag(e.target.value)}
           />
           <div className="flex gap-2 justify-end">
-            <button
-              onClick={() => setAddingItem(false)}
-              className="text-gray-400 hover:text-gray-600"
-            >
+            <button onClick={() => setAddingItem(false)} className="text-gray-400 hover:text-gray-600">
               <X size={16} />
             </button>
-            <button
-              onClick={addTodayItem}
-              className="text-indigo-500 hover:text-indigo-700"
-            >
+            <button onClick={addTodayItem} className="text-indigo-500 hover:text-indigo-700">
               <Check size={16} />
             </button>
           </div>
@@ -175,14 +144,8 @@ export default function TodayCard({
       )}
 
       {todayItems.length > 0 && (
-        <div
-          className={hasSuggestions ? 'border-t border-gray-100 pt-2 mt-1' : ''}
-        >
-          {hasSuggestions && (
-            <p className="text-xs text-gray-400 mb-1.5 font-medium">
-              {t('selected')}
-            </p>
-          )}
+        <div className={hasSuggestions ? 'border-t border-gray-100 pt-2 mt-1' : ''}>
+          {hasSuggestions && <p className="text-xs text-gray-400 mb-1.5 font-medium">{t('selected')}</p>}
           <div className="flex flex-col divide-y divide-gray-50">
             {todayItems.map((item) => (
               <div key={item.id} className="flex items-center gap-2.5 py-2">
@@ -198,9 +161,7 @@ export default function TodayCard({
                   >
                     {item.name}
                   </p>
-                  {item.tag && (
-                    <p className="text-xs text-gray-400">{item.tag}</p>
-                  )}
+                  {item.tag && <p className="text-xs text-gray-400">{item.tag}</p>}
                 </div>
                 <button
                   onClick={() => removeToday(item)}

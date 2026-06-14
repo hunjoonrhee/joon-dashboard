@@ -10,12 +10,7 @@ export default function StudyPage() {
 
   return (
     <main className="mx-auto px-4 py-4">
-      <StudyTab
-        sessions={sessions}
-        onRefresh={() =>
-          queryClient.invalidateQueries({ queryKey: ['sessions'] })
-        }
-      />
+      <StudyTab sessions={sessions} onRefresh={() => queryClient.invalidateQueries({ queryKey: ['sessions'] })} />
     </main>
   );
 }

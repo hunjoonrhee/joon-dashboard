@@ -28,17 +28,10 @@ const TOOLBAR = [
 
 // 백틱 인라인 코드를 <code> 태그로 수동 변환
 function preprocessMarkdown(text: string): string {
-  return text.replace(
-    /`([^`\n]+)`/g,
-    '<code class="til-inline-code">$1</code>'
-  );
+  return text.replace(/`([^`\n]+)`/g, '<code class="til-inline-code">$1</code>');
 }
 
-export default function TilEditor({
-  value,
-  onChange,
-  minHeight = '240px',
-}: Props) {
+export default function TilEditor({ value, onChange, minHeight = '240px' }: Props) {
   const t = useTranslations('til');
   const [tab, setTab] = useState<Tab>('write');
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -55,8 +48,7 @@ export default function TilEditor({
     let newEnd: number;
 
     if (wrap) {
-      newVal =
-        value.slice(0, start) + syntax + selected + syntax + value.slice(end);
+      newVal = value.slice(0, start) + syntax + selected + syntax + value.slice(end);
       newStart = start + syntax.length;
       newEnd = end + syntax.length;
     } else {
@@ -95,9 +87,7 @@ export default function TilEditor({
             type="button"
             onClick={() => setTab('write')}
             className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
-              tab === 'write'
-                ? 'bg-white text-gray-800 border border-gray-200'
-                : 'text-gray-400 hover:text-gray-600'
+              tab === 'write' ? 'bg-white text-gray-800 border border-gray-200' : 'text-gray-400 hover:text-gray-600'
             }`}
           >
             {t('write')}
@@ -106,9 +96,7 @@ export default function TilEditor({
             type="button"
             onClick={() => setTab('preview')}
             className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
-              tab === 'preview'
-                ? 'bg-white text-gray-800 border border-gray-200'
-                : 'text-gray-400 hover:text-gray-600'
+              tab === 'preview' ? 'bg-white text-gray-800 border border-gray-200' : 'text-gray-400 hover:text-gray-600'
             }`}
           >
             {t('preview')}
@@ -152,9 +140,7 @@ export default function TilEditor({
           `}</style>
           {value.trim() ? (
             <div className="til-preview text-sm text-gray-800">
-              <ReactMarkdown rehypePlugins={[rehypeRaw]}>
-                {processed}
-              </ReactMarkdown>
+              <ReactMarkdown rehypePlugins={[rehypeRaw]}>{processed}</ReactMarkdown>
             </div>
           ) : (
             <p className="text-gray-300 text-sm">{t('previewEmpty')}</p>

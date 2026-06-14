@@ -535,6 +535,13 @@
     "recordDate": "Date",
     "recordDuration": "Duration",
     "recordTags": "Tags (auto)",
-    "minutes": "{n}m"
+    "minutes": "{n}m",
+    "aiTutorLabel": "AI Tutor",
+    "sessionReadyTitle": "🎉 Ready to wrap up",
+    "endAndSave": "{endSession} & save record",
+    "errorMessage": "Something went wrong. Please try again.",
+    "quizCorrect": "Correct: {answer}",
+    "quizWrong": "Wrong: {answer}. Correct answer: {correct}.",
+    "backBtn": "← Back"
   }
 }

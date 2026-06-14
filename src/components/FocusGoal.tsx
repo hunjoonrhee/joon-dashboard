@@ -22,18 +22,13 @@ export default function FocusGoal({ topics, goals, onRefresh }: Props) {
   const [openCats, setOpenCats] = useState<Record<string, boolean>>({});
 
   const focusGoals = goals.filter((g) => g.is_focus);
-  const getTopics = (goalId: string) =>
-    topics.filter((t) => t.goal_id === goalId);
-  const getCategories = (goalId: string) => [
-    ...new Set(getTopics(goalId).map((t) => t.category)),
-  ];
+  const getTopics = (goalId: string) => topics.filter((t) => t.goal_id === goalId);
+  const getCategories = (goalId: string) => [...new Set(getTopics(goalId).map((t) => t.category))];
 
   const getPct = (goalId: string, cat: string) => {
     const filtered = getTopics(goalId).filter((t) => t.category === cat);
     if (filtered.length === 0) return 0;
-    return Math.round(
-      (filtered.filter((t) => t.completed).length / filtered.length) * 100
-    );
+    return Math.round((filtered.filter((t) => t.completed).length / filtered.length) * 100);
   };
 
   const toggleCat = (key: string) => {
@@ -43,10 +38,7 @@ export default function FocusGoal({ topics, goals, onRefresh }: Props) {
   const isCatOpen = (key: string) => openCats[key] ?? false;
 
   const toggle = async (topic: Topic) => {
-    await supabase
-      .from('topics')
-      .update({ completed: !topic.completed })
-      .eq('id', topic.id);
+    await supabase.from('topics').update({ completed: !topic.completed }).eq('id', topic.id);
     onRefresh?.();
   };
 
@@ -81,10 +73,7 @@ export default function FocusGoal({ topics, goals, onRefresh }: Props) {
         completed: false,
       });
     } else if (selectedTopic) {
-      await supabase
-        .from('topics')
-        .update({ name: form.name, category: form.category })
-        .eq('id', selectedTopic.id);
+      await supabase.from('topics').update({ name: form.name, category: form.category }).eq('id', selectedTopic.id);
     }
     setSaving(false);
     close();
@@ -112,9 +101,7 @@ export default function FocusGoal({ topics, goals, onRefresh }: Props) {
               <div key={focusGoal.id}>
                 {idx > 0 && <div className="border-t border-gray-100 mb-5" />}
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm font-semibold text-gray-800">
-                    {focusGoal.name}
-                  </p>
+                  <p className="text-sm font-semibold text-gray-800">{focusGoal.name}</p>
                   <button
                     onClick={() => open('add', focusGoal.id)}
                     className="text-indigo-500 hover:text-indigo-700 transition-colors"
@@ -129,56 +116,35 @@ export default function FocusGoal({ topics, goals, onRefresh }: Props) {
                   <div className="flex flex-col gap-2">
                     {categories.map((cat) => {
                       const pct = getPct(focusGoal.id, cat);
-                      const catTopics = getTopics(focusGoal.id).filter(
-                        (t) => t.category === cat
-                      );
+                      const catTopics = getTopics(focusGoal.id).filter((t) => t.category === cat);
                       const catKey = `${focusGoal.id}-${cat}`;
                       const isOpen = isCatOpen(catKey);
                       return (
-                        <div
-                          key={cat}
-                          className="border border-gray-100 rounded-lg overflow-hidden"
-                        >
+                        <div key={cat} className="border border-gray-100 rounded-lg overflow-hidden">
                           <button
                             className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 hover:bg-gray-100 transition-colors"
                             onClick={() => toggleCat(catKey)}
                           >
                             <div className="flex items-center gap-2">
                               {isOpen ? (
-                                <ChevronDown
-                                  size={13}
-                                  className="text-gray-400"
-                                />
+                                <ChevronDown size={13} className="text-gray-400" />
                               ) : (
-                                <ChevronRight
-                                  size={13}
-                                  className="text-gray-400"
-                                />
+                                <ChevronRight size={13} className="text-gray-400" />
                               )}
-                              <span className="text-xs font-medium text-gray-600">
-                                {cat}
-                              </span>
+                              <span className="text-xs font-medium text-gray-600">{cat}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <div className="w-16 h-1 bg-gray-200 rounded-full overflow-hidden">
-                                <div
-                                  className="h-full bg-indigo-500 rounded-full"
-                                  style={{ width: `${pct}%` }}
-                                />
+                                <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${pct}%` }} />
                               </div>
-                              <span className="text-xs text-gray-400">
-                                {pct}%
-                              </span>
+                              <span className="text-xs text-gray-400">{pct}%</span>
                             </div>
                           </button>
 
                           {isOpen && (
                             <div className="flex flex-col gap-1.5 p-3">
                               {catTopics.map((t) => (
-                                <div
-                                  key={t.id}
-                                  className="flex items-center justify-between"
-                                >
+                                <div key={t.id} className="flex items-center justify-between">
                                   <div
                                     className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
                                     onClick={() => toggle(t)}
@@ -186,11 +152,7 @@ export default function FocusGoal({ topics, goals, onRefresh }: Props) {
                                     <div
                                       className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${t.completed ? 'bg-indigo-500 border-indigo-500' : 'border-gray-300'}`}
                                     >
-                                      {t.completed && (
-                                        <span className="text-white text-xs">
-                                          ✓
-                                        </span>
-                                      )}
+                                      {t.completed && <span className="text-white text-xs">✓</span>}
                                     </div>
                                     <span
                                       className={`text-sm truncate ${t.completed ? 'line-through text-gray-300' : 'text-gray-700'}`}
@@ -199,9 +161,7 @@ export default function FocusGoal({ topics, goals, onRefresh }: Props) {
                                     </span>
                                   </div>
                                   <button
-                                    onClick={() =>
-                                      open('edit', focusGoal.id, t)
-                                    }
+                                    onClick={() => open('edit', focusGoal.id, t)}
                                     className="text-gray-400 hover:text-indigo-500 transition-colors ml-2 flex-shrink-0"
                                   >
                                     <Pencil size={13} />
@@ -217,9 +177,7 @@ export default function FocusGoal({ topics, goals, onRefresh }: Props) {
                 )}
 
                 {focusGoal.description && (
-                  <p className="text-xs text-orange-500 mt-2 font-medium">
-                    {focusGoal.description}
-                  </p>
+                  <p className="text-xs text-orange-500 mt-2 font-medium">{focusGoal.description}</p>
                 )}
               </div>
             );
@@ -228,15 +186,10 @@ export default function FocusGoal({ topics, goals, onRefresh }: Props) {
       </div>
 
       {modal && (
-        <Modal
-          title={modal === 'add' ? '항목 추가' : '항목 수정'}
-          onClose={close}
-        >
+        <Modal title={modal === 'add' ? '항목 추가' : '항목 수정'} onClose={close}>
           <div className="flex flex-col gap-3">
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">
-                항목 이름
-              </label>
+              <label className="text-xs text-gray-500 mb-1 block">항목 이름</label>
               <input
                 type="text"
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
@@ -246,9 +199,7 @@ export default function FocusGoal({ topics, goals, onRefresh }: Props) {
               />
             </div>
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">
-                카테고리
-              </label>
+              <label className="text-xs text-gray-500 mb-1 block">카테고리</label>
               <input
                 type="text"
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
@@ -260,20 +211,14 @@ export default function FocusGoal({ topics, goals, onRefresh }: Props) {
           </div>
           <div className="flex justify-between pt-1">
             {modal === 'edit' ? (
-              <button
-                onClick={remove}
-                className="text-red-400 hover:text-red-600 transition-colors"
-              >
+              <button onClick={remove} className="text-red-400 hover:text-red-600 transition-colors">
                 <Trash2 size={16} />
               </button>
             ) : (
               <div />
             )}
             <div className="flex gap-2">
-              <button
-                onClick={close}
-                className="text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5"
-              >
+              <button onClick={close} className="text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5">
                 취소
               </button>
               <button

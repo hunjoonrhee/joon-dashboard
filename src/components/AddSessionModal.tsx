@@ -18,11 +18,7 @@ interface Props {
   initialTitle?: string;
 }
 
-export default function AddSessionModal({
-  onClose,
-  onSaved,
-  initialTitle,
-}: Props) {
+export default function AddSessionModal({ onClose, onSaved, initialTitle }: Props) {
   const locale = useLocale();
   const { show } = useToast();
   const queryClient = useQueryClient();
@@ -32,13 +28,9 @@ export default function AddSessionModal({
 
   const [title, setTitle] = useState(initialTitle ?? '');
   const [til, setTil] = useState('');
-  const [selectedDate, setSelectedDate] = useState<
-    'today' | 'yesterday' | 'custom'
-  >('today');
+  const [selectedDate, setSelectedDate] = useState<'today' | 'yesterday' | 'custom'>('today');
   const [customDate, setCustomDate] = useState<Date>(new Date());
-  const [selectedDuration, setSelectedDuration] = useState<
-    '30' | '60' | '90' | 'custom'
-  >('60');
+  const [selectedDuration, setSelectedDuration] = useState<'30' | '60' | '90' | 'custom'>('60');
   const [customDuration, setCustomDuration] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [tagPool, setTagPool] = useState<string[]>([]);
@@ -48,12 +40,7 @@ export default function AddSessionModal({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const dateFnsLocale = locale === 'ko' ? ko : locale === 'de' ? de : enUS;
-  const dateFormat =
-    locale === 'ko'
-      ? 'yyyy.MM.dd'
-      : locale === 'de'
-        ? 'dd.MM.yyyy'
-        : 'MM/dd/yyyy';
+  const dateFormat = locale === 'ko' ? 'yyyy.MM.dd' : locale === 'de' ? 'dd.MM.yyyy' : 'MM/dd/yyyy';
 
   useEffect(() => {
     const load = async () => {
@@ -63,18 +50,10 @@ export default function AddSessionModal({
         .eq('key', 'adopted_roadmap_id')
         .single();
       if (!setting?.value) return;
-      const { data: roadmap } = await supabase
-        .from('ai_roadmaps')
-        .select('stages')
-        .eq('id', setting.value)
-        .single();
+      const { data: roadmap } = await supabase.from('ai_roadmaps').select('stages').eq('id', setting.value).single();
       if (!roadmap?.stages) return;
       const tags = [
-        ...new Set(
-          roadmap.stages.flatMap((s: { skills: { tags: string[] }[] }) =>
-            s.skills.flatMap((sk) => sk.tags)
-          )
-        ),
+        ...new Set(roadmap.stages.flatMap((s: { skills: { tags: string[] }[] }) => s.skills.flatMap((sk) => sk.tags))),
       ] as string[];
       setTagPool(tags.sort());
     };
@@ -91,15 +70,10 @@ export default function AddSessionModal({
     return customDate.toISOString().split('T')[0];
   };
 
-  const getDurationValue = () =>
-    selectedDuration !== 'custom' ? selectedDuration : customDuration;
+  const getDurationValue = () => (selectedDuration !== 'custom' ? selectedDuration : customDuration);
 
   const filteredTags = tagSearch.trim()
-    ? tagPool.filter(
-        (tag) =>
-          tag.toLowerCase().includes(tagSearch.toLowerCase()) &&
-          !selectedTags.includes(tag)
-      )
+    ? tagPool.filter((tag) => tag.toLowerCase().includes(tagSearch.toLowerCase()) && !selectedTags.includes(tag))
     : [];
 
   const addTag = (tag: string) => {
@@ -110,8 +84,7 @@ export default function AddSessionModal({
     setTagDropdownOpen(false);
   };
 
-  const removeTag = (tag: string) =>
-    setSelectedTags((prev) => prev.filter((t) => t !== tag));
+  const removeTag = (tag: string) => setSelectedTags((prev) => prev.filter((t) => t !== tag));
 
   const save = async () => {
     if (!title.trim()) return;
@@ -120,9 +93,7 @@ export default function AddSessionModal({
       await insertWithUser('sessions', {
         date: getDateValue(),
         title: title.trim(),
-        duration_minutes: getDurationValue()
-          ? parseInt(getDurationValue()!)
-          : null,
+        duration_minutes: getDurationValue() ? parseInt(getDurationValue()!) : null,
         tags: selectedTags,
         til: til.trim() || null,
       });
@@ -148,22 +119,14 @@ export default function AddSessionModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/40 flex items-end lg:items-center justify-center z-50 p-4"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 bg-black/40 flex items-end lg:items-center justify-center z-50 p-4" onClick={onClose}>
       <div
         className="bg-white rounded-2xl w-full max-w-lg p-5 flex flex-col gap-3 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <p className="text-base font-bold text-gray-800">
-            📝 {tStudy('addModal')}
-          </p>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
+          <p className="text-base font-bold text-gray-800">📝 {tStudy('addModal')}</p>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <X size={18} />
           </button>
         </div>
@@ -201,11 +164,7 @@ export default function AddSessionModal({
                 onClick={() => setSelectedDate(d)}
                 className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedDate === d ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
               >
-                {d === 'today'
-                  ? t('today')
-                  : d === 'yesterday'
-                    ? t('yesterday')
-                    : t('custom')}
+                {d === 'today' ? t('today') : d === 'yesterday' ? t('yesterday') : t('custom')}
               </button>
             ))}
           </div>
@@ -232,13 +191,7 @@ export default function AddSessionModal({
                 onClick={() => setSelectedDuration(d)}
                 className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedDuration === d ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
               >
-                {d === '30'
-                  ? t('min30')
-                  : d === '60'
-                    ? t('min60')
-                    : d === '90'
-                      ? t('min90')
-                      : t('minCustom')}
+                {d === '30' ? t('min30') : d === '60' ? t('min60') : d === '90' ? t('min90') : t('minCustom')}
               </button>
             ))}
           </div>
@@ -264,14 +217,8 @@ export default function AddSessionModal({
                     className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${isCustom ? 'bg-gray-100 text-gray-600 border border-gray-200' : 'bg-indigo-500 text-white'}`}
                   >
                     {tag}
-                    {isCustom && (
-                      <span className="text-gray-400 text-xs">*</span>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      className="hover:opacity-70"
-                    >
+                    {isCustom && <span className="text-gray-400 text-xs">*</span>}
+                    <button type="button" onClick={() => removeTag(tag)} className="hover:opacity-70">
                       <X size={10} />
                     </button>
                   </span>
@@ -313,20 +260,15 @@ export default function AddSessionModal({
                       </button>
                     ))}
                   </div>
-                ) : tagSearch.trim() &&
-                  !selectedTags.includes(tagSearch.trim()) ? (
+                ) : tagSearch.trim() && !selectedTags.includes(tagSearch.trim()) ? (
                   <button
                     type="button"
                     onMouseDown={() => addTag(tagSearch)}
                     className="w-full text-left px-3 py-2.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
                   >
                     <span className="text-gray-400">{t('tagCustomAdd')}: </span>
-                    <span className="font-medium text-gray-700">
-                      {tagSearch.trim()}
-                    </span>
-                    <span className="text-xs text-gray-400 ml-1">
-                      {t('tagGapNote')}
-                    </span>
+                    <span className="font-medium text-gray-700">{tagSearch.trim()}</span>
+                    <span className="text-xs text-gray-400 ml-1">{t('tagGapNote')}</span>
                   </button>
                 ) : null}
               </div>
@@ -347,11 +289,7 @@ export default function AddSessionModal({
           <button onClick={onClose} className={cancelBtnCls}>
             {t('cancel')}
           </button>
-          <button
-            onClick={save}
-            disabled={saving || !title.trim()}
-            className={`${saveBtnCls} flex-1`}
-          >
+          <button onClick={save} disabled={saving || !title.trim()} className={`${saveBtnCls} flex-1`}>
             {saving ? t('saving') : t('save')} 💾
           </button>
         </div>

@@ -44,10 +44,7 @@ export default function SettingsPage() {
     const load = async () => {
       const [settingsRes, certsRes] = await Promise.all([
         supabase.from('settings').select('*'),
-        supabase
-          .from('certifications')
-          .select('*')
-          .order('created_at', { ascending: false }),
+        supabase.from('certifications').select('*').order('created_at', { ascending: false }),
       ]);
       if (settingsRes.data) {
         const map: Record<string, string> = {};
@@ -70,11 +67,7 @@ export default function SettingsPage() {
     setSaving(true);
     await Promise.all(
       Object.entries(form).map(([key, value]) =>
-        upsertWithUser(
-          'settings',
-          { key, value },
-          { onConflict: 'key,user_id' }
-        )
+        upsertWithUser('settings', { key, value }, { onConflict: 'key,user_id' })
       )
     );
     setSaving(false);
@@ -117,8 +110,7 @@ export default function SettingsPage() {
     router.push(segments.join('/'));
   };
 
-  const inputCls =
-    'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400';
+  const inputCls = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400';
   const labelCls = 'text-xs text-gray-500 mb-1 block';
 
   return (
@@ -133,9 +125,7 @@ export default function SettingsPage() {
 
       <div className="flex flex-col gap-4">
         <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-sm font-medium text-gray-700 mb-4">
-            {t('basicSettings')}
-          </p>
+          <p className="text-sm font-medium text-gray-700 mb-4">{t('basicSettings')}</p>
           <div className="flex flex-col gap-4">
             <div>
               <label className={labelCls}>{t('name')}</label>
@@ -163,9 +153,7 @@ export default function SettingsPage() {
                 className={inputCls}
                 placeholder={t('bigGoalSubPlaceholder')}
                 value={form.big_goal_sub}
-                onChange={(e) =>
-                  setForm({ ...form, big_goal_sub: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, big_goal_sub: e.target.value })}
               />
             </div>
             <div>
@@ -174,9 +162,7 @@ export default function SettingsPage() {
                 type="number"
                 className={inputCls}
                 value={form.monthly_session_target}
-                onChange={(e) =>
-                  setForm({ ...form, monthly_session_target: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, monthly_session_target: e.target.value })}
               />
             </div>
           </div>
@@ -184,9 +170,7 @@ export default function SettingsPage() {
 
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-gray-700">
-              {t('certifications')}
-            </p>
+            <p className="text-sm font-medium text-gray-700">{t('certifications')}</p>
             <button
               onClick={() => setAddingCert((v) => !v)}
               className="text-xs text-indigo-500 hover:text-indigo-700 font-medium transition-colors"
@@ -204,9 +188,7 @@ export default function SettingsPage() {
                   className={inputCls}
                   placeholder={t('certNamePlaceholder')}
                   value={certForm.name}
-                  onChange={(e) =>
-                    setCertForm({ ...certForm, name: e.target.value })
-                  }
+                  onChange={(e) => setCertForm({ ...certForm, name: e.target.value })}
                 />
               </div>
               <div>
@@ -216,9 +198,7 @@ export default function SettingsPage() {
                   className={inputCls}
                   placeholder={t('certIssuerPlaceholder')}
                   value={certForm.issuer}
-                  onChange={(e) =>
-                    setCertForm({ ...certForm, issuer: e.target.value })
-                  }
+                  onChange={(e) => setCertForm({ ...certForm, issuer: e.target.value })}
                 />
               </div>
               <div>
@@ -228,13 +208,9 @@ export default function SettingsPage() {
                   className={inputCls}
                   placeholder={t('certTagsPlaceholder')}
                   value={certForm.tags}
-                  onChange={(e) =>
-                    setCertForm({ ...certForm, tags: e.target.value })
-                  }
+                  onChange={(e) => setCertForm({ ...certForm, tags: e.target.value })}
                 />
-                <p className="text-xs text-gray-300 mt-1">
-                  {t('certTagsNote')}
-                </p>
+                <p className="text-xs text-gray-300 mt-1">{t('certTagsNote')}</p>
               </div>
               <div>
                 <label className={labelCls}>{t('certDate')}</label>
@@ -242,9 +218,7 @@ export default function SettingsPage() {
                   type="date"
                   className={inputCls}
                   value={certForm.issued_at}
-                  onChange={(e) =>
-                    setCertForm({ ...certForm, issued_at: e.target.value })
-                  }
+                  onChange={(e) => setCertForm({ ...certForm, issued_at: e.target.value })}
                 />
               </div>
               <button
@@ -258,37 +232,23 @@ export default function SettingsPage() {
           )}
 
           {certs.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-3">
-              {t('noCerts')}
-            </p>
+            <p className="text-sm text-gray-400 text-center py-3">{t('noCerts')}</p>
           ) : (
             <div className="flex flex-col gap-2">
               {certs.map((cert) => (
-                <div
-                  key={cert.id}
-                  className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100"
-                >
+                <div key={cert.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-gray-800 truncate">
-                        {cert.name}
-                      </p>
+                      <p className="text-sm font-medium text-gray-800 truncate">{cert.name}</p>
                       <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-100 flex-shrink-0">
                         {t('verified')}
                       </span>
                     </div>
-                    {cert.issuer && (
-                      <p className="text-xs text-gray-400 mb-1">
-                        {cert.issuer}
-                      </p>
-                    )}
+                    {cert.issuer && <p className="text-xs text-gray-400 mb-1">{cert.issuer}</p>}
                     {cert.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {cert.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-xs px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-500"
-                          >
+                          <span key={tag} className="text-xs px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-500">
                             {tag}
                           </span>
                         ))}
@@ -308,9 +268,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-sm font-medium text-gray-700 mb-3">
-            {t('language')}
-          </p>
+          <p className="text-sm font-medium text-gray-700 mb-3">{t('language')}</p>
           <div className="flex gap-2">
             {LOCALES.map((loc) => (
               <button

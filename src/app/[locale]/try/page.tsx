@@ -70,13 +70,8 @@ export default function TryPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b border-gray-100 h-14 flex items-center justify-between px-8">
-        <div
-          className="flex items-center gap-2 cursor-pointer"
-          onClick={() => router.push(`/${locale}`)}
-        >
-          <div className="w-7 h-7 bg-indigo-500 rounded-lg flex items-center justify-center text-sm">
-            🧭
-          </div>
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push(`/${locale}`)}>
+          <div className="w-7 h-7 bg-indigo-500 rounded-lg flex items-center justify-center text-sm">🧭</div>
           <span className="text-sm font-bold text-gray-800">Growpath</span>
         </div>
         <div className="flex gap-2">
@@ -100,9 +95,7 @@ export default function TryPage() {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-500 text-xs font-semibold mb-4">
             ✦ {t('badge')}
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {t('title')}
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('title')}</h1>
           <p className="text-gray-500 text-sm">{t('sub')}</p>
         </div>
 
@@ -110,9 +103,7 @@ export default function TryPage() {
           <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
             <div className="flex flex-col gap-4 mb-5">
               <div>
-                <label className="text-xs text-gray-500 mb-2 block font-medium">
-                  {t('goalLabel')}
-                </label>
+                <label className="text-xs text-gray-500 mb-2 block font-medium">{t('goalLabel')}</label>
                 <input
                   type="text"
                   className={inputCls}
@@ -122,9 +113,7 @@ export default function TryPage() {
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-500 mb-2 block font-medium">
-                  {t('levelLabel')}
-                </label>
+                <label className="text-xs text-gray-500 mb-2 block font-medium">{t('levelLabel')}</label>
                 <input
                   type="text"
                   className={inputCls}
@@ -147,8 +136,7 @@ export default function TryPage() {
             >
               {loading ? (
                 <>
-                  <span className="animate-spin inline-block">✦</span>{' '}
-                  {t('generating')}
+                  <span className="animate-spin inline-block">✦</span> {t('generating')}
                 </>
               ) : (
                 <>✦ {t('generateBtn')}</>
@@ -190,18 +178,13 @@ export default function TryPage() {
                       >
                         {stage.title} {i === stages.length - 1 && '🏆'}
                       </p>
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        {stage.description}
-                      </p>
+                      <p className="text-xs text-gray-400 mt-0.5">{stage.description}</p>
                       <div className="flex gap-1 flex-wrap mt-1.5">
                         {stage.skills
                           .slice(0, 2)
                           .flatMap((sk) => sk.tags.slice(0, 3))
                           .map((tag, j) => (
-                            <span
-                              key={j}
-                              className="text-xs px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-600"
-                            >
+                            <span key={j} className="text-xs px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-600">
                               {tag}
                             </span>
                           ))}
@@ -213,9 +196,7 @@ export default function TryPage() {
             </div>
 
             <div className="bg-white border border-indigo-200 rounded-2xl p-5 shadow-sm text-center">
-              <p className="text-sm font-semibold text-gray-800 mb-1">
-                {t('saveTitle')}
-              </p>
+              <p className="text-sm font-semibold text-gray-800 mb-1">{t('saveTitle')}</p>
               <p className="text-xs text-gray-400 mb-4">{t('saveSub')}</p>
               <button
                 onClick={handleSave}

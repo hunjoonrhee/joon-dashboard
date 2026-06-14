@@ -5,14 +5,7 @@ import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles';
 import { supabase } from '@/lib/supabase';
 import { insertWithUser } from '@/lib/supabase';
 import type { Goal, Topic } from '@/types';
-import {
-  ChevronDown,
-  ChevronRight,
-  Pencil,
-  Plus,
-  Star,
-  Trash2,
-} from 'lucide-react';
+import { ChevronDown, ChevronRight, Pencil, Plus, Star, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -99,10 +92,8 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
     onRefresh();
   };
 
-  const toggleGoal = (id: string) =>
-    setOpenGoals((prev) => ({ ...prev, [id]: !prev[id] }));
-  const getTopics = (goalId: string) =>
-    topics.filter((t) => t.goal_id === goalId);
+  const toggleGoal = (id: string) => setOpenGoals((prev) => ({ ...prev, [id]: !prev[id] }));
+  const getTopics = (goalId: string) => topics.filter((t) => t.goal_id === goalId);
   const getPct = (goalId: string) => {
     const t = getTopics(goalId);
     if (t.length === 0) return 0;
@@ -114,13 +105,8 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
       <div className="flex flex-col gap-4">
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-              {t('title')}
-            </p>
-            <button
-              onClick={() => open('add')}
-              className="text-indigo-500 hover:text-indigo-700 transition-colors"
-            >
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t('title')}</p>
+            <button onClick={() => open('add')} className="text-indigo-500 hover:text-indigo-700 transition-colors">
               <Plus size={18} />
             </button>
           </div>
@@ -134,52 +120,25 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
                 const goalTopics = getTopics(g.id);
                 const isOpen = openGoals[g.id] ?? false;
                 return (
-                  <div
-                    key={g.id}
-                    className="border border-gray-100 rounded-xl overflow-hidden"
-                  >
+                  <div key={g.id} className="border border-gray-100 rounded-xl overflow-hidden">
                     <div className="flex items-center gap-2 p-3">
-                      <button
-                        onClick={() => toggleGoal(g.id)}
-                        className="text-gray-400 flex-shrink-0"
-                      >
-                        {isOpen ? (
-                          <ChevronDown size={15} />
-                        ) : (
-                          <ChevronRight size={15} />
-                        )}
+                      <button onClick={() => toggleGoal(g.id)} className="text-gray-400 flex-shrink-0">
+                        {isOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
                       </button>
-                      <div
-                        className="flex-1 min-w-0 cursor-pointer"
-                        onClick={() => router.push(`goals/${g.id}`)}
-                      >
+                      <div className="flex-1 min-w-0 cursor-pointer" onClick={() => router.push(`goals/${g.id}`)}>
                         <div className="flex items-center gap-1.5">
                           {g.is_focus && (
-                            <Star
-                              size={11}
-                              className="text-indigo-500 flex-shrink-0"
-                              fill="currentColor"
-                            />
+                            <Star size={11} className="text-indigo-500 flex-shrink-0" fill="currentColor" />
                           )}
-                          <p className="text-sm font-medium text-gray-800 truncate">
-                            {g.name}
-                          </p>
+                          <p className="text-sm font-medium text-gray-800 truncate">{g.name}</p>
                         </div>
-                        {g.description && (
-                          <p className="text-xs text-gray-400 mt-0.5 truncate">
-                            {g.description}
-                          </p>
-                        )}
+                        {g.description && <p className="text-xs text-gray-400 mt-0.5 truncate">{g.description}</p>}
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full ${priorityStyle[g.priority]}`}
-                        >
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${priorityStyle[g.priority]}`}>
                           {tPriority(g.priority)}
                         </span>
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full ${goalStatusStyle[g.status]}`}
-                        >
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${goalStatusStyle[g.status]}`}>
                           {tStatus(g.status)}
                         </span>
                         <button
@@ -195,10 +154,7 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
                       <div className="px-3 pb-2">
                         <div className="flex items-center gap-2">
                           <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-indigo-500 rounded-full"
-                              style={{ width: `${pct}%` }}
-                            />
+                            <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${pct}%` }} />
                           </div>
                           <span className="text-xs text-gray-400">{pct}%</span>
                         </div>
@@ -212,18 +168,12 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
                             <div
                               className={`w-3.5 h-3.5 rounded border flex items-center justify-center flex-shrink-0 ${t.completed ? 'bg-indigo-500 border-indigo-500' : 'border-gray-300'}`}
                             >
-                              {t.completed && (
-                                <span className="text-white text-xs">✓</span>
-                              )}
+                              {t.completed && <span className="text-white text-xs">✓</span>}
                             </div>
-                            <span
-                              className={`text-xs ${t.completed ? 'line-through text-gray-300' : 'text-gray-600'}`}
-                            >
+                            <span className={`text-xs ${t.completed ? 'line-through text-gray-300' : 'text-gray-600'}`}>
                               {t.name}
                             </span>
-                            <span className="text-xs text-gray-300 ml-auto">
-                              {t.category}
-                            </span>
+                            <span className="text-xs text-gray-300 ml-auto">{t.category}</span>
                           </div>
                         ))}
                       </div>
@@ -237,10 +187,7 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
       </div>
 
       {modal && (
-        <Modal
-          title={modal === 'add' ? t('addModal') : t('editModal')}
-          onClose={close}
-        >
+        <Modal title={modal === 'add' ? t('addModal') : t('editModal')} onClose={close}>
           <div className="flex flex-col gap-3">
             <div>
               <label className={labelCls}>{t('name')}</label>
@@ -259,9 +206,7 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
                 className={inputCls}
                 placeholder="예: 6월 재시험"
                 value={form.description}
-                onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
               />
             </div>
             <div className="flex gap-3">
@@ -306,9 +251,7 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
                 type="checkbox"
                 id="is_focus"
                 checked={form.is_focus}
-                onChange={(e) =>
-                  setForm({ ...form, is_focus: e.target.checked })
-                }
+                onChange={(e) => setForm({ ...form, is_focus: e.target.checked })}
               />
               <label htmlFor="is_focus" className="text-sm text-gray-600">
                 {t('focus')}
@@ -317,10 +260,7 @@ export default function GoalsTab({ goals, topics, onRefresh }: Props) {
           </div>
           <div className="flex justify-between pt-1">
             {modal === 'edit' ? (
-              <button
-                onClick={remove}
-                className="text-red-400 hover:text-red-600 transition-colors"
-              >
+              <button onClick={remove} className="text-red-400 hover:text-red-600 transition-colors">
                 <Trash2 size={16} />
               </button>
             ) : (

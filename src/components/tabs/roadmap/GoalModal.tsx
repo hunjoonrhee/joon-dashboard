@@ -57,11 +57,7 @@ export default function GoalModal({
   const tagPool = tagPoolProp ?? preset?.tags ?? [];
 
   const filteredTags = tagSearch.trim()
-    ? tagPool.filter(
-        (tag) =>
-          tag.toLowerCase().includes(tagSearch.toLowerCase()) &&
-          !form.tags.includes(tag)
-      )
+    ? tagPool.filter((tag) => tag.toLowerCase().includes(tagSearch.toLowerCase()) && !form.tags.includes(tag))
     : [];
 
   const addTag = (tag: string) => {
@@ -92,8 +88,7 @@ export default function GoalModal({
           .update({ is_focus: false })
           .neq('id', goal?.id ?? '');
       if (mode === 'add') await insertWithUser('goals', payload);
-      else if (goal)
-        await supabase.from('goals').update(payload).eq('id', goal.id);
+      else if (goal) await supabase.from('goals').update(payload).eq('id', goal.id);
       show(mode === 'add' ? tToast('goalAdded') : tToast('goalEdited'), {
         type: 'success',
       });
@@ -119,10 +114,7 @@ export default function GoalModal({
   };
 
   return (
-    <Modal
-      title={mode === 'add' ? t('addModal') : t('editModal')}
-      onClose={onClose}
-    >
+    <Modal title={mode === 'add' ? t('addModal') : t('editModal')} onClose={onClose}>
       <div className="flex flex-col gap-3">
         <div>
           <label className={labelCls}>{t('name')}</label>
@@ -170,9 +162,7 @@ export default function GoalModal({
             <select
               className={inputCls}
               value={form.status}
-              onChange={(e) =>
-                setForm({ ...form, status: e.target.value as Goal['status'] })
-              }
+              onChange={(e) => setForm({ ...form, status: e.target.value as Goal['status'] })}
             >
               <option value="in_progress">{tStatus('in_progress')}</option>
               <option value="completed">{tStatus('completed')}</option>
@@ -215,15 +205,11 @@ export default function GoalModal({
                   <span
                     key={tag}
                     className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
-                      isCustom
-                        ? 'bg-gray-100 text-gray-600 border border-gray-200'
-                        : 'bg-indigo-500 text-white'
+                      isCustom ? 'bg-gray-100 text-gray-600 border border-gray-200' : 'bg-indigo-500 text-white'
                     }`}
                   >
                     {tag}
-                    {isCustom && (
-                      <span className="text-gray-400 text-xs">*</span>
-                    )}
+                    {isCustom && <span className="text-gray-400 text-xs">*</span>}
                     <button
                       type="button"
                       onClick={() =>
@@ -275,22 +261,15 @@ export default function GoalModal({
                       </button>
                     ))}
                   </div>
-                ) : tagSearch.trim() &&
-                  !form.tags.includes(tagSearch.trim()) ? (
+                ) : tagSearch.trim() && !form.tags.includes(tagSearch.trim()) ? (
                   <button
                     type="button"
                     onMouseDown={() => addTag(tagSearch)}
                     className="w-full text-left px-3 py-2.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
                   >
-                    <span className="text-gray-400">
-                      {tCommon('tagCustomAdd')}:{' '}
-                    </span>
-                    <span className="font-medium text-gray-700">
-                      {tagSearch.trim()}
-                    </span>
-                    <span className="text-xs text-gray-400 ml-1">
-                      {tCommon('tagGapNote')}
-                    </span>
+                    <span className="text-gray-400">{tCommon('tagCustomAdd')}: </span>
+                    <span className="font-medium text-gray-700">{tagSearch.trim()}</span>
+                    <span className="text-xs text-gray-400 ml-1">{tCommon('tagGapNote')}</span>
                   </button>
                 ) : null}
               </div>
@@ -313,10 +292,7 @@ export default function GoalModal({
 
       <div className="flex justify-between pt-1">
         {mode === 'edit' ? (
-          <button
-            onClick={remove}
-            className="text-red-400 hover:text-red-600 transition-colors"
-          >
+          <button onClick={remove} className="text-red-400 hover:text-red-600 transition-colors">
             <Trash2 size={16} />
           </button>
         ) : (

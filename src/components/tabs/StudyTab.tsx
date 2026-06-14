@@ -33,12 +33,8 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
   const [selected, setSelected] = useState<Session | null>(null);
   const [form, setForm] = useState<StudyForm>(emptyForm);
   const [saving, setSaving] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<
-    'today' | 'yesterday' | 'custom'
-  >('today');
-  const [selectedDuration, setSelectedDuration] = useState<
-    '30' | '60' | '90' | 'custom'
-  >('60');
+  const [selectedDate, setSelectedDate] = useState<'today' | 'yesterday' | 'custom'>('today');
+  const [selectedDuration, setSelectedDuration] = useState<'30' | '60' | '90' | 'custom'>('60');
 
   const getDateValue = () => {
     if (selectedDate === 'today') return new Date().toISOString().split('T')[0];
@@ -95,9 +91,7 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
     const payload = {
       date: getDateValue(),
       title: form.title,
-      duration_minutes: getDurationValue()
-        ? parseInt(getDurationValue()!)
-        : null,
+      duration_minutes: getDurationValue() ? parseInt(getDurationValue()!) : null,
       tags: form.tags
         .split(',')
         .map((t) => t.trim())
@@ -156,22 +150,14 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
 
       {/* 콘텐츠 */}
       {subTab === 'sessions' ? (
-        <SessionList
-          sessions={sessions}
-          grouped={grouped}
-          onAdd={openAdd}
-          onEdit={openEdit}
-        />
+        <SessionList sessions={sessions} grouped={grouped} onAdd={openAdd} onEdit={openEdit} />
       ) : (
         <TilList sessions={tilSessions} />
       )}
 
       {/* 모바일 모달 */}
       {modal && (
-        <Modal
-          title={modal === 'add' ? t('addModal') : t('editModal')}
-          onClose={close}
-        >
+        <Modal title={modal === 'add' ? t('addModal') : t('editModal')} onClose={close}>
           <div className="flex flex-col gap-3">
             <div>
               <label className={labelCls}>오늘 뭐 했어?</label>
@@ -192,11 +178,7 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
                     onClick={() => setSelectedDate(d)}
                     className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedDate === d ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500'}`}
                   >
-                    {d === 'today'
-                      ? '오늘'
-                      : d === 'yesterday'
-                        ? '어제'
-                        : '직접'}
+                    {d === 'today' ? '오늘' : d === 'yesterday' ? '어제' : '직접'}
                   </button>
                 ))}
               </div>
@@ -228,9 +210,7 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
                   className={`${inputCls} mt-2`}
                   placeholder="분"
                   value={form.duration_minutes}
-                  onChange={(e) =>
-                    setForm({ ...form, duration_minutes: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, duration_minutes: e.target.value })}
                 />
               )}
             </div>
@@ -256,10 +236,7 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
           </div>
           <div className="flex justify-between pt-1">
             {modal === 'edit' ? (
-              <button
-                onClick={remove}
-                className="text-red-400 hover:text-red-600"
-              >
+              <button onClick={remove} className="text-red-400 hover:text-red-600">
                 <Trash2 size={16} />
               </button>
             ) : (

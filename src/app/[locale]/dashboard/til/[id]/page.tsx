@@ -83,20 +83,14 @@ export default function TilPage() {
           disabled={saving}
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-600 disabled:opacity-50 transition-colors"
         >
-          {saving ? (
-            <Loader2 size={14} className="animate-spin" />
-          ) : saved ? (
-            <Check size={14} />
-          ) : null}
+          {saving ? <Loader2 size={14} className="animate-spin" /> : saved ? <Check size={14} /> : null}
           {saved ? t('saved') : saving ? t('saving') : t('save')}
         </button>
       </div>
 
       {/* 세션 정보 */}
       <div className="mb-4">
-        <h1 className="text-xl font-bold text-gray-800 mb-1">
-          {session.title}
-        </h1>
+        <h1 className="text-xl font-bold text-gray-800 mb-1">{session.title}</h1>
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs text-gray-400">{session.date}</span>
           {session.duration_minutes && (
@@ -106,10 +100,7 @@ export default function TilPage() {
             </span>
           )}
           {session.tags.map((tag) => (
-            <span
-              key={tag}
-              className={`text-xs px-2 py-0.5 rounded-full ${getTagColor(tag)}`}
-            >
+            <span key={tag} className={`text-xs px-2 py-0.5 rounded-full ${getTagColor(tag)}`}>
               {tag}
             </span>
           ))}
@@ -117,11 +108,7 @@ export default function TilPage() {
       </div>
 
       {/* TIL 에디터 */}
-      <TilEditor
-        value={til}
-        onChange={setTil}
-        minHeight="calc(100vh - 220px)"
-      />
+      <TilEditor value={til} onChange={setTil} minHeight="calc(100vh - 220px)" />
 
       {/* 저장 단축키 안내 */}
       <p className="text-xs text-gray-300 mt-2 text-right">{t('saveHint')}</p>

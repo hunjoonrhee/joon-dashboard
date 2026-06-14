@@ -20,15 +20,11 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           response = NextResponse.next({
             request: { headers: request.headers },
           });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
+          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
         },
       },
     }
@@ -39,9 +35,7 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const locale = LOCALES.includes(pathname.split('/')[1])
-    ? pathname.split('/')[1]
-    : 'ko';
+  const locale = LOCALES.includes(pathname.split('/')[1]) ? pathname.split('/')[1] : 'ko';
 
   const isLoginPage = /^\/(ko|de|en)\/login$/.test(pathname);
   const isSignupPage = /^\/(ko|de|en)\/signup$/.test(pathname);
@@ -49,12 +43,7 @@ export async function middleware(request: NextRequest) {
   const isLandingPage = /^\/(ko|de|en)$/.test(pathname);
   const isOnboardingPage = /^\/(ko|de|en)\/onboarding/.test(pathname);
   const isPublicPage =
-    isLoginPage ||
-    isSignupPage ||
-    isTryPage ||
-    isLandingPage ||
-    isOnboardingPage ||
-    pathname === '/';
+    isLoginPage || isSignupPage || isTryPage || isLandingPage || isOnboardingPage || pathname === '/';
 
   // 비로그인 → 보호된 페이지 → 랜딩으로
   if (!user && !isPublicPage) {

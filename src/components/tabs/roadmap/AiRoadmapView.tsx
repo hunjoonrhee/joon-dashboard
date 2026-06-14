@@ -4,16 +4,7 @@ import { useUser } from '@/components/UserProvider';
 import GoalModal from '@/components/tabs/roadmap/GoalModal';
 import { supabase } from '@/lib/supabase';
 import type { AiRoadmap, RoadmapStage } from '@/types';
-import {
-  Check,
-  ChevronDown,
-  ChevronRight,
-  Plus,
-  RefreshCw,
-  Sparkles,
-  Trash2,
-  Trophy,
-} from 'lucide-react';
+import { Check, ChevronDown, ChevronRight, Plus, RefreshCw, Sparkles, Trash2, Trophy } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
@@ -24,12 +15,7 @@ interface Props {
   onRefresh?: () => void;
 }
 
-export default function AiRoadmapView({
-  adoptedRoadmap,
-  settings,
-  onAdopt,
-  onRefresh,
-}: Props) {
+export default function AiRoadmapView({ adoptedRoadmap, settings, onAdopt, onRefresh }: Props) {
   const t = useTranslations('roadmap');
   const locale = useLocale();
   const user = useUser();
@@ -89,9 +75,7 @@ export default function AiRoadmapView({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-bold text-indigo-500 uppercase tracking-widest">
-          {t('aiRoadmap')}
-        </p>
+        <p className="text-xs font-bold text-indigo-500 uppercase tracking-widest">{t('aiRoadmap')}</p>
         <button
           onClick={() => setShowForm((v) => !v)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500 text-white text-xs font-semibold hover:bg-indigo-600 transition-colors"
@@ -115,9 +99,7 @@ export default function AiRoadmapView({
               />
             </div>
             <div className="flex flex-col gap-1 flex-1">
-              <label className="text-xs text-gray-400">
-                {t('careerLevelLabel')}
-              </label>
+              <label className="text-xs text-gray-400">{t('careerLevelLabel')}</label>
               <input
                 type="text"
                 value={careerLevel}
@@ -178,16 +160,10 @@ export default function AiRoadmapView({
               }`}
               onClick={() => setExpandedId(expanded ? null : roadmap.id)}
             >
-              <div
-                className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                  adopted ? 'bg-indigo-500' : 'bg-gray-300'
-                }`}
-              />
+              <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${adopted ? 'bg-indigo-500' : 'bg-gray-300'}`} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <p
-                    className={`text-sm font-semibold truncate ${adopted ? 'text-indigo-800' : 'text-gray-800'}`}
-                  >
+                  <p className={`text-sm font-semibold truncate ${adopted ? 'text-indigo-800' : 'text-gray-800'}`}>
                     {roadmap.goal}
                   </p>
                   {adopted && (
@@ -249,15 +225,7 @@ export default function AiRoadmapView({
   );
 }
 
-function StageCard({
-  stage,
-  isLast,
-  onRefresh,
-}: {
-  stage: RoadmapStage;
-  isLast: boolean;
-  onRefresh?: () => void;
-}) {
+function StageCard({ stage, isLast, onRefresh }: { stage: RoadmapStage; isLast: boolean; onRefresh?: () => void }) {
   const t = useTranslations('roadmap');
   const [open, setOpen] = useState(false);
   const [goalModal, setGoalModal] = useState(false);
@@ -265,17 +233,13 @@ function StageCard({
 
   return (
     <>
-      <div
-        className={`border-b border-gray-50 last:border-0 ${isLast ? 'bg-indigo-50' : ''}`}
-      >
+      <div className={`border-b border-gray-50 last:border-0 ${isLast ? 'bg-indigo-50' : ''}`}>
         <div
           className={`flex items-center justify-between px-4 py-2.5 ${!isLast ? 'cursor-pointer hover:bg-gray-50' : ''}`}
           onClick={() => !isLast && setOpen((v) => !v)}
         >
           <div>
-            <p
-              className={`text-xs font-semibold ${isLast ? 'text-indigo-700' : 'text-gray-700'}`}
-            >
+            <p className={`text-xs font-semibold ${isLast ? 'text-indigo-700' : 'text-gray-700'}`}>
               {stage.level}. {t('stageUnit')} · {stage.title}
             </p>
             <p className="text-xs text-gray-400 mt-0.5">{stage.description}</p>
@@ -283,9 +247,7 @@ function StageCard({
           {isLast ? (
             <Trophy size={14} className="text-indigo-400 flex-shrink-0" />
           ) : (
-            <span className="text-xs text-gray-400">
-              {open ? t('collapseBtn') : t('expandBtn')}
-            </span>
+            <span className="text-xs text-gray-400">{open ? t('collapseBtn') : t('expandBtn')}</span>
           )}
         </div>
 
@@ -295,21 +257,12 @@ function StageCard({
               <div key={i} className="flex items-start gap-2 pt-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-300 flex-shrink-0 mt-1.5" />
                 <div>
-                  <p className="text-xs font-medium text-gray-700">
-                    {skill.name}
-                  </p>
-                  {skill.description && (
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {skill.description}
-                    </p>
-                  )}
+                  <p className="text-xs font-medium text-gray-700">{skill.name}</p>
+                  {skill.description && <p className="text-xs text-gray-400 mt-0.5">{skill.description}</p>}
                   {skill.tags.length > 0 && (
                     <div className="flex gap-1 flex-wrap mt-1">
                       {skill.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-xs px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-500"
-                        >
+                        <span key={tag} className="text-xs px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-500">
                           {tag}
                         </span>
                       ))}

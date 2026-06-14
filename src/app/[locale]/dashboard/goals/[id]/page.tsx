@@ -48,11 +48,7 @@ export default function GoalDetail() {
     const fetchData = async () => {
       const [{ data: g }, { data: tp }] = await Promise.all([
         supabase.from('goals').select('*').eq('id', id).single(),
-        supabase
-          .from('topics')
-          .select('*')
-          .eq('goal_id', id)
-          .order('created_at'),
+        supabase.from('topics').select('*').eq('goal_id', id).order('created_at'),
       ]);
       if (g) {
         setGoal(g);
@@ -74,10 +70,7 @@ export default function GoalDetail() {
     if (!goal) return;
     setSaving(true);
     if (infoDraft.is_focus) {
-      await supabase
-        .from('goals')
-        .update({ is_focus: false })
-        .neq('id', goal.id);
+      await supabase.from('goals').update({ is_focus: false }).neq('id', goal.id);
     }
     await supabase.from('goals').update(infoDraft).eq('id', goal.id);
     setGoal({ ...goal, ...infoDraft });
@@ -119,15 +112,8 @@ export default function GoalDetail() {
   };
 
   const toggleTopic = async (topic: Topic) => {
-    await supabase
-      .from('topics')
-      .update({ completed: !topic.completed })
-      .eq('id', topic.id);
-    setTopics((prev) =>
-      prev.map((tp) =>
-        tp.id === topic.id ? { ...tp, completed: !tp.completed } : tp
-      )
-    );
+    await supabase.from('topics').update({ completed: !topic.completed }).eq('id', topic.id);
+    setTopics((prev) => prev.map((tp) => (tp.id === topic.id ? { ...tp, completed: !tp.completed } : tp)));
   };
 
   const removeTopic = async (topic: Topic) => {
@@ -140,17 +126,11 @@ export default function GoalDetail() {
   const getPct = (cat: string) => {
     const filtered = topics.filter((tp) => tp.category === cat);
     if (filtered.length === 0) return 0;
-    return Math.round(
-      (filtered.filter((tp) => tp.completed).length / filtered.length) * 100
-    );
+    return Math.round((filtered.filter((tp) => tp.completed).length / filtered.length) * 100);
   };
 
   const totalPct =
-    topics.length === 0
-      ? 0
-      : Math.round(
-          (topics.filter((tp) => tp.completed).length / topics.length) * 100
-        );
+    topics.length === 0 ? 0 : Math.round((topics.filter((tp) => tp.completed).length / topics.length) * 100);
 
   if (loading)
     return (
@@ -180,9 +160,7 @@ export default function GoalDetail() {
         {/* 기본 정보 */}
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-gray-700">
-              {t('editModal')}
-            </p>
+            <p className="text-sm font-medium text-gray-700">{t('editModal')}</p>
             {!editingInfo ? (
               <button
                 onClick={() => setEditingInfo(true)}
@@ -192,10 +170,7 @@ export default function GoalDetail() {
               </button>
             ) : (
               <div className="flex gap-2">
-                <button
-                  onClick={cancelInfo}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
+                <button onClick={cancelInfo} className="text-gray-400 hover:text-gray-600 transition-colors">
                   <X size={15} />
                 </button>
                 <button
@@ -212,36 +187,26 @@ export default function GoalDetail() {
           {editingInfo ? (
             <div className="flex flex-col gap-3">
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">
-                  {t('name')}
-                </label>
+                <label className="text-xs text-gray-500 mb-1 block">{t('name')}</label>
                 <input
                   type="text"
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
                   value={infoDraft.name}
-                  onChange={(e) =>
-                    setInfoDraft({ ...infoDraft, name: e.target.value })
-                  }
+                  onChange={(e) => setInfoDraft({ ...infoDraft, name: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">
-                  {t('description')}
-                </label>
+                <label className="text-xs text-gray-500 mb-1 block">{t('description')}</label>
                 <input
                   type="text"
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
                   value={infoDraft.description}
-                  onChange={(e) =>
-                    setInfoDraft({ ...infoDraft, description: e.target.value })
-                  }
+                  onChange={(e) => setInfoDraft({ ...infoDraft, description: e.target.value })}
                 />
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="text-xs text-gray-500 mb-1 block">
-                    {t('priority')}
-                  </label>
+                  <label className="text-xs text-gray-500 mb-1 block">{t('priority')}</label>
                   <select
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
                     value={infoDraft.priority}
@@ -259,9 +224,7 @@ export default function GoalDetail() {
                   </select>
                 </div>
                 <div className="flex-1">
-                  <label className="text-xs text-gray-500 mb-1 block">
-                    {t('status')}
-                  </label>
+                  <label className="text-xs text-gray-500 mb-1 block">{t('status')}</label>
                   <select
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
                     value={infoDraft.status}
@@ -272,9 +235,7 @@ export default function GoalDetail() {
                       })
                     }
                   >
-                    <option value="in_progress">
-                      {tStatus('in_progress')}
-                    </option>
+                    <option value="in_progress">{tStatus('in_progress')}</option>
                     <option value="completed">{tStatus('completed')}</option>
                     <option value="planned">{tStatus('planned')}</option>
                   </select>
@@ -285,9 +246,7 @@ export default function GoalDetail() {
                   type="checkbox"
                   id="is_focus"
                   checked={infoDraft.is_focus}
-                  onChange={(e) =>
-                    setInfoDraft({ ...infoDraft, is_focus: e.target.checked })
-                  }
+                  onChange={(e) => setInfoDraft({ ...infoDraft, is_focus: e.target.checked })}
                 />
                 <label htmlFor="is_focus" className="text-sm text-gray-600">
                   {t('focus')}
@@ -297,27 +256,16 @@ export default function GoalDetail() {
           ) : (
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
-                <h1 className="text-lg font-semibold text-gray-800">
-                  {goal.name}
-                </h1>
-                {goal.description && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    {goal.description}
-                  </p>
-                )}
-                {goal.is_focus && (
-                  <p className="text-xs text-indigo-500 mt-2 font-medium">
-                    ★ {t('focus')}
-                  </p>
-                )}
+                <h1 className="text-lg font-semibold text-gray-800">{goal.name}</h1>
+                {goal.description && <p className="text-sm text-gray-500 mt-1">{goal.description}</p>}
+                {goal.is_focus && <p className="text-xs text-indigo-500 mt-2 font-medium">★ {t('focus')}</p>}
                 {/* 전체 진행도 */}
                 {topics.length > 0 && (
                   <div className="mt-3">
                     <div className="flex justify-between text-xs text-gray-400 mb-1">
                       <span>{totalPct}%</span>
                       <span>
-                        {topics.filter((tp) => tp.completed).length}/
-                        {topics.length}
+                        {topics.filter((tp) => tp.completed).length}/{topics.length}
                       </span>
                     </div>
                     <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -330,14 +278,10 @@ export default function GoalDetail() {
                 )}
               </div>
               <div className="flex items-center gap-2 flex-shrink-0 ml-3">
-                <span
-                  className={`text-xs px-2 py-0.5 rounded-full ${priorityStyle[goal.priority]}`}
-                >
+                <span className={`text-xs px-2 py-0.5 rounded-full ${priorityStyle[goal.priority]}`}>
                   {tPriority(goal.priority)}
                 </span>
-                <span
-                  className={`text-xs px-2 py-0.5 rounded-full ${statusStyle[goal.status]}`}
-                >
+                <span className={`text-xs px-2 py-0.5 rounded-full ${statusStyle[goal.status]}`}>
                   {tStatus(goal.status)}
                 </span>
               </div>
@@ -348,9 +292,7 @@ export default function GoalDetail() {
         {/* 체크리스트 */}
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-gray-700">
-              {t('checklist')}
-            </p>
+            <p className="text-sm font-medium text-gray-700">{t('checklist')}</p>
             <button
               onClick={() => setAddingTopic(true)}
               className="text-indigo-500 hover:text-indigo-700 transition-colors"
@@ -380,10 +322,7 @@ export default function GoalDetail() {
                 onChange={(e) => setNewCategory(e.target.value)}
               />
               <div className="flex gap-2 justify-end">
-                <button
-                  onClick={() => setAddingTopic(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
+                <button onClick={() => setAddingTopic(false)} className="text-gray-400 hover:text-gray-600">
                   <X size={16} />
                 </button>
                 <button
@@ -399,9 +338,7 @@ export default function GoalDetail() {
 
           {topics.length === 0 && !addingTopic ? (
             <div className="text-center py-6">
-              <p className="text-sm text-gray-400 leading-relaxed">
-                {t('checklistEmpty')}
-              </p>
+              <p className="text-sm text-gray-400 leading-relaxed">{t('checklistEmpty')}</p>
               <button
                 onClick={() => setAddingTopic(true)}
                 className="mt-3 text-xs text-indigo-500 hover:text-indigo-700 font-medium transition-colors"
@@ -421,17 +358,11 @@ export default function GoalDetail() {
                       <span>{pct}%</span>
                     </div>
                     <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-2">
-                      <div
-                        className="h-full bg-indigo-500 rounded-full transition-all"
-                        style={{ width: `${pct}%` }}
-                      />
+                      <div className="h-full bg-indigo-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
                     </div>
                     <div className="flex flex-col gap-1.5">
                       {catTopics.map((tp) => (
-                        <div
-                          key={tp.id}
-                          className="flex items-center justify-between group"
-                        >
+                        <div key={tp.id} className="flex items-center justify-between group">
                           <div
                             className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
                             onClick={() => toggleTopic(tp)}
@@ -439,9 +370,7 @@ export default function GoalDetail() {
                             <div
                               className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${tp.completed ? 'bg-indigo-500 border-indigo-500' : 'border-gray-300 hover:border-indigo-300'}`}
                             >
-                              {tp.completed && (
-                                <span className="text-white text-xs">✓</span>
-                              )}
+                              {tp.completed && <span className="text-white text-xs">✓</span>}
                             </div>
                             <span
                               className={`text-sm truncate ${tp.completed ? 'line-through text-gray-300' : 'text-gray-700'}`}

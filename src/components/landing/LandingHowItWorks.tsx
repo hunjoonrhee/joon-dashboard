@@ -13,9 +13,7 @@ function GoalVisual() {
   return (
     <div className="mt-4 bg-gray-800 rounded-lg p-3 border border-white/5">
       <p className="text-xs text-gray-500 mb-1.5">최종 목표</p>
-      <div className="bg-gray-700 rounded-md px-3 py-1.5 text-xs text-white">
-        Lead Architect
-      </div>
+      <div className="bg-gray-700 rounded-md px-3 py-1.5 text-xs text-white">Lead Architect</div>
     </div>
   );
 }
@@ -33,9 +31,7 @@ function RoadmapVisual() {
           >
             {i + 1}
           </div>
-          <span className={`text-xs ${i === 0 ? 'text-white' : 'text-gray-500'}`}>
-            {s}
-          </span>
+          <span className={`text-xs ${i === 0 ? 'text-white' : 'text-gray-500'}`}>{s}</span>
         </div>
       ))}
     </div>
@@ -68,21 +64,14 @@ export default function LandingHowItWorks() {
   return (
     <section className="max-w-3xl mx-auto px-6 py-20">
       <div className="text-center mb-12">
-        <p className="text-xs font-bold tracking-widest uppercase text-indigo-400 mb-3">
-          {t('howEyebrow')}
-        </p>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-3">
-          {t('howTitle')}
-        </h2>
+        <p className="text-xs font-bold tracking-widest uppercase text-indigo-400 mb-3">{t('howEyebrow')}</p>
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-3">{t('howTitle')}</h2>
         <p className="text-gray-400 text-sm">{t('howSub')}</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         {steps.map((step) => (
-          <div
-            key={step.numKey}
-            className="bg-gray-900 border border-white/6 rounded-2xl p-5"
-          >
+          <div key={step.numKey} className="bg-gray-900 border border-white/6 rounded-2xl p-5">
             <div className="inline-block px-2.5 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold tracking-widest mb-4">
               {t(step.numKey)}
             </div>

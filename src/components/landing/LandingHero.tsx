@@ -44,9 +44,7 @@ export default function LandingHero() {
           <span className="text-indigo-400">{t('headline2')}</span>
         </h1>
 
-        <p className="text-gray-400 text-base leading-relaxed mb-8 max-w-md mx-auto">
-          {t('sub')}
-        </p>
+        <p className="text-gray-400 text-base leading-relaxed mb-8 max-w-md mx-auto">{t('sub')}</p>
 
         <div className="flex gap-3 justify-center flex-wrap">
           <button

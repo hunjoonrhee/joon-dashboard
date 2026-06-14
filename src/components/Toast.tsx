@@ -25,19 +25,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   let nextId = 0;
 
-  const show = useCallback(
-    (message: string, options?: { type?: ToastType; sub?: string }) => {
-      const id = ++nextId;
-      setToasts((prev) => [
-        ...prev,
-        { id, message, type: options?.type ?? 'success', sub: options?.sub },
-      ]);
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
-      }, 3000);
-    },
-    []
-  );
+  const show = useCallback((message: string, options?: { type?: ToastType; sub?: string }) => {
+    const id = ++nextId;
+    setToasts((prev) => [...prev, { id, message, type: options?.type ?? 'success', sub: options?.sub }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 3000);
+  }, []);
 
   const icons = { success: '✓', error: '✕', info: 'ℹ' };
   const colors = {
@@ -69,9 +63,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             </div>
             <div className="min-w-0">
               <p className="text-sm font-semibold">{toast.message}</p>
-              {toast.sub && (
-                <p className="text-xs mt-0.5 opacity-70">{toast.sub}</p>
-              )}
+              {toast.sub && <p className="text-xs mt-0.5 opacity-70">{toast.sub}</p>}
             </div>
           </div>
         ))}

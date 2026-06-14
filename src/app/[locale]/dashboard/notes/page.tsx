@@ -10,10 +10,7 @@ export default function NotesPage() {
 
   return (
     <main className="px-6 py-6">
-      <NotesTab
-        notes={notes}
-        onRefresh={() => queryClient.invalidateQueries({ queryKey: ['notes'] })}
-      />
+      <NotesTab notes={notes} onRefresh={() => queryClient.invalidateQueries({ queryKey: ['notes'] })} />
     </main>
   );
 }

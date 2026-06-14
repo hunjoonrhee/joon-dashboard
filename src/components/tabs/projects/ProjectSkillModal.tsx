@@ -17,12 +17,7 @@ interface Props {
   onSaved: () => void;
 }
 
-export default function ProjectSkillModal({
-  projectId,
-  projectName,
-  onClose,
-  onSaved,
-}: Props) {
+export default function ProjectSkillModal({ projectId, projectName, onClose, onSaved }: Props) {
   const t = useTranslations('projects');
   const tCommon = useTranslations('common');
   const { show } = useToast();
@@ -39,18 +34,10 @@ export default function ProjectSkillModal({
         .eq('key', 'adopted_roadmap_id')
         .single();
       if (!setting?.value) return;
-      const { data: roadmap } = await supabase
-        .from('ai_roadmaps')
-        .select('stages')
-        .eq('id', setting.value)
-        .single();
+      const { data: roadmap } = await supabase.from('ai_roadmaps').select('stages').eq('id', setting.value).single();
       if (!roadmap?.stages) return;
       const tags = [
-        ...new Set(
-          roadmap.stages.flatMap((s: AiRoadmap['stages'][number]) =>
-            s.skills.flatMap((sk) => sk.tags)
-          )
-        ),
+        ...new Set(roadmap.stages.flatMap((s: AiRoadmap['stages'][number]) => s.skills.flatMap((sk) => sk.tags))),
       ] as string[];
       setTagPool(tags.sort());
     };
@@ -58,9 +45,7 @@ export default function ProjectSkillModal({
   }, []);
 
   const toggle = (tag: string) => {
-    setSelected((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
+    setSelected((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]));
   };
 
   const addCustom = () => {
@@ -160,10 +145,7 @@ export default function ProjectSkillModal({
       <p className="text-xs text-gray-300 mb-4">{t('skillModalNote')}</p>
 
       <div className="flex justify-between pt-1">
-        <button
-          onClick={onClose}
-          className="text-xs text-gray-400 hover:text-gray-600"
-        >
+        <button onClick={onClose} className="text-xs text-gray-400 hover:text-gray-600">
           {t('skipForNow')}
         </button>
         <div className="flex gap-2">

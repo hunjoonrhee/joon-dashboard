@@ -1,15 +1,7 @@
 'use client';
 
 import HomeTab from '@/components/tabs/HomeTab';
-import {
-  useGoals,
-  useNotes,
-  useProjectTasks,
-  useSessions,
-  useSettings,
-  useTodayItems,
-  useTopics,
-} from '@/lib/queries';
+import { useGoals, useNotes, useProjectTasks, useSessions, useSettings, useTodayItems, useTopics } from '@/lib/queries';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function HomePage() {

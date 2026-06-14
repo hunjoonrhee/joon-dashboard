@@ -2,8 +2,7 @@ import type { RoadmapStage } from '@/types';
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
-const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent';
 
 const SYSTEM_PROMPT = `You are an expert learning path designer who can create roadmaps for any domain — programming, languages, music, design, fitness, or any other skill.
 Given a person's current level and their final goal, generate a realistic and actionable learning roadmap.
@@ -48,27 +47,17 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export async function POST(req: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return NextResponse.json(
-      { error: 'GEMINI_API_KEY not set' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'GEMINI_API_KEY not set' }, { status: 500 });
   }
 
   // Service role 클라이언트 — RLS 우회, user_id 직접 주입
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
   const { goal, careerLevel, locale, userId } = await req.json();
-  const lang =
-    locale === 'de' ? 'German' : locale === 'en' ? 'English' : 'Korean';
+  const lang = locale === 'de' ? 'German' : locale === 'en' ? 'English' : 'Korean';
 
   if (!goal || !careerLevel) {
-    return NextResponse.json(
-      { error: 'goal and careerLevel are required' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'goal and careerLevel are required' }, { status: 400 });
   }
 
   const userPrompt = `Current level: ${careerLevel}
@@ -118,10 +107,7 @@ Generate a learning roadmap from the current level to the final goal. Adapt the 
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       console.error('No JSON found in raw:', raw);
-      return NextResponse.json(
-        { error: 'Invalid AI response', raw: raw.slice(0, 500) },
-        { status: 502 }
-      );
+      return NextResponse.json({ error: 'Invalid AI response', raw: raw.slice(0, 500) }, { status: 502 });
     }
 
     const parsed = JSON.parse(jsonMatch[0]);
@@ -152,9 +138,6 @@ Generate a learning roadmap from the current level to the final goal. Adapt the 
     return NextResponse.json(data);
   } catch (e) {
     console.error('Route error:', e);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
