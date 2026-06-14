@@ -25,7 +25,11 @@ export default function TilList({ sessions }: Props) {
       ) : (
         <div className="flex flex-col divide-y divide-gray-100">
           {sessions.map((s) => (
-            <div key={s.id} className="py-3 cursor-pointer" onClick={() => router.push(`/til/${s.id}`)}>
+            <div
+              key={s.id}
+              className="py-3 cursor-pointer"
+              onClick={() => router.push(`/${locale}/dashboard/til/${s.id}`)}
+            >
               <p className="text-xs text-gray-400 mb-1">{dateLabel(s.date)}</p>
               <p className="text-sm font-medium text-gray-800 mb-1">{s.title}</p>
               <p className="text-xs text-gray-500 line-clamp-2">{s.til}</p>

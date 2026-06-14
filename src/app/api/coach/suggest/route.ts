@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 const SYSTEM_PROMPT = `You are a personal learning coach AI.
 Analyze the user's study data and provide actionable coaching insights.
@@ -54,6 +54,12 @@ export async function POST(req: NextRequest) {
   }
 
   const { sessions, adoptedRoadmap, goals, locale, careerLevel } = await req.json();
+
+  // TIL 히스토리 추출
+  const tilHistory = sessions
+    .filter((s: { til?: string }) => s.til && s.til.trim().length > 0)
+    .map((s: { til: string }) => s.til)
+    .slice(0, 5);
   const lang = locale === 'de' ? 'German' : locale === 'en' ? 'English' : 'Korean';
 
   const thirtyDaysAgo = new Date();
@@ -96,13 +102,14 @@ Study data:
 - Tag frequency (last 30 days): ${JSON.stringify(tagFrequency)}
 - Gap skills (not yet studied): ${gapSkills.slice(0, 10).join(', ')}
 - Total roadmap skills: ${adoptedRoadmap?.stages.flatMap((s: { skills: unknown[] }) => s.skills).length ?? 0}
+- Recent TIL notes (what user actually learned, may be empty): ${tilHistory.length > 0 ? tilHistory.join(' | ') : 'None'}
 - Active goals: ${goals
     .filter((g: { status: string }) => g.status === 'in_progress')
     .map((g: { name: string }) => g.name)
     .join(', ')}
 
 Based on this data:
-1. What ONE skill should the user study today and why? Consider their career level — don't recommend basics if they're experienced.
+1. What ONE skill should the user study today and why? Consider their career level and TIL notes — if TIL shows they recently covered a topic but noted gaps, recommend filling those gaps. Don't recommend basics if they're experienced.
 2. At current pace, how many months to complete the roadmap? What if they study 1 more session/week?
 3. Is there a concerning pattern in their study habits?`;
 

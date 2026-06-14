@@ -91,7 +91,8 @@
   "status": {
     "in_progress": "In Progress",
     "completed": "Completed",
-    "planned": "Planned"
+    "planned": "Planned",
+    "not_started": "Not started"
   },
   "priority": {
     "urgent": "Urgent",
@@ -141,7 +142,15 @@
     "sessionListTitle": "Study log",
     "emptyTitle": "No study records yet",
     "emptyDesc": "Add your first study session",
-    "addFirst": "Add record"
+    "addFirst": "Add record",
+    "loading": "Loading...",
+    "notFound": "Session not found.",
+    "basicInfo": "Basic Info",
+    "studyItems": "Study Items",
+    "studyItemsEmpty": "Press + to add study items.",
+    "keywordPlaceholder": "Enter keyword...",
+    "tilSection": "TIL — Today I Learned",
+    "backToList": "Back to list"
   },
   "notes": {
     "title": "Notes",

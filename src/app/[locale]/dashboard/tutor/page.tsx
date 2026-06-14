@@ -5,6 +5,7 @@ import type { AiRoadmap } from '@/types';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 interface QuizData {
   question: string;
@@ -15,6 +16,7 @@ interface QuizData {
 interface SummaryData {
   concepts: string[];
   tags: string[];
+  tilNote?: string;
 }
 
 interface Message {
@@ -31,16 +33,16 @@ interface UserContext {
   gapSkills: string[];
   projects: string[];
   goal: string;
+  tilHistory: string[];
 }
 
 type PageState = 'loading' | 'session' | 'gate' | 'complete';
 
-// 유저 컨텍스트 로드
 async function loadUserContext(topic: string): Promise<UserContext> {
   try {
     const [settingsRes, sessionsRes, roadmapRes, projectsRes] = await Promise.all([
       supabase.from('settings').select('key, value').in('key', ['career_level', 'adopted_roadmap_id']),
-      supabase.from('sessions').select('tags, date').order('date', { ascending: false }).limit(20),
+      supabase.from('sessions').select('tags, date, til').order('date', { ascending: false }).limit(30),
       supabase.from('ai_roadmaps').select('goal, stages').eq('adopted', true).single(),
       supabase.from('projects').select('name').eq('status', 'in_progress').limit(5),
     ]);
@@ -48,7 +50,14 @@ async function loadUserContext(topic: string): Promise<UserContext> {
     const careerLevel =
       settingsRes.data?.find((s: { key: string; value: string }) => s.key === 'career_level')?.value ?? 'Not specified';
 
-    const recentTags = [...new Set((sessionsRes.data ?? []).flatMap((s: { tags: string[] }) => s.tags))] as string[];
+    const sessions = sessionsRes.data ?? [];
+    const recentTags = [...new Set(sessions.flatMap((s: { tags: string[] }) => s.tags))] as string[];
+
+    // TIL 히스토리 — 있는 것만
+    const tilHistory = sessions
+      .filter((s: { til?: string }) => s.til && s.til.trim().length > 0)
+      .map((s: { til: string }) => s.til)
+      .slice(0, 5);
 
     const adoptedRoadmap = roadmapRes.data as AiRoadmap | null;
     const studiedTagSet = new Set(recentTags);
@@ -60,21 +69,9 @@ async function loadUserContext(topic: string): Promise<UserContext> {
 
     const projects = (projectsRes.data ?? []).map((p: { name: string }) => p.name);
 
-    return {
-      careerLevel,
-      recentTags,
-      gapSkills,
-      projects,
-      goal: adoptedRoadmap?.goal ?? topic,
-    };
+    return { careerLevel, recentTags, gapSkills, projects, goal: adoptedRoadmap?.goal ?? topic, tilHistory };
   } catch {
-    return {
-      careerLevel: 'Not specified',
-      recentTags: [],
-      gapSkills: [],
-      projects: [],
-      goal: topic,
-    };
+    return { careerLevel: 'Not specified', recentTags: [], gapSkills: [], projects: [], goal: topic, tilHistory: [] };
   }
 }
 
@@ -92,6 +89,7 @@ export default function TutorPage() {
   const [userContext, setUserContext] = useState<UserContext | null>(null);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isEndingSession, setIsEndingSession] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [sessionSummary, setSessionSummary] = useState<SummaryData | null>(null);
   const [savedRecord, setSavedRecord] = useState<{
@@ -105,7 +103,6 @@ export default function TutorPage() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startedRef = useRef(false);
 
-  // 컨텍스트 로드 후 세션 시작
   useEffect(() => {
     if (isGate || !topic) return;
     loadUserContext(topic).then((ctx) => {
@@ -114,7 +111,6 @@ export default function TutorPage() {
     });
   }, [topic, isGate]);
 
-  // 타이머
   useEffect(() => {
     if (pageState !== 'session') return;
     timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
@@ -123,31 +119,24 @@ export default function TutorPage() {
     };
   }, [pageState]);
 
-  // 첫 AI 메시지
   useEffect(() => {
     if (pageState !== 'session' || !topic || !userContext || startedRef.current) return;
     startedRef.current = true;
     sendToAI([]);
   }, [pageState, topic, userContext]);
 
-  // 스크롤
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const sendToAI = async (history: Message[]) => {
+  const sendToAI = async (history: Message[], requestSummary = false) => {
     setLoading(true);
     const contents = history.map((m) => ({ role: m.role, parts: m.parts }));
     try {
       const res = await fetch('/api/tutor/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          topic,
-          messages: contents,
-          locale,
-          userContext,
-        }),
+        body: JSON.stringify({ topic, messages: contents, locale, userContext, requestSummary }),
       });
       const data = await res.json();
       const aiMsg: Message = {
@@ -158,8 +147,10 @@ export default function TutorPage() {
       };
       setMessages((prev) => [...prev, aiMsg]);
       if (data.summary) setSessionSummary(data.summary);
+      return data.summary ?? null;
     } catch {
       setMessages((prev) => [...prev, { role: 'model', parts: [{ text: t('errorMessage') }] }]);
+      return null;
     } finally {
       setLoading(false);
     }
@@ -200,25 +191,37 @@ export default function TutorPage() {
   };
 
   const handleEndSession = async () => {
+    if (isEndingSession || loading) return;
+    setIsEndingSession(true);
+
+    // 1. AI한테 SUMMARY 요청
+    const summary = await sendToAI(messages, true);
+    const finalSummary = summary ?? sessionSummary;
+
+    // 2. 타이머 종료
     if (timerRef.current) clearInterval(timerRef.current);
     const durationMin = Math.max(1, Math.round(elapsed / 60));
     const today = new Date().toISOString().split('T')[0];
-    const tags = sessionSummary?.tags ?? [topic];
+    const tags = finalSummary?.tags ?? [topic];
+    const tilNote = finalSummary?.tilNote ?? '';
     const title = `${topic} — ${t('aiTutorLabel')}`;
 
+    // 3. sessions에 저장 (til 포함)
     try {
       await insertWithUser('sessions', {
         title,
         date: today,
         duration: durationMin,
         tags,
-        memo: `${t('aiTutorLabel')} (${durationMin}${t('minutes', { n: '' }).replace('', '').trim()})`,
+        til: tilNote,
+        memo: `${t('aiTutorLabel')} (${durationMin}분)`,
       });
     } catch (e) {
       console.error('세션 저장 실패:', e);
     }
 
     setSavedRecord({ title, date: today, duration: durationMin, tags });
+    setIsEndingSession(false);
     setPageState('complete');
   };
 
@@ -288,7 +291,7 @@ export default function TutorPage() {
               <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 mb-4 flex flex-col gap-2">
                 <div className="flex justify-between">
                   <span className="text-xs text-gray-400">{t('recordTitle')}</span>
-                  <span className="text-xs font-medium text-gray-700">{savedRecord.title}</span>
+                  <span className="text-xs font-medium text-gray-700 text-right max-w-[60%]">{savedRecord.title}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-xs text-gray-400">{t('recordDate')}</span>
@@ -355,9 +358,10 @@ export default function TutorPage() {
           </span>
           <button
             onClick={handleEndSession}
-            className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+            disabled={isEndingSession || loading}
+            className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 disabled:opacity-40 transition-colors"
           >
-            {t('endSession')}
+            {isEndingSession ? '요약 중...' : t('endSession')}
           </button>
         </div>
       </div>
@@ -368,11 +372,15 @@ export default function TutorPage() {
             {messages.map((msg, i) => (
               <div key={i}>
                 {msg.role === 'model' && (
-                  <div className="flex flex-col gap-2 max-w-[85%]">
+                  <div className="flex flex-col gap-2 max-w-[88%]">
                     {msg.parts[0].text && (
-                      <div className="bg-gray-50 border border-gray-100 rounded-2xl rounded-tl-sm px-4 py-3">
-                        <p className="text-[10px] font-semibold text-indigo-500 mb-1">{t('aiTutorLabel')}</p>
-                        <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">{msg.parts[0].text}</p>
+                      <div
+                        className="text-sm text-gray-800 leading-relaxed prose prose-sm max-w-none
+  prose-code:bg-gray-100 prose-code:px-1.5 prose-code:rounded prose-code:text-indigo-600 prose-code:font-mono
+  prose-pre:!bg-gray-900 prose-pre:!text-gray-100 prose-pre:rounded-xl prose-pre:text-xs prose-pre:overflow-x-auto
+  [&_pre_code]:!bg-transparent [&_pre_code]:!text-gray-100 [&_pre_code]:!p-0"
+                      >
+                        <ReactMarkdown>{msg.parts[0].text}</ReactMarkdown>
                       </div>
                     )}
                     {msg.quiz && (
@@ -419,7 +427,7 @@ export default function TutorPage() {
               </div>
             ))}
 
-            {loading && (
+            {(loading || isEndingSession) && (
               <div className="flex gap-1 px-4 py-3 bg-gray-50 rounded-2xl rounded-tl-sm w-fit">
                 <span
                   className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce"
@@ -436,32 +444,33 @@ export default function TutorPage() {
               </div>
             )}
 
-            {sessionSummary && (
-              <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 text-center">
-                <p className="text-xs font-semibold text-emerald-700 mb-1">{t('sessionReadyTitle')}</p>
-                <button
-                  onClick={handleEndSession}
-                  className="mt-1 px-4 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-medium hover:bg-emerald-600 transition-colors"
-                >
-                  {t('endAndSave', { endSession: t('endSession') })}
-                </button>
-              </div>
-            )}
             <div ref={chatEndRef} />
           </div>
 
           <div className="border-t border-gray-100 px-4 py-3 flex gap-2 flex-shrink-0 bg-white">
-            <input
-              type="text"
+            <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
               placeholder={t('inputPlaceholder')}
-              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-indigo-300 focus:bg-white transition-colors"
+              disabled={isEndingSession}
+              rows={1}
+              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-indigo-300 focus:bg-white transition-colors disabled:opacity-40 resize-none overflow-hidden"
+              style={{ minHeight: '42px', maxHeight: '120px' }}
+              onInput={(e) => {
+                const el = e.currentTarget;
+                el.style.height = 'auto';
+                el.style.height = `${el.scrollHeight}px`;
+              }}
             />
             <button
               onClick={handleSend}
-              disabled={!input.trim() || loading}
+              disabled={!input.trim() || loading || isEndingSession}
               className="px-4 py-2.5 rounded-xl bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               {t('send')}
@@ -476,17 +485,13 @@ export default function TutorPage() {
             <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-indigo-400 rounded-full transition-all duration-500"
-                style={{
-                  width: sessionSummary
-                    ? '100%'
-                    : `${Math.min(90, (messages.filter((m) => m.role === 'model').length / 5) * 100)}%`,
-                }}
+                style={{ width: `${Math.min(90, (messages.filter((m) => m.role === 'model').length / 5) * 100)}%` }}
               />
             </div>
           </div>
           {userContext && (
             <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">컨텍스트</p>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">레벨</p>
               <p className="text-[10px] text-gray-500 leading-relaxed">{userContext.careerLevel}</p>
             </div>
           )}
@@ -508,7 +513,8 @@ export default function TutorPage() {
           <div className="mt-auto">
             <button
               onClick={handleEndSession}
-              className="w-full text-[10px] text-gray-400 border border-gray-200 rounded-lg py-1.5 hover:bg-white hover:text-gray-600 transition-colors"
+              disabled={isEndingSession || loading}
+              className="w-full text-[10px] text-gray-400 border border-gray-200 rounded-lg py-1.5 hover:bg-white hover:text-gray-600 disabled:opacity-40 transition-colors"
             >
               {t('endSession')}
             </button>

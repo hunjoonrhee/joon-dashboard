@@ -3,9 +3,9 @@
 import { useTranslations } from 'next-intl';
 
 interface Step {
-  numKey: keyof ReturnType<typeof useTranslations<'landing'>>;
-  titleKey: keyof ReturnType<typeof useTranslations<'landing'>>;
-  descKey: keyof ReturnType<typeof useTranslations<'landing'>>;
+  numKey: string;
+  titleKey: string;
+  descKey: string;
   visual: React.ReactNode;
 }
 

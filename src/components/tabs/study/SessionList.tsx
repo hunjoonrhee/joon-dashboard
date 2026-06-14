@@ -20,7 +20,7 @@ function TilBadge({ sessionId }: { sessionId: string }) {
     <button
       onClick={(e) => {
         e.stopPropagation();
-        router.push(`/${locale}/til/${sessionId}`);
+        router.push(`/${locale}/dashboard/til/${sessionId}`);
       }}
       className="text-xs px-2 py-0.5 rounded bg-green-50 text-green-600 font-medium hover:bg-green-100 transition-colors"
     >
@@ -67,7 +67,7 @@ export default function SessionList({ sessions, grouped, onAdd, onEdit }: Props)
             <div
               key={s.id}
               className="flex items-start gap-3 px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors cursor-pointer"
-              onClick={() => router.push(`/${locale}/sessions/${s.id}`)}
+              onClick={() => router.push(`/${locale}/dashboard/sessions/${s.id}`)}
             >
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-800 truncate">{s.title}</p>

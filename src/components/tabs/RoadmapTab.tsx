@@ -93,8 +93,14 @@ export default function RoadmapTab({ goals, topics, sessions = [], onRefresh, se
 
   const handleAdopt = async (roadmap: AiRoadmap) => {
     try {
+      // 기존 모든 로드맵 adopted 해제
+      await supabase.from('ai_roadmaps').update({ adopted: false }).neq('id', roadmap.id);
+
+      // 새 로드맵 adopted 설정
+      await supabase.from('ai_roadmaps').update({ adopted: true }).eq('id', roadmap.id);
+
       // 기존 이 로드맵에서 온 goals 삭제 (재채택 시 중복 방지)
-      await supabase.from('goals').delete().eq('roadmap_id', roadmap.id);
+      await supabase.from('goals').delete().eq('roadmap_id', roadmap.id).eq('is_auto_generated', true);
 
       // 각 stage → Goal 자동 생성
       const goalPayloads = roadmap.stages.map((stage) => ({

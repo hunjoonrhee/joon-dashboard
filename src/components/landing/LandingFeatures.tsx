@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 interface Feature {
   icon: string;
   iconBg: string;
-  titleKey: keyof ReturnType<typeof useTranslations<'landing'>>;
-  descKey: keyof ReturnType<typeof useTranslations<'landing'>>;
+  titleKey: string; // 변경
+  descKey: string; // 변경
   isPro?: boolean;
 }
 

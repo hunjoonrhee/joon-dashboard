@@ -91,7 +91,8 @@
   "status": {
     "in_progress": "In Bearbeitung",
     "completed": "Abgeschlossen",
-    "planned": "Geplant"
+    "planned": "Geplant",
+    "not_started": "Nicht begonnen"
   },
   "priority": {
     "urgent": "Dringend",
@@ -141,7 +142,15 @@
     "sessionListTitle": "Lernprotokoll",
     "emptyTitle": "Noch keine Einträge",
     "emptyDesc": "Füge deinen ersten Lerneintrag hinzu",
-    "addFirst": "Eintrag hinzufügen"
+    "addFirst": "Eintrag hinzufügen",
+    "loading": "Wird geladen...",
+    "notFound": "Sitzung nicht gefunden.",
+    "basicInfo": "Grundinformationen",
+    "studyItems": "Gelernte Inhalte",
+    "studyItemsEmpty": "+ Schaltfläche drücken, um Inhalte hinzuzufügen.",
+    "keywordPlaceholder": "Stichwort eingeben...",
+    "tilSection": "TIL — Today I Learned",
+    "backToList": "Zur Liste"
   },
   "notes": {
     "title": "Notizen",

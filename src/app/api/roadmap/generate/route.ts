@@ -2,7 +2,7 @@ import type { RoadmapStage } from '@/types';
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
 
 const SYSTEM_PROMPT = `You are an expert learning path designer who can create roadmaps for any domain — programming, languages, music, design, fitness, or any other skill.
 Given a person's current level and their final goal, generate a realistic and actionable learning roadmap.

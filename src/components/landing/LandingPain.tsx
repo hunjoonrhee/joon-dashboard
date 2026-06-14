@@ -4,8 +4,8 @@ import { useTranslations } from 'next-intl';
 
 interface PainItem {
   icon: string;
-  titleKey: keyof ReturnType<typeof useTranslations<'landing'>>;
-  descKey: keyof ReturnType<typeof useTranslations<'landing'>>;
+  titleKey: string;
+  descKey: string;
 }
 
 const PAIN_ITEMS: PainItem[] = [

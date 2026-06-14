@@ -91,7 +91,8 @@
   "status": {
     "in_progress": "진행 중",
     "completed": "완료",
-    "planned": "예정"
+    "planned": "예정",
+    "not_started": "시작 전"
   },
   "priority": {
     "urgent": "긴급",
@@ -141,7 +142,15 @@
     "sessionListTitle": "공부 기록",
     "emptyTitle": "공부 기록이 없어요",
     "emptyDesc": "첫 번째 공부 기록을 추가해보세요",
-    "addFirst": "기록 추가"
+    "addFirst": "기록 추가",
+    "loading": "불러오는 중...",
+    "notFound": "세션을 찾을 수 없어요.",
+    "basicInfo": "기본 정보",
+    "studyItems": "공부한 항목",
+    "studyItemsEmpty": "+ 버튼으로 공부한 항목을 추가해봐요.",
+    "keywordPlaceholder": "키워드 입력...",
+    "tilSection": "TIL — Today I Learned",
+    "backToList": "목록으로"
   },
   "notes": {
     "title": "노트",

@@ -5,13 +5,14 @@ import { supabase } from '@/lib/supabase';
 import { getTagColor } from '@/lib/tagColor';
 import type { Session } from '@/types';
 import { ArrowLeft, Check, Loader2 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function TilPage() {
   const params = useParams();
   const router = useRouter();
+  const locale = useLocale();
   const t = useTranslations('til');
   const id = params.id as string;
 
@@ -47,7 +48,7 @@ export default function TilPage() {
     setSaved(true);
     setTimeout(() => {
       setSaved(false);
-      router.push(`/sessions/${id}`);
+      router.back();
     }, 1000);
   };
 
@@ -72,7 +73,7 @@ export default function TilPage() {
       {/* 상단 네비 */}
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={() => router.push('/study')}
+          onClick={() => router.back()}
           className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 transition-colors text-sm"
         >
           <ArrowLeft size={15} />

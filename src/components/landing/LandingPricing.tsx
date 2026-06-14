@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
 interface PricingFeature {
-  labelKey: keyof ReturnType<typeof useTranslations<'landing'>>;
+  labelKey: string;
   included: boolean;
 }
 
