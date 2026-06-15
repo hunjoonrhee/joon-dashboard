@@ -3,11 +3,13 @@ import type { Goal, Note, Project, ProjectTask, Session, Setting, TodayItem, Top
 import { useQuery } from '@tanstack/react-query';
 
 // ─── Sessions ───────────────────────────────────────────
-export const useSessions = () =>
+export const useSessions = (roadmapId?: string | null) =>
   useQuery({
-    queryKey: ['sessions'],
+    queryKey: ['sessions', roadmapId ?? 'all'],
     queryFn: async () => {
-      const { data } = await supabase.from('sessions').select('*').order('date', { ascending: false });
+      let q = supabase.from('sessions').select('*').order('date', { ascending: false });
+      if (roadmapId) q = q.eq('roadmap_id', roadmapId);
+      const { data } = await q;
       return (data ?? []) as Session[];
     },
   });

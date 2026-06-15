@@ -1,13 +1,14 @@
 'use client';
 
 import AddSessionModal from '@/components/AddSessionModal';
-import { calcMaxStreak, calcStreak } from '@/lib/streak';
 import { supabase } from '@/lib/supabase';
-import type { AiRoadmap, Goal, Note, ProjectTask, Session, TodayItem, Topic } from '@/types';
-import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import type { Goal, Note, ProjectTask, Session, TodayItem, Topic } from '@/types';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import CoachCard from '../CoachCard';
 import HeroCard from './home/HeroCard';
+import { useAdoptedRoadmap } from './home/hooks/useAdoptedRoadmap';
+import { useHomeStats } from './home/hooks/useHomeStats';
 import NotesPreviewCard from './home/NotesPreviewCard';
 import TilPreviewCard from './home/TilPreviewCard';
 import TodayCard from './home/TodayCard';
@@ -25,7 +26,7 @@ interface Props {
 }
 
 export default function HomeTab({
-  sessions,
+  sessions: allSessions,
   topics,
   goals,
   settings,
@@ -35,44 +36,16 @@ export default function HomeTab({
   onRefresh,
 }: Props) {
   const t = useTranslations('home');
-  const locale = useLocale();
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [completedItemName, setCompletedItemName] = useState('');
-  const [adoptedRoadmap, setAdoptedRoadmap] = useState<AiRoadmap | null>(null);
 
-  useEffect(() => {
-    const adoptedId = settings.adopted_roadmap_id;
-    if (!adoptedId) return;
-    supabase
-      .from('ai_roadmaps')
-      .select('*')
-      .eq('id', adoptedId)
-      .single()
-      .then(({ data }: { data: AiRoadmap | null }) => {
-        if (data) setAdoptedRoadmap(data as AiRoadmap);
-      });
-  }, [settings.adopted_roadmap_id]);
+  const { adoptedRoadmap, adoptedRoadmapId } = useAdoptedRoadmap(settings);
 
-  const streak = calcStreak(sessions);
-  const maxStreak = calcMaxStreak(sessions);
+  const { sessions, streak, maxStreak, monthCount, overallPct, completedTopics, gapPct, week, weeklyStats } =
+    useHomeStats({ adoptedRoadmapId, adoptedRoadmap, topics, goals, allSessions });
 
   const focusGoals = goals.filter((g) => g.is_focus);
   const totalTopics = topics.filter((t) => focusGoals.some((g) => g.id === t.goal_id));
-  const completedTopics = totalTopics.filter((t) => t.completed);
-  const overallPct = totalTopics.length === 0 ? 0 : Math.round((completedTopics.length / totalTopics.length) * 100);
-
-  const thisMonth = new Date().getMonth();
-  const monthCount = sessions.filter((s) => new Date(s.date).getMonth() === thisMonth).length;
-
-  // 갭 분석 계산 — 채택된 로드맵 기준 (공부기록 태그 + 목표 태그)
-  const studiedTags = new Set([...sessions.flatMap((s) => s.tags), ...goals.flatMap((g) => g.tags ?? [])]);
-  const gapPct = (() => {
-    if (!adoptedRoadmap) return null;
-    const allSkills = adoptedRoadmap.stages.flatMap((s) => s.skills);
-    if (allSkills.length === 0) return null;
-    const studied = allSkills.filter((sk) => sk.tags.some((tag) => studiedTags.has(tag))).length;
-    return Math.round((studied / allSkills.length) * 100);
-  })();
 
   const suggestedTopics = totalTopics
     .filter((t) => !t.completed)
@@ -85,41 +58,6 @@ export default function HomeTab({
     .slice(0, 2);
 
   const getTopicGoalName = (topic: Topic) => focusGoals.find((g) => g.id === topic.goal_id)?.name ?? '';
-
-  const weeklyStats = (() => {
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-    monday.setHours(0, 0, 0, 0);
-    const weeklySessions = sessions.filter((s) => {
-      const sd = new Date(s.date);
-      return sd >= monday && sd <= today;
-    });
-    return {
-      hours: Math.round((weeklySessions.reduce((sum, s) => sum + (s.duration_minutes ?? 0), 0) / 60) * 10) / 10,
-      tilCount: weeklySessions.filter((s) => s.til).length,
-    };
-  })();
-
-  const week = (() => {
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
-      const dateStr = d.toISOString().split('T')[0];
-      return {
-        label: d
-          .toLocaleDateString(locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US', { weekday: 'short' })
-          .slice(0, 2),
-        hasSession: sessions.some((s) => s.date === dateStr),
-        isToday: d.toDateString() === today.toDateString(),
-      };
-    });
-  })();
 
   const toggleToday = async (item: TodayItem) => {
     const nowCompleted = !item.completed;
@@ -160,6 +98,7 @@ export default function HomeTab({
           completedTopicsCount={completedTopics.length}
         />
       </div>
+
       <CoachCard sessions={sessions} goals={goals} adoptedRoadmap={adoptedRoadmap} isPro={true} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

@@ -314,7 +314,9 @@
     "error": "분석에 실패했어요. 다시 시도해보세요.",
     "addStudy": "공부 기록 추가",
     "insufficientData": "공부 기록이 {current}개예요. {min}개 이상 쌓이면 AI가 분석해드릴게요.",
-    "resources": "학습 리소스"
+    "resources": "학습 리소스",
+        "insufficientGuide": "공부기록 {remaining}개만 더 추가하면 AI 코치가 활성화돼요"
+
   },
   "til": {
     "write": "쓰기",
@@ -505,7 +507,13 @@
     "domain3Label": "악기 / 예술",
     "domain3Sub": "피아노, 기타, 작곡...",
     "domain4Label": "직접 입력",
-    "domain4Sub": "원하시는 목표를 직접 입력해보세요"
+    "domain4Sub": "원하시는 목표를 직접 입력해보세요",
+    "step3CtaTitle": "로드맵 준비 완료!",
+    "step3CtaSub": "AI 코치를 활성화하려면 공부기록 3개가 필요해요",
+    "step3CtaProgress": "AI 코치 활성화까지",
+    "step3CtaProgressSub": "공부기록 3개를 채우면 AI가 분석을 시작해요",
+    "step3CtaAddSession": "첫 공부기록 남기기",
+    "step3CtaSkip": "나중에 할게요 →"
   },
   "verify": {
     "title": "이메일을 확인해주세요",

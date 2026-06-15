@@ -314,7 +314,8 @@
     "error": "Analysis failed. Please try again.",
     "addStudy": "Add study session",
     "insufficientData": "Only {current} sessions logged. AI needs at least {min} to analyze.",
-    "resources": "Learning resources"
+    "resources": "Learning resources",
+    "insufficientGuide": "{remaining} more sessions to unlock the AI Coach"
   },
   "til": {
     "write": "Write",
@@ -505,7 +506,13 @@
     "domain3Label": "Music / Arts",
     "domain3Sub": "Piano, guitar, composition...",
     "domain4Label": "Custom goal",
-    "domain4Sub": "Write your own goal"
+    "domain4Sub": "Write your own goal",
+    "step3CtaTitle": "Roadmap ready!",
+    "step3CtaSub": "Add 3 study sessions to activate the AI Coach",
+    "step3CtaProgress": "Until AI Coach activation",
+    "step3CtaProgressSub": "Once you have 3 sessions, AI analysis begins",
+    "step3CtaAddSession": "Add first study session",
+    "step3CtaSkip": "Skip for now →"
   },
   "verify": {
     "title": "Please verify your email",

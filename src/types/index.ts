@@ -8,6 +8,7 @@ export interface Session {
   til: string | null;
   tags: string[];
   created_at: string;
+  roadmap_id: string | null; // 추가
 }
 
 export interface Topic {

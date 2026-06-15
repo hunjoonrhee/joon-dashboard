@@ -314,7 +314,8 @@
     "error": "Analyse fehlgeschlagen. Bitte erneut versuchen.",
     "addStudy": "Lernsitzung hinzufügen",
     "insufficientData": "Erst {current} Einträge. Ab {min} Einträgen analysiert die KI.",
-    "resources": "Lernressourcen"
+    "resources": "Lernressourcen",
+    "insufficientGuide": "Noch {remaining} Einträge bis der KI-Coach aktiviert wird"
   },
   "til": {
     "write": "Schreiben",
@@ -505,7 +506,13 @@
     "domain3Label": "Musik / Kunst",
     "domain3Sub": "Klavier, Gitarre, Komposition...",
     "domain4Label": "Eigenes Ziel",
-    "domain4Sub": "Schreib dein eigenes Ziel"
+    "domain4Sub": "Schreib dein eigenes Ziel",
+    "step3CtaTitle": "Roadmap bereit!",
+    "step3CtaSub": "Für den KI-Coach werden 3 Lerneinträge benötigt",
+    "step3CtaProgress": "Bis zur KI-Coach-Aktivierung",
+    "step3CtaProgressSub": "Mit 3 Einträgen startet die KI-Analyse",
+    "step3CtaAddSession": "Erste Lernsitzung hinzufügen",
+    "step3CtaSkip": "Später →"
   },
   "verify": {
     "title": "Bitte bestätige deine E-Mail",

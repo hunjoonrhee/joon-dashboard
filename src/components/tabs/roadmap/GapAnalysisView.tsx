@@ -1,5 +1,6 @@
 'use client';
 
+import { calcGapAnalysis, getSourceWeight, type SkillWithSource, type TrustSource } from '@/lib/gapAnalysis';
 import { supabase } from '@/lib/supabase';
 import type { AiRoadmap } from '@/types';
 import { useTranslations } from 'next-intl';
@@ -11,13 +12,9 @@ interface Props {
   onGoToAi: () => void;
 }
 
-type TrustSource = 'cert' | 'practical' | 'study' | 'none';
-
-interface SkillWithSource {
-  name: string;
-  tags: string[];
-  source: TrustSource;
-  matchedTags: string[];
+interface SourceLabelConfig {
+  label: string;
+  color: string;
 }
 
 export default function GapAnalysisView({ adoptedRoadmap, studiedTags, onGoToAi }: Props) {
@@ -32,12 +29,10 @@ export default function GapAnalysisView({ adoptedRoadmap, studiedTags, onGoToAi 
         supabase.from('project_skills').select('tags'),
       ]);
       if (certsRes.data) {
-        const tags = new Set<string>((certsRes.data as { tags: string[] }[]).flatMap((c) => c.tags));
-        setCertTags(tags);
+        setCertTags(new Set((certsRes.data as { tags: string[] }[]).flatMap((c) => c.tags)));
       }
       if (projectSkillsRes.data) {
-        const tags = new Set<string>((projectSkillsRes.data as { tags: string[] }[]).flatMap((ps) => ps.tags));
-        setPracticalTags(tags);
+        setPracticalTags(new Set((projectSkillsRes.data as { tags: string[] }[]).flatMap((ps) => ps.tags)));
       }
     };
     load();
@@ -58,60 +53,28 @@ export default function GapAnalysisView({ adoptedRoadmap, studiedTags, onGoToAi 
     );
   }
 
-  const getSource = (tags: string[]): { source: TrustSource; matchedTags: string[] } => {
-    if (tags.length === 0) return { source: 'none', matchedTags: [] };
+  const {
+    gapPct,
+    totalWeight,
+    maxWeight,
+    skills: allSkills,
+  } = calcGapAnalysis({
+    adoptedRoadmap,
+    studiedTags,
+    certTags,
+    practicalTags,
+  });
 
-    const certMatched = tags.filter((tag) => certTags.has(tag));
-    if (certMatched.length / tags.length >= 0.3) return { source: 'cert', matchedTags: certMatched };
-
-    const practicalMatched = tags.filter((tag) => practicalTags.has(tag));
-    if (practicalMatched.length / tags.length >= 0.3) return { source: 'practical', matchedTags: practicalMatched };
-
-    const studyMatched = tags.filter((tag) => studiedTags.has(tag));
-    if (studyMatched.length / tags.length >= 0.3) return { source: 'study', matchedTags: studyMatched };
-
-    return { source: 'none', matchedTags: [] };
-  };
-
-  const getWeight = (source: TrustSource) => {
-    if (source === 'cert') return 1.0;
-    if (source === 'practical') return 1.0;
-    if (source === 'study') return 0.6;
-    return 0;
-  };
-
-  const allSkills = adoptedRoadmap.stages.flatMap((s) =>
-    s.skills.map((sk): SkillWithSource => {
-      const { source, matchedTags } = getSource(sk.tags);
-      return { name: sk.name, tags: sk.tags, source, matchedTags };
-    })
-  );
-
-  const totalWeight = allSkills.reduce((sum, sk) => sum + getWeight(sk.source), 0);
-  const maxWeight = allSkills.length;
-  const gapPct = maxWeight === 0 ? 0 : Math.round((totalWeight / maxWeight) * 100);
-
-  const sourceLabel = (source: TrustSource) => {
-    if (source === 'cert')
-      return {
-        label: t('sourceCert'),
-        color: 'bg-green-50 text-green-600 border-green-100',
-      };
+  const sourceLabel = (source: TrustSource): SourceLabelConfig => {
+    if (source === 'cert') return { label: t('sourceCert'), color: 'bg-green-50 text-green-600 border-green-100' };
     if (source === 'practical')
-      return {
-        label: t('sourcePractical'),
-        color: 'bg-amber-50 text-amber-600 border-amber-100',
-      };
-    if (source === 'study')
-      return {
-        label: t('sourceStudy'),
-        color: 'bg-indigo-50 text-indigo-500 border-indigo-100',
-      };
-    return {
-      label: t('sourceNone'),
-      color: 'bg-gray-50 text-gray-400 border-gray-100',
-    };
+      return { label: t('sourcePractical'), color: 'bg-amber-50 text-amber-600 border-amber-100' };
+    if (source === 'study') return { label: t('sourceStudy'), color: 'bg-indigo-50 text-indigo-500 border-indigo-100' };
+    return { label: t('sourceNone'), color: 'bg-gray-50 text-gray-400 border-gray-100' };
   };
+
+  const getSkillsForStage = (stageSkills: AiRoadmap['stages'][0]['skills']): SkillWithSource[] =>
+    allSkills.filter((sk) => stageSkills.some((s) => s.name === sk.name));
 
   return (
     <div className="flex flex-col gap-4">
@@ -120,18 +83,14 @@ export default function GapAnalysisView({ adoptedRoadmap, studiedTags, onGoToAi 
         <div className="flex items-center justify-between mb-3">
           <p className="text-sm font-bold text-gray-700">{t('gapTitle')}</p>
           <span
-            className={`text-lg font-bold ${
-              gapPct >= 70 ? 'text-green-500' : gapPct >= 40 ? 'text-amber-500' : 'text-red-400'
-            }`}
+            className={`text-lg font-bold ${gapPct >= 70 ? 'text-green-500' : gapPct >= 40 ? 'text-amber-500' : 'text-red-400'}`}
           >
             {gapPct}%
           </span>
         </div>
         <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
           <div
-            className={`h-full rounded-full transition-all ${
-              gapPct >= 70 ? 'bg-green-400' : gapPct >= 40 ? 'bg-amber-400' : 'bg-red-400'
-            }`}
+            className={`h-full rounded-full transition-all ${gapPct >= 70 ? 'bg-green-400' : gapPct >= 40 ? 'bg-amber-400' : 'bg-red-400'}`}
             style={{ width: `${gapPct}%` }}
           />
         </div>
@@ -143,14 +102,15 @@ export default function GapAnalysisView({ adoptedRoadmap, studiedTags, onGoToAi 
           {' · '}
           {adoptedRoadmap.goal}
         </p>
-        {/* 신뢰도 범례 */}
         <div className="flex gap-3 flex-wrap mt-3 pt-3 border-t border-gray-100">
-          {[
-            { source: 'cert' as TrustSource, icon: '🏆' },
-            { source: 'practical' as TrustSource, icon: '⚡' },
-            { source: 'study' as TrustSource, icon: '📖' },
-            { source: 'none' as TrustSource, icon: '○' },
-          ].map(({ source, icon }) => {
+          {(
+            [
+              { source: 'cert' as TrustSource, icon: '🏆' },
+              { source: 'practical' as TrustSource, icon: '⚡' },
+              { source: 'study' as TrustSource, icon: '📖' },
+              { source: 'none' as TrustSource, icon: '○' },
+            ] as const
+          ).map(({ source, icon }) => {
             const { label, color } = sourceLabel(source);
             return (
               <span key={source} className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border ${color}`}>
@@ -164,11 +124,8 @@ export default function GapAnalysisView({ adoptedRoadmap, studiedTags, onGoToAi 
 
       {/* 단계별 갭 */}
       {adoptedRoadmap.stages.map((stage) => {
-        const stageSkills = stage.skills.map((sk): SkillWithSource => {
-          const { source, matchedTags } = getSource(sk.tags);
-          return { name: sk.name, tags: sk.tags, source, matchedTags };
-        });
-        const stageWeight = stageSkills.reduce((sum, sk) => sum + getWeight(sk.source), 0);
+        const stageSkills = getSkillsForStage(stage.skills);
+        const stageWeight = stageSkills.reduce((sum, sk) => sum + getSourceWeight(sk.source), 0);
         const stagePct = stageSkills.length === 0 ? 0 : Math.round((stageWeight / stageSkills.length) * 100);
 
         return (
@@ -180,9 +137,7 @@ export default function GapAnalysisView({ adoptedRoadmap, studiedTags, onGoToAi 
                   {stageSkills.filter((s) => s.source !== 'none').length}/{stageSkills.length}
                 </span>
                 <span
-                  className={`text-xs font-bold ${
-                    stagePct >= 70 ? 'text-green-500' : stagePct >= 40 ? 'text-amber-500' : 'text-gray-400'
-                  }`}
+                  className={`text-xs font-bold ${stagePct >= 70 ? 'text-green-500' : stagePct >= 40 ? 'text-amber-500' : 'text-gray-400'}`}
                 >
                   {stagePct}%
                 </span>

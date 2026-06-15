@@ -2,7 +2,7 @@
 
 import { useToast } from '@/components/Toast';
 import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles';
-import { supabase, insertWithUser } from '@/lib/supabase';
+import { insertWithUser, supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import { de, enUS, ko } from 'date-fns/locale';
 import { X } from 'lucide-react';
@@ -10,7 +10,6 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { useUser } from './UserProvider';
 
 interface Props {
   onClose: () => void;
@@ -37,6 +36,7 @@ export default function AddSessionModal({ onClose, onSaved, initialTitle }: Prop
   const [tagSearch, setTagSearch] = useState('');
   const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [adoptedRoadmapId, setAdoptedRoadmapId] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const dateFnsLocale = locale === 'ko' ? ko : locale === 'de' ? de : enUS;
@@ -50,6 +50,7 @@ export default function AddSessionModal({ onClose, onSaved, initialTitle }: Prop
         .eq('key', 'adopted_roadmap_id')
         .single();
       if (!setting?.value) return;
+      setAdoptedRoadmapId(setting.value);
       const { data: roadmap } = await supabase.from('ai_roadmaps').select('stages').eq('id', setting.value).single();
       if (!roadmap?.stages) return;
       const tags = [
@@ -96,6 +97,7 @@ export default function AddSessionModal({ onClose, onSaved, initialTitle }: Prop
         duration_minutes: getDurationValue() ? parseInt(getDurationValue()!) : null,
         tags: selectedTags,
         til: til.trim() || null,
+        roadmap_id: adoptedRoadmapId,
       });
       const matchedTags = selectedTags.filter((tag) => tagPool.includes(tag));
       if (matchedTags.length > 0) {
