@@ -173,7 +173,7 @@ export async function POST(req: NextRequest) {
     // 코드 리뷰 모드
     systemPrompt = buildCodeReviewPrompt(context);
     contents = [
-      ...history,
+      ...history.filter((m) => m.parts.length > 0 && m.parts[0].text?.trim()),
       {
         role: 'user',
         parts: [
@@ -186,7 +186,7 @@ export async function POST(req: NextRequest) {
   } else if (requestSummary) {
     systemPrompt = buildSystemPrompt(context);
     contents = [
-      ...history,
+      ...history.filter((m) => m.parts.length > 0 && m.parts[0].text?.trim()),
       {
         role: 'user',
         parts: [
@@ -210,7 +210,7 @@ export async function POST(req: NextRequest) {
     ];
   } else {
     systemPrompt = buildSystemPrompt(context);
-    contents = history;
+    contents = history.filter((m) => m.parts.length > 0 && m.parts[0].text?.trim());
   }
 
   try {
@@ -222,7 +222,7 @@ export async function POST(req: NextRequest) {
         contents,
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: codeReview ? 4000 : 1500,
+          maxOutputTokens: codeReview ? 8000 : 1500,
         },
       }),
     });

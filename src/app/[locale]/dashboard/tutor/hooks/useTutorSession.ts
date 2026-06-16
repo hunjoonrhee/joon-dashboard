@@ -33,6 +33,11 @@ export interface SavedRecord {
   tags: string[];
 }
 
+export type TutorError =
+  | { type: 'unavailable' } // 503 — 서버 과부하, 재시도 가능
+  | { type: 'invalid' } // 400 — 요청 오류
+  | { type: 'unknown' }; // 기타
+
 interface UseTutorSessionParams {
   topic: string;
   userContext: UserContext | null;
@@ -48,6 +53,8 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
   const [isEndingSession, setIsEndingSession] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [sessionSummary, setSessionSummary] = useState<SummaryData | null>(null);
+  const [lastError, setLastError] = useState<TutorError | null>(null);
+  const [retryFn, setRetryFn] = useState<(() => void) | null>(null);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startedRef = useRef(false);
@@ -72,13 +79,35 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
     code = ''
   ): Promise<SummaryData | null> => {
     setLoading(true);
-    const contents = history.map((m) => ({ role: m.role, parts: m.parts }));
+    setLastError(null);
+    setRetryFn(null);
+
+    const contents = history
+      .map((m) => ({ role: m.role, parts: m.parts }))
+      .filter((m) => m.parts.length > 0 && m.parts[0].text?.trim());
+
     try {
       const res = await fetch('/api/tutor/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic, messages: contents, locale, userContext, requestSummary, codeReview, code }),
       });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        const status = errData?.error?.code ?? res.status;
+
+        if (status === 503) {
+          setLastError({ type: 'unavailable' });
+          setRetryFn(() => () => sendToAI(history, requestSummary, codeReview, code));
+        } else if (status === 400) {
+          setLastError({ type: 'invalid' });
+        } else {
+          setLastError({ type: 'unknown' });
+        }
+        return null;
+      }
+
       const data = await res.json();
       const aiMsg: Message = {
         role: 'model',
@@ -90,11 +119,15 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
       if (data.summary) setSessionSummary(data.summary);
       return data.summary ?? null;
     } catch {
-      setMessages((prev) => [...prev, { role: 'model', parts: [{ text: t('errorMessage') }] }]);
+      setLastError({ type: 'unknown' });
       return null;
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRetry = () => {
+    if (retryFn) retryFn();
   };
 
   const handleSend = async (text: string) => {
@@ -164,6 +197,8 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
         til: tilNote,
         memo: `${t('aiTutorLabel')} (${durationMin}분)`,
       });
+      localStorage.removeItem('coach_suggestion');
+      localStorage.removeItem('coach_suggestion_date');
     } catch (e) {
       console.error('세션 저장 실패:', e);
     }
@@ -178,6 +213,8 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
     isEndingSession,
     elapsedMin: Math.floor(elapsed / 60),
     sessionSummary,
+    lastError,
+    handleRetry,
     handleSend,
     handleCodeReviewSubmit,
     handleQuizSelect,

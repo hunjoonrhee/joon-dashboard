@@ -3,11 +3,105 @@
 import type { Session } from '@/types';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import type { Components } from 'react-markdown';
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface Props {
   sessions: Session[];
   onAddStudy: () => void;
 }
+
+const previewMarkdownComponents: Components = {
+  code({ className, children }) {
+    const match = /language-(\w+)/.exec(className ?? '');
+    const isBlock = Boolean(match);
+    const codeString = String(children).replace(/\n$/, '');
+    const lines = codeString.split('\n');
+    const clipped = lines.slice(0, 5).join('\n');
+    const hasMore = lines.length > 5;
+
+    if (isBlock) {
+      return (
+        <div style={{ position: 'relative' }}>
+          <SyntaxHighlighter
+            style={vscDarkPlus}
+            language={match![1]}
+            PreTag="div"
+            customStyle={{
+              borderRadius: '6px',
+              fontSize: '0.75em',
+              margin: '4px 0',
+              padding: '8px 10px',
+              maxHeight: '100px',
+              overflow: 'hidden',
+            }}
+          >
+            {clipped}
+          </SyntaxHighlighter>
+          {hasMore && (
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: '32px',
+                background: 'linear-gradient(to bottom, transparent, #1e1e1e)',
+                borderRadius: '0 0 6px 6px',
+                display: 'flex',
+                alignItems: 'flex-end',
+                justifyContent: 'center',
+                paddingBottom: '4px',
+              }}
+            >
+              <span style={{ fontSize: '10px', color: '#9ca3af' }}>+{lines.length - 5}줄 더...</span>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <code
+        style={{
+          background: '#ede9fe',
+          color: '#4f46e5',
+          padding: '1px 4px',
+          borderRadius: '3px',
+          fontSize: '0.8em',
+          fontFamily: 'ui-monospace, monospace',
+          border: '1px solid #c4b5fd',
+        }}
+      >
+        {children}
+      </code>
+    );
+  },
+  p({ children }) {
+    return <p style={{ margin: '2px 0', fontSize: '12px', color: '#6b7280', lineHeight: 1.5 }}>{children}</p>;
+  },
+  h1({ children }) {
+    return <p style={{ margin: '2px 0', fontSize: '13px', fontWeight: 700, color: '#1f2937' }}>{children}</p>;
+  },
+  h2({ children }) {
+    return <p style={{ margin: '2px 0', fontSize: '12px', fontWeight: 700, color: '#1f2937' }}>{children}</p>;
+  },
+  ul({ children }) {
+    return <ul style={{ paddingLeft: '14px', margin: '2px 0', fontSize: '12px', color: '#6b7280' }}>{children}</ul>;
+  },
+  ol({ children }) {
+    return <ol style={{ paddingLeft: '14px', margin: '2px 0', fontSize: '12px', color: '#6b7280' }}>{children}</ol>;
+  },
+  blockquote({ children }) {
+    return (
+      <blockquote style={{ borderLeft: '2px solid #e5e7eb', paddingLeft: '8px', margin: '2px 0', color: '#9ca3af' }}>
+        {children}
+      </blockquote>
+    );
+  },
+};
 
 export default function TilPreviewCard({ sessions, onAddStudy }: Props) {
   const t = useTranslations('home');
@@ -51,12 +145,14 @@ export default function TilPreviewCard({ sessions, onAddStudy }: Props) {
           {tilSessions.map((s) => (
             <div
               key={s.id}
-              className="py-2.5 cursor-pointer"
-              onClick={() => router.push(`/${locale}/dashboard/sessions/${s.id}`)}
+              className="py-2.5 cursor-pointer hover:bg-gray-50 rounded-lg px-1 transition-colors"
+              onClick={() => router.push(`/${locale}/dashboard/til/${s.id}`)}
             >
               <p className="text-xs text-gray-400 mb-1">{dateLabel(s.date)}</p>
-              <p className="text-sm font-semibold text-gray-800 mb-1 truncate">{s.title}</p>
-              <p className="text-xs text-gray-500 line-clamp-3 leading-relaxed">{s.til}</p>
+              <p className="text-sm font-semibold text-gray-800 mb-1.5 truncate">{s.title}</p>
+              <div className="overflow-hidden" style={{ maxHeight: '120px' }}>
+                <ReactMarkdown components={previewMarkdownComponents}>{s.til!}</ReactMarkdown>
+              </div>
               {s.tags.length > 0 && (
                 <div className="flex gap-1 flex-wrap mt-1.5">
                   {s.tags.slice(0, 2).map((tag) => (

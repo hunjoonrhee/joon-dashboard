@@ -38,6 +38,8 @@ export default function TutorPage() {
     isEndingSession,
     elapsedMin,
     sessionSummary,
+    lastError,
+    handleRetry,
     handleSend,
     handleCodeReviewSubmit,
     handleQuizSelect,
@@ -86,7 +88,9 @@ export default function TutorPage() {
             messages={messages}
             loading={loading}
             isEndingSession={isEndingSession}
+            lastError={lastError}
             onQuizSelect={handleQuizSelect}
+            onRetry={handleRetry}
           />
 
           {codeReviewMode ? (

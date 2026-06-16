@@ -34,9 +34,9 @@ export default function TutorMessageItem({ message, msgIdx, onQuizSelect }: Prop
   if (message.isCodeReview) {
     return (
       <div className="flex justify-end">
-        <div className="bg-gray-900 rounded-2xl rounded-tr-sm px-4 py-3 max-w-[75%] w-full">
-          <p className="text-[10px] text-indigo-400 font-semibold mb-1.5">🔍 코드 리뷰 요청</p>
-          <ReactMarkdown components={markdownComponents}>{message.parts[0].text}</ReactMarkdown>
+        <div className="bg-gray-900 rounded-2xl rounded-tr-sm px-4 py-3 max-w-[75%]">
+          <p className="text-[10px] text-indigo-400 font-semibold mb-1">🔍 코드 리뷰 요청</p>
+          <p className="text-[10px] text-gray-400">코드가 제출됐어요 — AI 리뷰를 확인하세요 👇</p>
         </div>
       </div>
     );
