@@ -1,15 +1,91 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
-const buildSystemPrompt = (userContext: {
+interface Message {
+  role: 'user' | 'model';
+  parts: { text: string }[];
+}
+
+interface UserContext {
   careerLevel: string;
   recentTags: string[];
   gapSkills: string[];
   projects: string[];
   goal: string;
   tilHistory: string[];
-}) => {
+}
+
+function detectDomain(goal: string, tags: string[]): string {
+  const goalLower = goal.toLowerCase();
+  if (
+    /angular|react|vue|typescript|javascript|python|java|coding|developer|architect|frontend|backend|fullstack/.test(
+      goalLower
+    )
+  )
+    return 'development';
+  if (
+    /deutsch|german|english|korean|japanese|french|spanish|language|sprache|vocabulary|grammar|회화|마스터/.test(
+      goalLower
+    )
+  )
+    return 'language';
+  if (/abitur|수능|exam|prüfung|certificate|certification|pmp|cfa|ielts|toefl|goethe|telc/.test(goalLower))
+    return 'exam';
+  if (/writing|작문|essay|blog|copywriting|schreiben/.test(goalLower)) return 'writing';
+
+  const tagStr = tags.join(' ').toLowerCase();
+  if (/angular|react|vue|typescript|javascript|python|java|coding/.test(tagStr)) return 'development';
+  if (/deutsch|german|english|korean|japanese|french|spanish|language/.test(tagStr)) return 'language';
+
+  return 'general';
+}
+
+function getDomainRules(domain: string): string {
+  switch (domain) {
+    case 'development':
+      return `Domain: Software Development
+- ALWAYS use real code examples. Never explain without code.
+- Ask open-ended questions, NOT multiple choice. ("Why would you use X here?" / "What's wrong with this code?")
+- When user shares code → immediately review it: correctness, best practices, performance, readability.
+- Progress path: concept intro with code → user question/code → assess understanding → deepen or pivot.
+- Quiz format: code snippet with a question, not multiple choice.`;
+
+    case 'language':
+      return `Domain: Language Learning
+- DO NOT reference the user's software projects or technical work in examples.
+- Use real-life situations: workplace conversations, daily life, social interactions.
+- When user writes a sentence/paragraph → correct it immediately with explanation of WHY.
+- Show natural alternatives ("More natural way to say this: ...")
+- Teach through real situations: workplace, daily life, specific scenarios.
+- Practice formats: sentence correction, translation, fill-in-the-blank, roleplay.
+- Multiple choice OK for grammar rules, but prefer open-ended production tasks.
+- If goal is conversation → do roleplay: take on a character and have a real dialogue.`;
+
+    case 'exam':
+      return `Domain: Exam Preparation
+- Use real exam-style questions appropriate to the target exam.
+- After wrong answers: explain why, show the correct reasoning process.
+- Track weak areas within the session and circle back to them.
+- Multiple choice IS appropriate here — mirrors the actual exam format.
+- Give time estimates and strategy tips relevant to the exam.`;
+
+    case 'writing':
+      return `Domain: Writing / Composition
+- When user shares text → provide detailed feedback: structure, clarity, style, flow.
+- Show before/after examples.
+- Ask user to revise based on feedback.
+- Focus on the user's specific writing goal (blog, essay, script, etc).`;
+
+    default:
+      return `Domain: General
+- Adapt your teaching style based on the user's responses.
+- Use examples relevant to their background and goals.
+- Mix explanation and interactive questioning.`;
+  }
+}
+
+const buildSystemPrompt = (userContext: UserContext) => {
   const domain = detectDomain(userContext.goal, userContext.recentTags);
 
   return `You are an active, intelligent 1:1 tutor. You are NOT a passive Q&A bot.
@@ -42,91 +118,33 @@ Session control:
 - When user ends session, generate: [SUMMARY]{"concepts":["concept1"],"tags":["tag1"],"tilNote":"one sentence summary of what was covered and any gaps noticed"}[/SUMMARY]`;
 };
 
-function detectDomain(goal: string, tags: string[]): string {
-  const goalLower = goal.toLowerCase();
+const buildCodeReviewPrompt = (userContext: UserContext): string => {
+  return `You are an expert code reviewer with deep knowledge of software architecture and clean code principles.
 
-  // goal 먼저 체크
-  if (
-    /angular|react|vue|typescript|javascript|python|java|coding|developer|architect|frontend|backend|fullstack/.test(
-      goalLower
-    )
-  )
-    return 'development';
-  if (
-    /deutsch|german|english|korean|japanese|french|spanish|language|sprache|vocabulary|grammar|회화|마스터/.test(
-      goalLower
-    )
-  )
-    return 'language';
-  if (/abitur|수능|exam|prüfung|certificate|certification|pmp|cfa|ielts|toefl|goethe|telc/.test(goalLower))
-    return 'exam';
-  if (/writing|작문|essay|blog|copywriting|schreiben/.test(goalLower)) return 'writing';
+User context:
+- Career level: ${userContext.careerLevel}
+- Learning goal: ${userContext.goal}
+- Skill gaps: ${userContext.gapSkills.slice(0, 8).join(', ') || 'Unknown'}
+- Active projects: ${userContext.projects.join(', ') || 'None'}
+- Recent study tags: ${userContext.recentTags.slice(0, 10).join(', ') || 'None'}
 
-  // goal로 판단 안 되면 tags 체크
-  const tagStr = tags.join(' ').toLowerCase();
-  if (/angular|react|vue|typescript|javascript|python|java|coding/.test(tagStr)) return 'development';
-  if (/deutsch|german|english|korean|japanese|french|spanish|language/.test(tagStr)) return 'language';
+Code review rules:
+1. **Correctness** — Does it work? Any bugs or edge cases?
+2. **Clean Code** — Naming, single responsibility, readability
+3. **SOLID principles** — Especially SRP and OCP
+4. **Performance** — Any obvious inefficiencies?
+5. **Best practices** — Language/framework specific conventions
 
-  return 'general';
-}
+Review format:
+- Start with a one-line overall assessment
+- List issues by severity: 🔴 Critical / 🟡 Improvement / 🟢 Suggestion
+- For each issue: show the problematic code → explain why → show improved version
+- End with what the user did well (positive reinforcement)
+- Connect feedback to their learning goal and skill gaps where relevant
 
-function getDomainRules(domain: string): string {
-  switch (domain) {
-    case 'development':
-      return `Domain: Software Development
-- ALWAYS use real code examples. Never explain without code.
-- Ask open-ended questions, NOT multiple choice. ("Why would you use X here?" / "What's wrong with this code?")
-- When user shares code → immediately review it: correctness, best practices, performance, readability.
-- Progress path: concept intro with code → user question/code → assess understanding → deepen or pivot.
-- Quiz format: code snippet with a question, not multiple choice.`;
-
-    case 'language':
-      return `Domain: Language Learning
-      - DO NOT reference the user's software projects or technical work in examples.
-- Use real-life situations: workplace conversations, daily life, social interactions.
-- When user writes a sentence/paragraph → correct it immediately with explanation of WHY.
-- Show natural alternatives ("More natural way to say this: ...")
-- Teach through real situations: workplace, daily life, specific scenarios.
-- Practice formats: sentence correction, translation, fill-in-the-blank, roleplay.
-- Multiple choice OK for grammar rules, but prefer open-ended production tasks.
-- If goal is conversation → do roleplay: take on a character and have a real dialogue.`;
-
-    case 'exam':
-      return `Domain: Exam Preparation
-- Use real exam-style questions appropriate to the target exam.
-- After wrong answers: explain why, show the correct reasoning process.
-- Track weak areas within the session and circle back to them.
-- Multiple choice IS appropriate here — mirrors the actual exam format.
-- Give time estimates and strategy tips relevant to the exam.`;
-
-    case 'writing':
-      return `Domain: Writing / Composition
-- When user shares text → provide detailed feedback: structure, clarity, style, flow.
-- Show before/after examples.
-- Ask user to revise based on feedback.
-- Focus on the user's specific writing goal (blog, essay, script, etc).`;
-
-    default:
-      return `Domain: General
-- Adapt your teaching style based on the user's responses.
-- Use examples relevant to their background and goals.
-- Mix explanation and interactive questioning.`;
-  }
-}
-
-interface Message {
-  role: 'user' | 'model';
-  parts: { text: string }[];
-}
-
-interface UserContext {
-  careerLevel: string;
-  recentTags: string[];
-  gapSkills: string[];
-  projects: string[];
-  goal: string;
-  tilHistory: string[];
-}
+Be specific and educational — explain WHY each change is better, not just what to change.
+Output language must match the locale specified.`;
+};
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -134,7 +152,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'GEMINI_API_KEY not set' }, { status: 500 });
   }
 
-  const { topic, messages, locale, userContext, requestSummary } = await req.json();
+  const { topic, messages, locale, userContext, requestSummary, codeReview, code } = await req.json();
   const lang = locale === 'de' ? 'German' : locale === 'en' ? 'English' : 'Korean';
 
   const context: UserContext = userContext ?? {
@@ -149,9 +167,24 @@ export async function POST(req: NextRequest) {
   const history: Message[] = messages ?? [];
 
   let contents: Message[];
+  let systemPrompt: string;
 
-  if (requestSummary) {
-    // 세션 종료 요청 — 요약 생성
+  if (codeReview && code) {
+    // 코드 리뷰 모드
+    systemPrompt = buildCodeReviewPrompt(context);
+    contents = [
+      ...history,
+      {
+        role: 'user',
+        parts: [
+          {
+            text: `Output language: ${lang}\n\nPlease review this code:\n\n\`\`\`\n${code}\n\`\`\``,
+          },
+        ],
+      },
+    ];
+  } else if (requestSummary) {
+    systemPrompt = buildSystemPrompt(context);
     contents = [
       ...history,
       {
@@ -164,7 +197,7 @@ export async function POST(req: NextRequest) {
       },
     ];
   } else if (history.length === 0) {
-    // 첫 메시지 — 세션 시작
+    systemPrompt = buildSystemPrompt(context);
     contents = [
       {
         role: 'user',
@@ -176,6 +209,7 @@ export async function POST(req: NextRequest) {
       },
     ];
   } else {
+    systemPrompt = buildSystemPrompt(context);
     contents = history;
   }
 
@@ -184,9 +218,12 @@ export async function POST(req: NextRequest) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: buildSystemPrompt(context) }] },
+        system_instruction: { parts: [{ text: systemPrompt }] },
         contents,
-        generationConfig: { temperature: 0.7, maxOutputTokens: 1500 },
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: codeReview ? 4000 : 1500,
+        },
       }),
     });
 
@@ -203,11 +240,9 @@ export async function POST(req: NextRequest) {
       .map((p: { text: string }) => p.text)
       .join('');
 
-    // 퀴즈 파싱 (시험 도메인용)
     const quizMatch = raw.match(/\[QUIZ\]([\s\S]*?)\[\/QUIZ\]/);
     const quiz = quizMatch ? JSON.parse(quizMatch[1]) : null;
 
-    // SUMMARY 파싱
     const summaryMatch = raw.match(/\[SUMMARY\]([\s\S]*?)\[\/SUMMARY\]/);
     const summary = summaryMatch ? JSON.parse(summaryMatch[1]) : null;
 

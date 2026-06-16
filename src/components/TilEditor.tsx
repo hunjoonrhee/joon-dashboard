@@ -2,7 +2,10 @@
 
 import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
+import type { Components } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import rehypeRaw from 'rehype-raw';
 
 interface Props {
@@ -26,10 +29,37 @@ const TOOLBAR = [
   { label: '```', syntax: '```\n', wrap: false, title: 'Code block' },
 ];
 
-// 백틱 인라인 코드를 <code> 태그로 수동 변환
-function preprocessMarkdown(text: string): string {
-  return text.replace(/`([^`\n]+)`/g, '<code class="til-inline-code">$1</code>');
-}
+const markdownComponents: Components = {
+  code({ className, children, ...props }) {
+    const match = /language-(\w+)/.exec(className ?? '');
+    const isBlock = Boolean(match);
+    const codeString = String(children).replace(/\n$/, '');
+
+    if (isBlock) {
+      return (
+        <SyntaxHighlighter
+          style={vscDarkPlus}
+          language={match![1]}
+          PreTag="div"
+          customStyle={{
+            borderRadius: '6px',
+            fontSize: '0.85em',
+            margin: '8px 0',
+            padding: '12px',
+          }}
+        >
+          {codeString}
+        </SyntaxHighlighter>
+      );
+    }
+
+    return (
+      <code className="til-inline-code" {...props}>
+        {children}
+      </code>
+    );
+  },
+};
 
 export default function TilEditor({ value, onChange, minHeight = '240px' }: Props) {
   const t = useTranslations('til');
@@ -63,8 +93,6 @@ export default function TilEditor({ value, onChange, minHeight = '240px' }: Prop
       ta.setSelectionRange(newStart, newEnd);
     }, 0);
   };
-
-  const processed = preprocessMarkdown(value);
 
   return (
     <div className="flex flex-col border border-gray-200 rounded-xl overflow-hidden">
@@ -134,13 +162,13 @@ export default function TilEditor({ value, onChange, minHeight = '240px' }: Prop
             .til-preview ol { list-style: decimal; padding-left: 20px; margin: 6px 0; }
             .til-preview li { margin: 2px 0; }
             .til-preview hr { border: none; border-top: 1px solid #e5e7eb; margin: 12px 0; }
-            .til-preview pre { background: #1e1e1e; color: #d4d4d4; padding: 12px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
-            .til-preview pre code { background: none; border: none; padding: 0; color: inherit; font-size: 0.85em; }
             .til-preview p { margin: 4px 0; line-height: 1.6; }
           `}</style>
           {value.trim() ? (
             <div className="til-preview text-sm text-gray-800">
-              <ReactMarkdown rehypePlugins={[rehypeRaw]}>{processed}</ReactMarkdown>
+              <ReactMarkdown rehypePlugins={[rehypeRaw]} components={markdownComponents}>
+                {value}
+              </ReactMarkdown>
             </div>
           ) : (
             <p className="text-gray-300 text-sm">{t('previewEmpty')}</p>

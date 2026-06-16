@@ -1,0 +1,186 @@
+'use client';
+
+import { insertWithUser } from '@/lib/supabase';
+import { useLocale, useTranslations } from 'next-intl';
+import { useEffect, useRef, useState } from 'react';
+import type { UserContext } from './useUserContext';
+
+export interface QuizData {
+  question: string;
+  options: string[];
+  correct: number;
+}
+
+export interface SummaryData {
+  concepts: string[];
+  tags: string[];
+  tilNote?: string;
+}
+
+export interface Message {
+  role: 'user' | 'model';
+  parts: { text: string }[];
+  quiz?: QuizData;
+  summary?: SummaryData;
+  selectedOption?: number;
+  isCodeReview?: boolean;
+}
+
+export interface SavedRecord {
+  title: string;
+  date: string;
+  duration: number;
+  tags: string[];
+}
+
+interface UseTutorSessionParams {
+  topic: string;
+  userContext: UserContext | null;
+  onComplete: (record: SavedRecord) => void;
+}
+
+export function useTutorSession({ topic, userContext, onComplete }: UseTutorSessionParams) {
+  const t = useTranslations('tutor');
+  const locale = useLocale();
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [isEndingSession, setIsEndingSession] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const [sessionSummary, setSessionSummary] = useState<SummaryData | null>(null);
+
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startedRef = useRef(false);
+
+  useEffect(() => {
+    timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!topic || !userContext || startedRef.current) return;
+    startedRef.current = true;
+    sendToAI([]);
+  }, [topic, userContext]);
+
+  const sendToAI = async (
+    history: Message[],
+    requestSummary = false,
+    codeReview = false,
+    code = ''
+  ): Promise<SummaryData | null> => {
+    setLoading(true);
+    const contents = history.map((m) => ({ role: m.role, parts: m.parts }));
+    try {
+      const res = await fetch('/api/tutor/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, messages: contents, locale, userContext, requestSummary, codeReview, code }),
+      });
+      const data = await res.json();
+      const aiMsg: Message = {
+        role: 'model',
+        parts: [{ text: data.text }],
+        quiz: data.quiz ?? undefined,
+        summary: data.summary ?? undefined,
+      };
+      setMessages((prev) => [...prev, aiMsg]);
+      if (data.summary) setSessionSummary(data.summary);
+      return data.summary ?? null;
+    } catch {
+      setMessages((prev) => [...prev, { role: 'model', parts: [{ text: t('errorMessage') }] }]);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSend = async (text: string) => {
+    if (!text.trim() || loading) return;
+    const userMsg: Message = { role: 'user', parts: [{ text }] };
+    const next = [...messages, userMsg];
+    setMessages(next);
+    await sendToAI(next);
+  };
+
+  const handleCodeReviewSubmit = async (code: string) => {
+    if (!code.trim() || loading) return;
+    const userMsg: Message = {
+      role: 'user',
+      parts: [{ text: `코드 리뷰 요청:\n\`\`\`\n${code}\n\`\`\`` }],
+      isCodeReview: true,
+    };
+    const next = [...messages, userMsg];
+    setMessages(next);
+    await sendToAI(next, false, true, code);
+  };
+
+  const handleQuizSelect = async (msgIdx: number, optIdx: number) => {
+    const quiz = messages[msgIdx].quiz;
+    if (!quiz) return;
+    const answerText = quiz.options[optIdx];
+    const isCorrect = optIdx === quiz.correct;
+    const correctText = quiz.options[quiz.correct];
+
+    const userMsg: Message = {
+      role: 'user',
+      parts: [
+        {
+          text: isCorrect
+            ? t('quizCorrect', { answer: answerText })
+            : t('quizWrong', { answer: answerText, correct: correctText }),
+        },
+      ],
+    };
+
+    const updatedMessages = messages.map((m, i) => (i === msgIdx ? { ...m, selectedOption: optIdx } : m));
+    const next = [...updatedMessages, userMsg];
+    setMessages(next);
+    await sendToAI(next);
+  };
+
+  const handleEndSession = async () => {
+    if (isEndingSession || loading) return;
+    setIsEndingSession(true);
+
+    const summary = await sendToAI(messages, true);
+    const finalSummary = summary ?? sessionSummary;
+
+    if (timerRef.current) clearInterval(timerRef.current);
+    const durationMin = Math.max(1, Math.round(elapsed / 60));
+    const today = new Date().toISOString().split('T')[0];
+    const tags = finalSummary?.tags ?? [topic];
+    const tilNote = finalSummary?.tilNote ?? '';
+    const title = `${topic} — ${t('aiTutorLabel')}`;
+
+    try {
+      await insertWithUser('sessions', {
+        title,
+        date: today,
+        duration: durationMin,
+        tags,
+        til: tilNote,
+        memo: `${t('aiTutorLabel')} (${durationMin}분)`,
+      });
+    } catch (e) {
+      console.error('세션 저장 실패:', e);
+    }
+
+    setIsEndingSession(false);
+    onComplete({ title, date: today, duration: durationMin, tags });
+  };
+
+  return {
+    messages,
+    loading,
+    isEndingSession,
+    elapsedMin: Math.floor(elapsed / 60),
+    sessionSummary,
+    handleSend,
+    handleCodeReviewSubmit,
+    handleQuizSelect,
+    handleEndSession,
+  };
+}
