@@ -61,9 +61,6 @@ export default function Onboarding3() {
     setLoading(true);
     setError(null);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
       const res = await fetch('/api/roadmap/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -71,7 +68,6 @@ export default function Onboarding3() {
           goal,
           careerLevel: level,
           locale,
-          userId: user?.id,
         }),
       });
       if (!res.ok) throw new Error();
