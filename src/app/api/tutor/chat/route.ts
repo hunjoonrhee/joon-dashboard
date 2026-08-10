@@ -42,7 +42,7 @@ function detectDomain(goal: string, tags: string[]): string {
   return 'general';
 }
 
-function getDomainRules(domain: string): string {
+function getDomainRules(domain: string, targetLanguage: string | null): string {
   switch (domain) {
     case 'development':
       return `Domain: Software Development
@@ -54,6 +54,11 @@ function getDomainRules(domain: string): string {
 
     case 'language':
       return `Domain: Language Learning
+${
+  targetLanguage
+    ? `- The user is practicing ${targetLanguage}. Any roleplay dialogue, example sentences, and vocabulary must be written in ${targetLanguage} - this is the whole point of the practice. Corrections, grammar explanations, and other meta-commentary go in the output language specified above, not in ${targetLanguage}.`
+    : ''
+}
 - DO NOT reference the user's software projects or technical work in examples.
 - Use real-life situations: workplace conversations, daily life, social interactions.
 - When user writes a sentence/paragraph → correct it immediately with explanation of WHY.
@@ -86,7 +91,7 @@ function getDomainRules(domain: string): string {
   }
 }
 
-const buildSystemPrompt = (userContext: UserContext) => {
+const buildSystemPrompt = (userContext: UserContext, targetLanguage: string | null) => {
   const domain = detectDomain(userContext.goal, userContext.recentTags);
 
   return `You are an active, intelligent 1:1 tutor. You are NOT a passive Q&A bot.
@@ -111,7 +116,7 @@ Core teaching rules:
 - Be concise — max 100 words per explanation unless complexity requires more.
 - Output language must match the locale specified.
 
-${getDomainRules(domain)}
+${getDomainRules(domain, targetLanguage)}
 
 Session control:
 - Keep the session going as long as the user wants. Do NOT auto-terminate.
@@ -162,7 +167,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { topic, messages, locale, userContext, requestSummary, codeReview, code } = await req.json();
+  const { topic, messages, locale, userContext, requestSummary, codeReview, code, targetLanguage } = await req.json();
   const lang = locale === 'de' ? 'German' : locale === 'en' ? 'English' : 'Korean';
 
   const context: UserContext = userContext ?? {
@@ -194,7 +199,7 @@ export async function POST(req: NextRequest) {
       },
     ];
   } else if (requestSummary) {
-    systemPrompt = buildSystemPrompt(context);
+    systemPrompt = buildSystemPrompt(context, targetLanguage ?? null);
     contents = [
       ...history.filter((m) => m.parts.length > 0 && m.parts[0].text?.trim()),
       {
@@ -207,7 +212,7 @@ export async function POST(req: NextRequest) {
       },
     ];
   } else if (history.length === 0) {
-    systemPrompt = buildSystemPrompt(context);
+    systemPrompt = buildSystemPrompt(context, targetLanguage ?? null);
     contents = [
       {
         role: 'user',
@@ -219,7 +224,7 @@ export async function POST(req: NextRequest) {
       },
     ];
   } else {
-    systemPrompt = buildSystemPrompt(context);
+    systemPrompt = buildSystemPrompt(context, targetLanguage ?? null);
     contents = history.filter((m) => m.parts.length > 0 && m.parts[0].text?.trim());
   }
 
