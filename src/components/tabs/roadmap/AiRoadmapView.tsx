@@ -1,6 +1,5 @@
 'use client';
 
-import { useUser } from '@/components/UserProvider';
 import GoalModal from '@/components/tabs/roadmap/GoalModal';
 import { supabase } from '@/lib/supabase';
 import type { AiRoadmap, RoadmapStage } from '@/types';
@@ -18,7 +17,6 @@ interface Props {
 export default function AiRoadmapView({ adoptedRoadmap, settings, onAdopt, onRefresh }: Props) {
   const t = useTranslations('roadmap');
   const locale = useLocale();
-  const user = useUser();
   const [roadmaps, setRoadmaps] = useState<AiRoadmap[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [goal, setGoal] = useState(settings.big_goal ?? '');
@@ -45,7 +43,7 @@ export default function AiRoadmapView({ adoptedRoadmap, settings, onAdopt, onRef
       const res = await fetch('/api/roadmap/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ goal, careerLevel, locale, userId: user?.id }),
+        body: JSON.stringify({ goal, careerLevel, locale }),
       });
       if (!res.ok) throw new Error();
       const data: AiRoadmap = await res.json();

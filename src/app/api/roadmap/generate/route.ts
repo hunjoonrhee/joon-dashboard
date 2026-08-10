@@ -1,3 +1,4 @@
+import { getAuthenticatedUserId } from '@/lib/api-auth';
 import type { RoadmapStage } from '@/types';
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
@@ -50,10 +51,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'GEMINI_API_KEY not set' }, { status: 500 });
   }
 
-  // Service role 클라이언트 — RLS 우회, user_id 직접 주입
+  // Service role 클라이언트 — RLS 우회, user_id는 검증된 세션에서만 가져옴 (body의 userId는 신뢰하지 않음 - 클라이언트가 임의로 다른 사람의 id를 보낼 수 있음)
   const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  const userId = await getAuthenticatedUserId(req);
 
-  const { goal, careerLevel, locale, userId } = await req.json();
+  const { goal, careerLevel, locale } = await req.json();
   const lang = locale === 'de' ? 'German' : locale === 'en' ? 'English' : 'Korean';
 
   if (!goal || !careerLevel) {

@@ -1,3 +1,4 @@
+import { getAuthenticatedUserId } from '@/lib/api-auth';
 import { NextRequest, NextResponse } from 'next/server';
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
@@ -150,6 +151,15 @@ export async function POST(req: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return NextResponse.json({ error: 'GEMINI_API_KEY not set' }, { status: 500 });
+  }
+
+  // No anonymous tutor flow exists in the product (unlike the roadmap
+  // generator's trial mode) - every call here spends real Gemini quota, so
+  // require a verified session/token rather than leaving this open to
+  // anyone who has the URL.
+  const userId = await getAuthenticatedUserId(req);
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { topic, messages, locale, userContext, requestSummary, codeReview, code } = await req.json();
