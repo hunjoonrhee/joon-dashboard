@@ -92,7 +92,14 @@ ${
 }
 
 const buildSystemPrompt = (userContext: UserContext, targetLanguage: string | null) => {
-  const domain = detectDomain(userContext.goal, userContext.recentTags);
+  // detectDomain() keys off userContext.goal, which is the caller's active
+  // *roadmap* goal - unrelated to what this specific chat session is about.
+  // A user can have a dev-career roadmap adopted while still opening a
+  // language-roleplay session, so goal-text sniffing would miss it entirely
+  // (the whole point of this session) - targetLanguage being set is a
+  // direct, unambiguous signal that this is a language session, so it
+  // short-circuits the heuristic instead of being just another guess.
+  const domain = targetLanguage ? 'language' : detectDomain(userContext.goal, userContext.recentTags);
 
   return `You are an active, intelligent 1:1 tutor. You are NOT a passive Q&A bot.
 Your job is to LEAD the learning session — analyze the user's level in real time and decide what to teach next.
