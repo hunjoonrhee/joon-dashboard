@@ -220,12 +220,22 @@ export async function POST(req: NextRequest) {
     ];
   } else if (history.length === 0) {
     systemPrompt = buildSystemPrompt(context, targetLanguage ?? null);
+    // This literal instruction sits right next to "Teach me about: ${topic}"
+    // in the opening user turn - much more salient to the model than the
+    // system prompt's domain rules further up the context. Saying
+    // "Output language: Korean" here unconditionally was overriding the
+    // system prompt's targetLanguage carve-out, so the very first roleplay
+    // message (the one most users will actually notice) came back in the
+    // learner's locale instead of the language being practiced.
+    const openingLanguageDirective = targetLanguage
+      ? `Output language: ${lang} for corrections/explanations - but conduct the roleplay dialogue itself in ${targetLanguage}, since practicing it is the whole point of this session.`
+      : `Output language: ${lang}`;
     contents = [
       {
         role: 'user',
         parts: [
           {
-            text: `Output language: ${lang}\n\nTeach me about: ${topic}\n\nStart by briefly assessing what I might already know based on my background, then begin teaching at the right level.`,
+            text: `${openingLanguageDirective}\n\nTeach me about: ${topic}\n\nStart by briefly assessing what I might already know based on my background, then begin teaching at the right level.`,
           },
         ],
       },
