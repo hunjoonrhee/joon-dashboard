@@ -223,12 +223,16 @@ export async function POST(req: NextRequest) {
     // "Start by briefly assessing what I might already know" primes a
     // locale-language preamble before anything else happens - fine for
     // regular tutoring, but for roleplay it meant the model would narrate
-    // the scene and ask the user to reply in targetLanguage instead of
-    // actually opening in character, in targetLanguage, itself. Roleplay
-    // sessions get a distinct opening task with no assessment step, so nothing
-    // primes a locale-language preamble before the in-character line.
+    // the whole scene in the locale and ask the user to reply in
+    // targetLanguage, instead of actually opening in character itself.
+    // Cutting that preamble entirely (an earlier version of this fix) swung
+    // too far the other way - the in-character line came back generic and
+    // impersonal, with no sign the model had taken the user's level/goal
+    // into account. This keeps exactly one locale-language sentence for
+    // that context, then requires the actual dialogue to be in-character
+    // and in targetLanguage.
     const openingTask = targetLanguage
-      ? `Output language: ${lang} for corrections/explanations - but the roleplay dialogue itself, including this very first line, must be in ${targetLanguage}, since practicing it is the whole point of this session.\n\nScenario: ${topic}\n\nImmediately take on a character and open the scene with your first in-character line, written in ${targetLanguage}. Do not narrate the scenario or ask the user to begin in ${lang} first - just start speaking as the character, in ${targetLanguage}, right now.`
+      ? `Output language: ${lang} for corrections/explanations - but the roleplay dialogue itself must be in ${targetLanguage}, since practicing it is the whole point of this session.\n\nScenario: ${topic}\n\nWrite exactly one short sentence in ${lang} that shows you've factored in the user's level/background for this scenario, then immediately open the scene in character with your first line written entirely in ${targetLanguage}. Do not narrate the scenario or ask the user to begin in ${lang} - after that one sentence, go straight into character.`
       : `Output language: ${lang}\n\nTeach me about: ${topic}\n\nStart by briefly assessing what I might already know based on my background, then begin teaching at the right level.`;
     contents = [
       {
