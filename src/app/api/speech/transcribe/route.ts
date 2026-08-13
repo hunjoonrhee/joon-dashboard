@@ -4,6 +4,47 @@ import { NextRequest, NextResponse } from 'next/server';
 const SPEECH_API_URL = 'https://speech.googleapis.com/v1/speech:recognize';
 const DEFAULT_SAMPLE_RATE_HERTZ = 16000;
 
+// Growpath's dev-career persona dictates study notes and goals in Korean
+// with English technical loanwords embedded ("오늘 앵귤러 공부를 했어") - without
+// a hint, Google's language model tends to overwrite the loanword with a
+// more probable Korean word for that sentence position, even though it
+// transcribes the same word correctly in isolation. speechContexts biases
+// recognition toward this list without forcing it, so it's harmless for
+// language-learner sessions (German/English dictation) that never hit it.
+const TECH_TERM_SPEECH_HINTS = [
+  'Angular',
+  'React',
+  'Vue',
+  'Svelte',
+  'Next.js',
+  'TypeScript',
+  'JavaScript',
+  'Python',
+  'Java',
+  'Kotlin',
+  'Swift',
+  'Node.js',
+  'API',
+  'REST',
+  'GraphQL',
+  'SQL',
+  'NoSQL',
+  'Computed',
+  'Props',
+  'State',
+  'Hooks',
+  'RxJS',
+  'Redux',
+  'Docker',
+  'Kubernetes',
+  'AWS',
+  'CI/CD',
+  'Git',
+  'frontend',
+  'backend',
+  'fullstack',
+];
+
 export async function POST(req: NextRequest) {
   // Shares GOOGLE_TTS_API_KEY with the Text-to-Speech route rather than
   // having its own env var - same Google Cloud project, same key, already
@@ -46,7 +87,10 @@ export async function POST(req: NextRequest) {
           encoding: 'LINEAR16',
           sampleRateHertz,
           languageCode,
-          model: 'default',
+          // latest_short handles code-switched/technical speech noticeably
+          // better than the legacy default model - see the hints list above.
+          model: 'latest_short',
+          speechContexts: [{ phrases: TECH_TERM_SPEECH_HINTS, boost: 15 }],
         },
         audio: { content: audioBase64 },
       }),
