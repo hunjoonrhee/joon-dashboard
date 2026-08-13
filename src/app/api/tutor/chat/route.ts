@@ -91,7 +91,7 @@ ${
   }
 }
 
-const buildSystemPrompt = (userContext: UserContext, targetLanguage: string | null) => {
+const buildSystemPrompt = (userContext: UserContext, targetLanguage: string | null, lang: string) => {
   // detectDomain() keys off userContext.goal, which is the caller's active
   // *roadmap* goal - unrelated to what this specific chat session is about.
   // A user can have a dev-career roadmap adopted while still opening a
@@ -121,7 +121,11 @@ Core teaching rules:
 - Connect new concepts to what they already know ("You know RxJS — Signals work similarly but...")
 - Reference their actual projects when giving examples.
 - Be concise — max 100 words per explanation unless complexity requires more.
-- Output language must match the locale specified.
+- ${
+  targetLanguage
+    ? `Output language is split by role, on every turn of this conversation: in-character roleplay dialogue must be in ${targetLanguage}; everything else (corrections, explanations, meta-commentary) must be in ${lang}. This split applies for the entire session, not just the opening turn.`
+    : `Output language must be ${lang}.`
+}
 
 ${getDomainRules(domain, targetLanguage)}
 
@@ -206,7 +210,7 @@ export async function POST(req: NextRequest) {
       },
     ];
   } else if (requestSummary) {
-    systemPrompt = buildSystemPrompt(context, targetLanguage ?? null);
+    systemPrompt = buildSystemPrompt(context, targetLanguage ?? null, lang);
     contents = [
       ...history.filter((m) => m.parts.length > 0 && m.parts[0].text?.trim()),
       {
@@ -219,7 +223,7 @@ export async function POST(req: NextRequest) {
       },
     ];
   } else if (history.length === 0) {
-    systemPrompt = buildSystemPrompt(context, targetLanguage ?? null);
+    systemPrompt = buildSystemPrompt(context, targetLanguage ?? null, lang);
     // "Start by briefly assessing what I might already know" primes a
     // locale-language preamble before anything else happens - fine for
     // regular tutoring, but for roleplay it meant the model would narrate
@@ -245,7 +249,7 @@ export async function POST(req: NextRequest) {
       },
     ];
   } else {
-    systemPrompt = buildSystemPrompt(context, targetLanguage ?? null);
+    systemPrompt = buildSystemPrompt(context, targetLanguage ?? null, lang);
     contents = history.filter((m) => m.parts.length > 0 && m.parts[0].text?.trim());
   }
 
