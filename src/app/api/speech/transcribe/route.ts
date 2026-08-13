@@ -87,9 +87,15 @@ export async function POST(req: NextRequest) {
           encoding: 'LINEAR16',
           sampleRateHertz,
           languageCode,
-          // latest_short handles code-switched/technical speech noticeably
-          // better than the legacy default model - see the hints list above.
-          model: 'latest_short',
+          // latest_long over latest_short - callers (log/goal-setup notes,
+          // roleplay turns) routinely dictate more than one sentence, and
+          // latest_short is tuned for single short commands/queries.
+          model: 'latest_long',
+          // Without this, multiple spoken sentences come back as one
+          // unbroken run of words with no period/comma between them - reads
+          // as "it merged my sentences into one" even though every word was
+          // transcribed correctly.
+          enableAutomaticPunctuation: true,
           speechContexts: [{ phrases: TECH_TERM_SPEECH_HINTS, boost: 15 }],
         },
         audio: { content: audioBase64 },
