@@ -295,8 +295,15 @@ export async function POST(req: NextRequest) {
     // caller like the mobile app's roleplay screen can read only that part
     // aloud; null when the model didn't use the tag (non-roleplay chat, or
     // an occasional formatting miss - callers should fall back to `text`).
+    // The model bolds corrected/emphasized words with markdown (**word**)
+    // inside dialogue lines same as everywhere else - harmless for on-screen
+    // text, but a TTS engine reads the literal asterisks aloud ("Sternchen").
+    // dialogueText is TTS-only, so it strips emphasis markers; `text` (used
+    // for display) is untouched and keeps the markdown.
+    const stripMarkdownEmphasis = (segment: string) => segment.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1');
+
     const dialogueSegments = [...raw.matchAll(/\[DIALOGUE\]([\s\S]*?)\[\/DIALOGUE\]/g)]
-      .map((m) => m[1].trim())
+      .map((m) => stripMarkdownEmphasis(m[1].trim()))
       .filter(Boolean);
     const dialogueText = dialogueSegments.length > 0 ? dialogueSegments.join(' ') : null;
 
