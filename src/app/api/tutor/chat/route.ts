@@ -42,7 +42,7 @@ function detectDomain(goal: string, tags: string[]): string {
   return 'general';
 }
 
-function getDomainRules(domain: string, targetLanguage: string | null): string {
+function getDomainRules(domain: string, targetLanguage: string | null, lang: string): string {
   switch (domain) {
     case 'development':
       return `Domain: Software Development
@@ -57,7 +57,7 @@ function getDomainRules(domain: string, targetLanguage: string | null): string {
 ${
   targetLanguage
     ? `- The user is practicing ${targetLanguage}. Any roleplay dialogue, example sentences, and vocabulary must be written in ${targetLanguage} - this is the whole point of the practice. Corrections, grammar explanations, and other meta-commentary go in the output language specified above, not in ${targetLanguage}.
-- Wrap every in-character roleplay line (the ${targetLanguage} dialogue itself, not corrections/explanations) in [DIALOGUE][/DIALOGUE] tags, e.g. [DIALOGUE]Guten Tag, was möchten Sie bestellen?[/DIALOGUE]. This lets the app read only the actual dialogue aloud instead of mixing it with your other-language commentary.`
+- Wrap every complete sentence written in ${targetLanguage} in [DIALOGUE][/DIALOGUE] tags - this includes in-character roleplay lines AND any ${targetLanguage} example or corrected sentence you write (e.g. showing the user a fixed version of what they said). Only the ${lang} explanation text around it stays outside the tags. Example: [DIALOGUE]Guten Tag, was möchten Sie bestellen?[/DIALOGUE]. This lets the app read every ${targetLanguage} sentence aloud - including corrections, which the user needs to hear pronounced correctly - without also reading your ${lang} commentary in the wrong voice.`
     : ''
 }
 - DO NOT reference the user's software projects or technical work in examples.
@@ -124,11 +124,11 @@ Core teaching rules:
 - Be concise — max 100 words per explanation unless complexity requires more.
 - ${
   targetLanguage
-    ? `Output language is split by role, on every turn of this conversation: in-character roleplay dialogue must be in ${targetLanguage}; everything else (corrections, explanations, meta-commentary) must be in ${lang}. This split applies for the entire session, not just the opening turn. Additionally, wrap every in-character ${targetLanguage} dialogue line in [DIALOGUE][/DIALOGUE] tags on every turn - see the Language Learning domain rules below for the exact format.`
+    ? `Output language is split by role, on every turn of this conversation: in-character roleplay dialogue must be in ${targetLanguage}; everything else (corrections, explanations, meta-commentary) must be in ${lang}. This split applies for the entire session, not just the opening turn. Additionally, wrap every ${targetLanguage} sentence (dialogue lines AND example/corrected sentences) in [DIALOGUE][/DIALOGUE] tags on every turn - see the Language Learning domain rules below for the exact format.`
     : `Output language must be ${lang}.`
 }
 
-${getDomainRules(domain, targetLanguage)}
+${getDomainRules(domain, targetLanguage, lang)}
 
 Session control:
 - Keep the session going as long as the user wants. Do NOT auto-terminate.
