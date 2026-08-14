@@ -45,107 +45,6 @@ const TECH_TERM_SPEECH_HINTS = [
   'fullstack',
 ];
 
-type PronunciationWordScore = { word: string; accuracyScore: number; errorType: string };
-type PronunciationResult = {
-  accuracyScore: number;
-  fluencyScore: number;
-  completenessScore: number;
-  pronScore: number;
-  words: PronunciationWordScore[];
-};
-
-/**
- * Scores the same audio already sent to Google STT against its own
- * transcript as the reference text - not a "did Azure agree with Google"
- * check, but a per-word acoustic/phonetic accuracy score for whatever the
- * user actually said. Best-effort: any failure here (missing config,
- * network, a malformed Azure response) returns null rather than failing the
- * request - the transcript is the primary result callers need, this is an
- * enhancement on top of it.
- */
-// Kept as a small permanent diagnostic rather than a one-off debug prop -
-// this call can fail intermittently in real usage (external API), and this
-// route has no other way to surface why to anyone testing it.
-type PronunciationAttempt = { result: PronunciationResult | null; debugReason: string | null };
-
-async function assessPronunciation(audioBuffer: ArrayBuffer, referenceText: string, languageCode: string): Promise<PronunciationAttempt> {
-  const region = process.env.AZURE_SPEECH_REGION;
-  const key = process.env.AZURE_SPEECH_KEY;
-  if (!region || !key) return { result: null, debugReason: 'AZURE_SPEECH_REGION/AZURE_SPEECH_KEY not set' };
-
-  const assessmentConfig = Buffer.from(
-    JSON.stringify({
-      ReferenceText: referenceText,
-      GradingSystem: 'HundredMark',
-      Granularity: 'Phoneme',
-      Dimension: 'Comprehensive',
-      EnableMiscue: true,
-    })
-  ).toString('base64');
-
-  try {
-    const res = await fetch(
-      `https://${region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=${languageCode}&format=detailed`,
-      {
-        method: 'POST',
-        headers: {
-          'Ocp-Apim-Subscription-Key': key,
-          // Same WAV bytes already sent to Google, reused here rather than
-          // re-reading the request body - this IS a full WAV file (RIFF
-          // header + PCM data), so the content type must say so ("audio/wav"
-          // alone, parsed like any WAV file) rather than
-          // "codecs=audio/pcm" (headerless raw PCM) - the latter tells Azure
-          // there's no header to skip, so it tried to align the 44-byte RIFF
-          // header itself as audio samples. Google's STT tolerated that
-          // mismatch; Azure's phoneme-level scoring did not - it returned no
-          // NBest result at all, which assessPronunciation was already
-          // built to treat as a null result, so this failed silently rather
-          // than with a visible error.
-          'Content-Type': 'audio/wav',
-          Accept: 'application/json',
-          'Pronunciation-Assessment': assessmentConfig,
-        },
-        body: Buffer.from(audioBuffer),
-      }
-    );
-
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error('Azure Pronunciation Assessment error:', res.status, errText);
-      return { result: null, debugReason: `HTTP ${res.status}: ${errText.slice(0, 200)}` };
-    }
-
-    const data = await res.json();
-    const best = data.NBest?.[0];
-    // Scores sit directly on the NBest item (AccuracyScore/FluencyScore/
-    // CompletenessScore/PronScore, same for each Words[] entry) - not
-    // nested under a PronunciationAssessment sub-object like Microsoft's
-    // SDK-based samples show. Confirmed by logging the response's actual
-    // key names rather than trusting the docs' shape.
-    if (!best || typeof best.PronScore !== 'number') {
-      return { result: null, debugReason: `RecognitionStatus=${data.RecognitionStatus}, no usable NBest[0]` };
-    }
-
-    return {
-      result: {
-        accuracyScore: best.AccuracyScore ?? 0,
-        fluencyScore: best.FluencyScore ?? 0,
-        completenessScore: best.CompletenessScore ?? 0,
-        pronScore: best.PronScore ?? 0,
-        words: ((best.Words ?? []) as { Word: string; AccuracyScore?: number; ErrorType?: string }[]).map((w) => ({
-          word: w.Word,
-          accuracyScore: w.AccuracyScore ?? 0,
-          errorType: w.ErrorType ?? 'None',
-        })),
-      },
-      debugReason: null,
-    };
-  } catch (e) {
-    console.error('Azure Pronunciation Assessment request failed:', e);
-    return { result: null, debugReason: e instanceof Error ? e.message : String(e) };
-  }
-}
-
 export async function POST(req: NextRequest) {
   // Shares GOOGLE_TTS_API_KEY with the Text-to-Speech route rather than
   // having its own env var - same Google Cloud project, same key, already
@@ -166,10 +65,6 @@ export async function POST(req: NextRequest) {
   }
   const sampleRateParam = req.nextUrl.searchParams.get('sampleRateHertz');
   const sampleRateHertz = sampleRateParam ? Number(sampleRateParam) : DEFAULT_SAMPLE_RATE_HERTZ;
-  // Opt-in - only the roleplay voice composer wants this (and its extra
-  // Azure round-trip); log/goal-setup dictation has no use for a
-  // pronunciation score and shouldn't pay for one.
-  const shouldAssessPronunciation = req.nextUrl.searchParams.get('assessPronunciation') === 'true';
 
   // The client uploads the raw recorded audio bytes directly (LINEAR16 WAV)
   // rather than JSON+base64 - expo-file-system's upload() sends the file as
@@ -219,12 +114,7 @@ export async function POST(req: NextRequest) {
       .join(' ')
       .trim();
 
-    // Nothing to score without a transcript, and no point spending an Azure
-    // call on an empty reference text.
-    const attempt =
-      shouldAssessPronunciation && transcript ? await assessPronunciation(audioBuffer, transcript, languageCode) : { result: null, debugReason: null };
-
-    return NextResponse.json({ transcript, pronunciation: attempt.result, pronunciationDebug: attempt.debugReason });
+    return NextResponse.json({ transcript });
   } catch (e) {
     console.error('Speech transcribe route error:', e);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
