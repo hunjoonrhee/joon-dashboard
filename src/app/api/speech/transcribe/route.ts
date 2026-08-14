@@ -63,10 +63,15 @@ type PronunciationResult = {
  * request - the transcript is the primary result callers need, this is an
  * enhancement on top of it.
  */
-async function assessPronunciation(audioBuffer: ArrayBuffer, referenceText: string, languageCode: string): Promise<PronunciationResult | null> {
+// Kept as a small permanent diagnostic rather than a one-off debug prop -
+// this call can fail intermittently in real usage (external API), and this
+// route has no other way to surface why to anyone testing it.
+type PronunciationAttempt = { result: PronunciationResult | null; debugReason: string | null };
+
+async function assessPronunciation(audioBuffer: ArrayBuffer, referenceText: string, languageCode: string): Promise<PronunciationAttempt> {
   const region = process.env.AZURE_SPEECH_REGION;
   const key = process.env.AZURE_SPEECH_KEY;
-  if (!region || !key) return null;
+  if (!region || !key) return { result: null, debugReason: 'AZURE_SPEECH_REGION/AZURE_SPEECH_KEY not set' };
 
   const assessmentConfig = Buffer.from(
     JSON.stringify({
@@ -105,8 +110,9 @@ async function assessPronunciation(audioBuffer: ArrayBuffer, referenceText: stri
     );
 
     if (!res.ok) {
-      console.error('Azure Pronunciation Assessment error:', res.status, await res.text());
-      return null;
+      const errText = await res.text();
+      console.error('Azure Pronunciation Assessment error:', res.status, errText);
+      return { result: null, debugReason: `HTTP ${res.status}: ${errText.slice(0, 200)}` };
     }
 
     const data = await res.json();
@@ -116,22 +122,27 @@ async function assessPronunciation(audioBuffer: ArrayBuffer, referenceText: stri
     // nested under a PronunciationAssessment sub-object like Microsoft's
     // SDK-based samples show. Confirmed by logging the response's actual
     // key names rather than trusting the docs' shape.
-    if (!best || typeof best.PronScore !== 'number') return null;
+    if (!best || typeof best.PronScore !== 'number') {
+      return { result: null, debugReason: `RecognitionStatus=${data.RecognitionStatus}, no usable NBest[0]` };
+    }
 
     return {
-      accuracyScore: best.AccuracyScore ?? 0,
-      fluencyScore: best.FluencyScore ?? 0,
-      completenessScore: best.CompletenessScore ?? 0,
-      pronScore: best.PronScore ?? 0,
-      words: ((best.Words ?? []) as { Word: string; AccuracyScore?: number; ErrorType?: string }[]).map((w) => ({
-        word: w.Word,
-        accuracyScore: w.AccuracyScore ?? 0,
-        errorType: w.ErrorType ?? 'None',
-      })),
+      result: {
+        accuracyScore: best.AccuracyScore ?? 0,
+        fluencyScore: best.FluencyScore ?? 0,
+        completenessScore: best.CompletenessScore ?? 0,
+        pronScore: best.PronScore ?? 0,
+        words: ((best.Words ?? []) as { Word: string; AccuracyScore?: number; ErrorType?: string }[]).map((w) => ({
+          word: w.Word,
+          accuracyScore: w.AccuracyScore ?? 0,
+          errorType: w.ErrorType ?? 'None',
+        })),
+      },
+      debugReason: null,
     };
   } catch (e) {
     console.error('Azure Pronunciation Assessment request failed:', e);
-    return null;
+    return { result: null, debugReason: e instanceof Error ? e.message : String(e) };
   }
 }
 
@@ -210,10 +221,10 @@ export async function POST(req: NextRequest) {
 
     // Nothing to score without a transcript, and no point spending an Azure
     // call on an empty reference text.
-    const pronunciation =
-      shouldAssessPronunciation && transcript ? await assessPronunciation(audioBuffer, transcript, languageCode) : null;
+    const attempt =
+      shouldAssessPronunciation && transcript ? await assessPronunciation(audioBuffer, transcript, languageCode) : { result: null, debugReason: null };
 
-    return NextResponse.json({ transcript, pronunciation });
+    return NextResponse.json({ transcript, pronunciation: attempt.result, pronunciationDebug: attempt.debugReason });
   } catch (e) {
     console.error('Speech transcribe route error:', e);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
