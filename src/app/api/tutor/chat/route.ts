@@ -134,7 +134,15 @@ ${getDomainRules(domain, targetLanguage, lang)}
 Session control:
 - Keep the session going as long as the user wants. Do NOT auto-terminate.
 - Only generate [SUMMARY] when the user explicitly requests to end the session.
-- When user ends session, generate: [SUMMARY]{"concepts":["concept1"],"tags":["tag1"],"tilNote":"one sentence summary of what was covered and any gaps noticed"}[/SUMMARY]`;
+- When user ends session, generate: [SUMMARY]{"concepts":["concept1"],"tags":["tag1"],"tilNote":"one sentence summary of what was covered and any gaps noticed"${
+    targetLanguage
+      ? `,"vocabWords":[{"word":"a ${targetLanguage} word or phrase from this session","meaning":"its meaning in ${lang}","example":"an example sentence using it in ${targetLanguage}, ideally quoted or adapted from this actual conversation"}]`
+      : ''
+  }}[/SUMMARY]${
+    targetLanguage
+      ? ` For vocabWords: pick 3-5 of the most useful ${targetLanguage} words/phrases from this session - prioritize ones the user got wrong or that came up more than once. Use an empty array if nothing stood out.`
+      : ''
+  }`;
 };
 
 const buildCodeReviewPrompt = (userContext: UserContext): string => {
@@ -219,7 +227,7 @@ export async function POST(req: NextRequest) {
         role: 'user',
         parts: [
           {
-            text: `Output language: ${lang}\n\nThe user is ending the session now. Please provide a [SUMMARY] of what was covered, what concepts were learned, relevant tags, and a brief tilNote about any gaps or areas to revisit.`,
+            text: `Output language: ${lang}\n\nThe user is ending the session now. Please provide a [SUMMARY] of what was covered, what concepts were learned, relevant tags${targetLanguage ? ', 3-5 key vocabWords from the session' : ''}, and a brief tilNote about any gaps or areas to revisit.`,
           },
         ],
       },
