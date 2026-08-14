@@ -56,7 +56,8 @@ function getDomainRules(domain: string, targetLanguage: string | null): string {
       return `Domain: Language Learning
 ${
   targetLanguage
-    ? `- The user is practicing ${targetLanguage}. Any roleplay dialogue, example sentences, and vocabulary must be written in ${targetLanguage} - this is the whole point of the practice. Corrections, grammar explanations, and other meta-commentary go in the output language specified above, not in ${targetLanguage}.`
+    ? `- The user is practicing ${targetLanguage}. Any roleplay dialogue, example sentences, and vocabulary must be written in ${targetLanguage} - this is the whole point of the practice. Corrections, grammar explanations, and other meta-commentary go in the output language specified above, not in ${targetLanguage}.
+- Wrap every in-character roleplay line (the ${targetLanguage} dialogue itself, not corrections/explanations) in [DIALOGUE][/DIALOGUE] tags, e.g. [DIALOGUE]Guten Tag, was möchten Sie bestellen?[/DIALOGUE]. This lets the app read only the actual dialogue aloud instead of mixing it with your other-language commentary.`
     : ''
 }
 - DO NOT reference the user's software projects or technical work in examples.
@@ -123,7 +124,7 @@ Core teaching rules:
 - Be concise — max 100 words per explanation unless complexity requires more.
 - ${
   targetLanguage
-    ? `Output language is split by role, on every turn of this conversation: in-character roleplay dialogue must be in ${targetLanguage}; everything else (corrections, explanations, meta-commentary) must be in ${lang}. This split applies for the entire session, not just the opening turn.`
+    ? `Output language is split by role, on every turn of this conversation: in-character roleplay dialogue must be in ${targetLanguage}; everything else (corrections, explanations, meta-commentary) must be in ${lang}. This split applies for the entire session, not just the opening turn. Additionally, wrap every in-character ${targetLanguage} dialogue line in [DIALOGUE][/DIALOGUE] tags on every turn - see the Language Learning domain rules below for the exact format.`
     : `Output language must be ${lang}.`
 }
 
@@ -236,7 +237,7 @@ export async function POST(req: NextRequest) {
     // that context, then requires the actual dialogue to be in-character
     // and in targetLanguage.
     const openingTask = targetLanguage
-      ? `Output language: ${lang} for corrections/explanations - but the roleplay dialogue itself must be in ${targetLanguage}, since practicing it is the whole point of this session.\n\nScenario: ${topic}\n\nWrite exactly one short sentence in ${lang} that shows you've factored in the user's level/background for this scenario, then immediately open the scene in character with your first line written entirely in ${targetLanguage}. Do not narrate the scenario or ask the user to begin in ${lang} - after that one sentence, go straight into character.`
+      ? `Output language: ${lang} for corrections/explanations - but the roleplay dialogue itself must be in ${targetLanguage}, since practicing it is the whole point of this session.\n\nScenario: ${topic}\n\nWrite exactly one short sentence in ${lang} that shows you've factored in the user's level/background for this scenario, then immediately open the scene in character with your first line written entirely in ${targetLanguage}, wrapped in [DIALOGUE][/DIALOGUE] tags. Do not narrate the scenario or ask the user to begin in ${lang} - after that one sentence, go straight into character.`
       : `Output language: ${lang}\n\nTeach me about: ${topic}\n\nStart by briefly assessing what I might already know based on my background, then begin teaching at the right level.`;
     contents = [
       {
@@ -286,12 +287,26 @@ export async function POST(req: NextRequest) {
     const summaryMatch = raw.match(/\[SUMMARY\]([\s\S]*?)\[\/SUMMARY\]/);
     const summary = summaryMatch ? JSON.parse(summaryMatch[1]) : null;
 
+    // Roleplay turns mix ${targetLanguage} in-character dialogue with
+    // ${lang} meta-commentary in one reply (see buildSystemPrompt) - a TTS
+    // caller reading the whole thing aloud in one voice mispronounces
+    // whichever half doesn't match. dialogueText pulls out just the
+    // in-character lines (tags only, content stays in `text` too) so a
+    // caller like the mobile app's roleplay screen can read only that part
+    // aloud; null when the model didn't use the tag (non-roleplay chat, or
+    // an occasional formatting miss - callers should fall back to `text`).
+    const dialogueSegments = [...raw.matchAll(/\[DIALOGUE\]([\s\S]*?)\[\/DIALOGUE\]/g)]
+      .map((m) => m[1].trim())
+      .filter(Boolean);
+    const dialogueText = dialogueSegments.length > 0 ? dialogueSegments.join(' ') : null;
+
     const text = raw
       .replace(/\[QUIZ\][\s\S]*?\[\/QUIZ\]/g, '')
       .replace(/\[SUMMARY\][\s\S]*?\[\/SUMMARY\]/g, '')
+      .replace(/\[\/?DIALOGUE\]/g, '')
       .trim();
 
-    return NextResponse.json({ text, quiz, summary });
+    return NextResponse.json({ text, quiz, summary, dialogueText });
   } catch (e) {
     console.error('Tutor route error:', e);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
