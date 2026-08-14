@@ -63,16 +63,10 @@ type PronunciationResult = {
  * request - the transcript is the primary result callers need, this is an
  * enhancement on top of it.
  */
-// TEMPORARY: return shape includes a debugError string alongside the result
-// so a failure reaches the client (and Metro's log) instead of only
-// Vercel's server-side logs, which aren't reachable from here right now -
-// remove this once pronunciation scoring is confirmed working end-to-end.
-type PronunciationAssessmentAttempt = { result: PronunciationResult | null; debugError: string | null };
-
-async function assessPronunciation(audioBuffer: ArrayBuffer, referenceText: string, languageCode: string): Promise<PronunciationAssessmentAttempt> {
+async function assessPronunciation(audioBuffer: ArrayBuffer, referenceText: string, languageCode: string): Promise<PronunciationResult | null> {
   const region = process.env.AZURE_SPEECH_REGION;
   const key = process.env.AZURE_SPEECH_KEY;
-  if (!region || !key) return { result: null, debugError: 'AZURE_SPEECH_REGION/AZURE_SPEECH_KEY not set' };
+  if (!region || !key) return null;
 
   const assessmentConfig = Buffer.from(
     JSON.stringify({
@@ -111,9 +105,8 @@ async function assessPronunciation(audioBuffer: ArrayBuffer, referenceText: stri
     );
 
     if (!res.ok) {
-      const errText = await res.text();
-      console.error('Azure Pronunciation Assessment error:', res.status, errText);
-      return { result: null, debugError: `HTTP ${res.status}: ${errText.slice(0, 300)}` };
+      console.error('Azure Pronunciation Assessment error:', res.status, await res.text());
+      return null;
     }
 
     const data = await res.json();
@@ -121,32 +114,24 @@ async function assessPronunciation(audioBuffer: ArrayBuffer, referenceText: stri
     // Scores sit directly on the NBest item (AccuracyScore/FluencyScore/
     // CompletenessScore/PronScore, same for each Words[] entry) - not
     // nested under a PronunciationAssessment sub-object like Microsoft's
-    // SDK-based samples show. Confirmed by actually logging the response's
+    // SDK-based samples show. Confirmed by logging the response's actual
     // key names rather than trusting the docs' shape.
-    if (!best || typeof best.PronScore !== 'number') {
-      return {
-        result: null,
-        debugError: `No pronunciation scores. RecognitionStatus=${data.RecognitionStatus}. NBest[0] keys: ${best ? Object.keys(best).join(',') : 'no NBest[0]'}`,
-      };
-    }
+    if (!best || typeof best.PronScore !== 'number') return null;
 
     return {
-      result: {
-        accuracyScore: best.AccuracyScore ?? 0,
-        fluencyScore: best.FluencyScore ?? 0,
-        completenessScore: best.CompletenessScore ?? 0,
-        pronScore: best.PronScore ?? 0,
-        words: ((best.Words ?? []) as { Word: string; AccuracyScore?: number; ErrorType?: string }[]).map((w) => ({
-          word: w.Word,
-          accuracyScore: w.AccuracyScore ?? 0,
-          errorType: w.ErrorType ?? 'None',
-        })),
-      },
-      debugError: null,
+      accuracyScore: best.AccuracyScore ?? 0,
+      fluencyScore: best.FluencyScore ?? 0,
+      completenessScore: best.CompletenessScore ?? 0,
+      pronScore: best.PronScore ?? 0,
+      words: ((best.Words ?? []) as { Word: string; AccuracyScore?: number; ErrorType?: string }[]).map((w) => ({
+        word: w.Word,
+        accuracyScore: w.AccuracyScore ?? 0,
+        errorType: w.ErrorType ?? 'None',
+      })),
     };
   } catch (e) {
     console.error('Azure Pronunciation Assessment request failed:', e);
-    return { result: null, debugError: e instanceof Error ? e.message : String(e) };
+    return null;
   }
 }
 
@@ -225,12 +210,10 @@ export async function POST(req: NextRequest) {
 
     // Nothing to score without a transcript, and no point spending an Azure
     // call on an empty reference text.
-    const attempt =
-      shouldAssessPronunciation && transcript
-        ? await assessPronunciation(audioBuffer, transcript, languageCode)
-        : { result: null, debugError: null };
+    const pronunciation =
+      shouldAssessPronunciation && transcript ? await assessPronunciation(audioBuffer, transcript, languageCode) : null;
 
-    return NextResponse.json({ transcript, pronunciation: attempt.result, pronunciationDebug: attempt.debugError });
+    return NextResponse.json({ transcript, pronunciation });
   } catch (e) {
     console.error('Speech transcribe route error:', e);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
