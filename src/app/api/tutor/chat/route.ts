@@ -263,7 +263,11 @@ export async function POST(req: NextRequest) {
         contents,
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: codeReview ? 8000 : 1500,
+          // 1500 was tight enough that a language-domain correction turn -
+          // Korean explanation plus a full corrected rewrite of the user's
+          // (sometimes lengthy) paragraph, in the target language - could
+          // hit the cap and get cut off mid-word rather than mid-thought.
+          maxOutputTokens: codeReview ? 8000 : 3000,
         },
       }),
     });
