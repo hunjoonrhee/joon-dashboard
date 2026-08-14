@@ -327,10 +327,31 @@ export async function POST(req: NextRequest) {
     // failure mode for this feature.
     const looksLikeCompleteSentence = (segment: string) => !/\.\.\.$/.test(segment) && /[.!?][)"'』」]?$/.test(segment);
 
+    // The model sometimes quotes the user's own (uncorrected) sentence back
+    // verbatim before showing the fix, despite being told not to tag it (see
+    // the domain rule's EXCEPTION) - same unreliable-instruction problem as
+    // looksLikeCompleteSentence above. A tagged segment that's essentially
+    // what the user just said is almost certainly that quote, not a new
+    // sentence - checked against the actual last user turn instead of
+    // trusting the tag.
+    const normalizeForComparison = (s: string) =>
+      s
+        .toLowerCase()
+        .replace(/[.,!?;:"'„“”]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    const lastUserText = normalizeForComparison([...history].reverse().find((m) => m.role === 'user')?.parts?.[0]?.text ?? '');
+    const isQuotedUserText = (segment: string) => {
+      if (!lastUserText) return false;
+      const normalizedSegment = normalizeForComparison(segment);
+      return normalizedSegment.length > 0 && (normalizedSegment === lastUserText || lastUserText.includes(normalizedSegment) || normalizedSegment.includes(lastUserText));
+    };
+
     const dialogueSegments = [...raw.matchAll(/\[DIALOGUE\]([\s\S]*?)\[\/DIALOGUE\]/g)]
       .map((m) => stripMarkdownEmphasis(m[1].trim()))
       .filter(Boolean)
-      .filter(looksLikeCompleteSentence);
+      .filter(looksLikeCompleteSentence)
+      .filter((segment) => !isQuotedUserText(segment));
     const dialogueText = dialogueSegments.length > 0 ? dialogueSegments.join(' ') : null;
 
     const text = raw
