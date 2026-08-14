@@ -119,7 +119,10 @@ async function assessPronunciation(audioBuffer: ArrayBuffer, referenceText: stri
     const data = await res.json();
     const best = data.NBest?.[0];
     if (!best?.PronunciationAssessment) {
-      return { result: null, debugError: `No PronunciationAssessment in response. RecognitionStatus=${data.RecognitionStatus}. Raw: ${JSON.stringify(data).slice(0, 300)}` };
+      return {
+        result: null,
+        debugError: `No PronunciationAssessment. RecognitionStatus=${data.RecognitionStatus}. Top-level keys: ${Object.keys(data).join(',')}. NBest[0] keys: ${data.NBest?.[0] ? Object.keys(data.NBest[0]).join(',') : 'no NBest[0]'}`,
+      };
     }
 
     return {
