@@ -118,23 +118,28 @@ async function assessPronunciation(audioBuffer: ArrayBuffer, referenceText: stri
 
     const data = await res.json();
     const best = data.NBest?.[0];
-    if (!best?.PronunciationAssessment) {
+    // Scores sit directly on the NBest item (AccuracyScore/FluencyScore/
+    // CompletenessScore/PronScore, same for each Words[] entry) - not
+    // nested under a PronunciationAssessment sub-object like Microsoft's
+    // SDK-based samples show. Confirmed by actually logging the response's
+    // key names rather than trusting the docs' shape.
+    if (!best || typeof best.PronScore !== 'number') {
       return {
         result: null,
-        debugError: `No PronunciationAssessment. RecognitionStatus=${data.RecognitionStatus}. Top-level keys: ${Object.keys(data).join(',')}. NBest[0] keys: ${data.NBest?.[0] ? Object.keys(data.NBest[0]).join(',') : 'no NBest[0]'}`,
+        debugError: `No pronunciation scores. RecognitionStatus=${data.RecognitionStatus}. NBest[0] keys: ${best ? Object.keys(best).join(',') : 'no NBest[0]'}`,
       };
     }
 
     return {
       result: {
-        accuracyScore: best.PronunciationAssessment.AccuracyScore ?? 0,
-        fluencyScore: best.PronunciationAssessment.FluencyScore ?? 0,
-        completenessScore: best.PronunciationAssessment.CompletenessScore ?? 0,
-        pronScore: best.PronunciationAssessment.PronScore ?? 0,
-        words: ((best.Words ?? []) as { Word: string; PronunciationAssessment?: { AccuracyScore?: number; ErrorType?: string } }[]).map((w) => ({
+        accuracyScore: best.AccuracyScore ?? 0,
+        fluencyScore: best.FluencyScore ?? 0,
+        completenessScore: best.CompletenessScore ?? 0,
+        pronScore: best.PronScore ?? 0,
+        words: ((best.Words ?? []) as { Word: string; AccuracyScore?: number; ErrorType?: string }[]).map((w) => ({
           word: w.Word,
-          accuracyScore: w.PronunciationAssessment?.AccuracyScore ?? 0,
-          errorType: w.PronunciationAssessment?.ErrorType ?? 'None',
+          accuracyScore: w.AccuracyScore ?? 0,
+          errorType: w.ErrorType ?? 'None',
         })),
       },
       debugError: null,
