@@ -317,9 +317,20 @@ export async function POST(req: NextRequest) {
     // for display) is untouched and keeps the markdown.
     const stripMarkdownEmphasis = (segment: string) => segment.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1');
 
+    // The prompt asks the model not to tag inline grammar-pattern fragments
+    // (e.g. "Ich möchte..." cited mid-explanation), but that's a judgment
+    // call the model doesn't reliably make - this is a mechanical backstop.
+    // An inline fragment almost always trails off with an ellipsis rather
+    // than real terminal punctuation, so that's a much more reliable signal
+    // than trusting the tag alone. Favors silence over reading nonsense: a
+    // genuine but unpunctuated line gets dropped too, but that's the safer
+    // failure mode for this feature.
+    const looksLikeCompleteSentence = (segment: string) => !/\.\.\.$/.test(segment) && /[.!?][)"'』」]?$/.test(segment);
+
     const dialogueSegments = [...raw.matchAll(/\[DIALOGUE\]([\s\S]*?)\[\/DIALOGUE\]/g)]
       .map((m) => stripMarkdownEmphasis(m[1].trim()))
-      .filter(Boolean);
+      .filter(Boolean)
+      .filter(looksLikeCompleteSentence);
     const dialogueText = dialogueSegments.length > 0 ? dialogueSegments.join(' ') : null;
 
     const text = raw

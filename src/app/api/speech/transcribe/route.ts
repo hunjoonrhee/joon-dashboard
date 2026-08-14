@@ -63,10 +63,16 @@ type PronunciationResult = {
  * request - the transcript is the primary result callers need, this is an
  * enhancement on top of it.
  */
-async function assessPronunciation(audioBuffer: ArrayBuffer, referenceText: string, languageCode: string): Promise<PronunciationResult | null> {
+// TEMPORARY: return shape includes a debugError string alongside the result
+// so a failure reaches the client (and Metro's log) instead of only
+// Vercel's server-side logs, which aren't reachable from here right now -
+// remove this once pronunciation scoring is confirmed working end-to-end.
+type PronunciationAssessmentAttempt = { result: PronunciationResult | null; debugError: string | null };
+
+async function assessPronunciation(audioBuffer: ArrayBuffer, referenceText: string, languageCode: string): Promise<PronunciationAssessmentAttempt> {
   const region = process.env.AZURE_SPEECH_REGION;
   const key = process.env.AZURE_SPEECH_KEY;
-  if (!region || !key) return null;
+  if (!region || !key) return { result: null, debugError: 'AZURE_SPEECH_REGION/AZURE_SPEECH_KEY not set' };
 
   const assessmentConfig = Buffer.from(
     JSON.stringify({
@@ -105,28 +111,34 @@ async function assessPronunciation(audioBuffer: ArrayBuffer, referenceText: stri
     );
 
     if (!res.ok) {
-      console.error('Azure Pronunciation Assessment error:', res.status, await res.text());
-      return null;
+      const errText = await res.text();
+      console.error('Azure Pronunciation Assessment error:', res.status, errText);
+      return { result: null, debugError: `HTTP ${res.status}: ${errText.slice(0, 300)}` };
     }
 
     const data = await res.json();
     const best = data.NBest?.[0];
-    if (!best?.PronunciationAssessment) return null;
+    if (!best?.PronunciationAssessment) {
+      return { result: null, debugError: `No PronunciationAssessment in response. RecognitionStatus=${data.RecognitionStatus}. Raw: ${JSON.stringify(data).slice(0, 300)}` };
+    }
 
     return {
-      accuracyScore: best.PronunciationAssessment.AccuracyScore ?? 0,
-      fluencyScore: best.PronunciationAssessment.FluencyScore ?? 0,
-      completenessScore: best.PronunciationAssessment.CompletenessScore ?? 0,
-      pronScore: best.PronunciationAssessment.PronScore ?? 0,
-      words: ((best.Words ?? []) as { Word: string; PronunciationAssessment?: { AccuracyScore?: number; ErrorType?: string } }[]).map((w) => ({
-        word: w.Word,
-        accuracyScore: w.PronunciationAssessment?.AccuracyScore ?? 0,
-        errorType: w.PronunciationAssessment?.ErrorType ?? 'None',
-      })),
+      result: {
+        accuracyScore: best.PronunciationAssessment.AccuracyScore ?? 0,
+        fluencyScore: best.PronunciationAssessment.FluencyScore ?? 0,
+        completenessScore: best.PronunciationAssessment.CompletenessScore ?? 0,
+        pronScore: best.PronunciationAssessment.PronScore ?? 0,
+        words: ((best.Words ?? []) as { Word: string; PronunciationAssessment?: { AccuracyScore?: number; ErrorType?: string } }[]).map((w) => ({
+          word: w.Word,
+          accuracyScore: w.PronunciationAssessment?.AccuracyScore ?? 0,
+          errorType: w.PronunciationAssessment?.ErrorType ?? 'None',
+        })),
+      },
+      debugError: null,
     };
   } catch (e) {
     console.error('Azure Pronunciation Assessment request failed:', e);
-    return null;
+    return { result: null, debugError: e instanceof Error ? e.message : String(e) };
   }
 }
 
@@ -205,10 +217,12 @@ export async function POST(req: NextRequest) {
 
     // Nothing to score without a transcript, and no point spending an Azure
     // call on an empty reference text.
-    const pronunciation =
-      shouldAssessPronunciation && transcript ? await assessPronunciation(audioBuffer, transcript, languageCode) : null;
+    const attempt =
+      shouldAssessPronunciation && transcript
+        ? await assessPronunciation(audioBuffer, transcript, languageCode)
+        : { result: null, debugError: null };
 
-    return NextResponse.json({ transcript, pronunciation });
+    return NextResponse.json({ transcript, pronunciation: attempt.result, pronunciationDebug: attempt.debugError });
   } catch (e) {
     console.error('Speech transcribe route error:', e);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
