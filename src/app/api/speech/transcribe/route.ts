@@ -63,12 +63,7 @@ type PronunciationResult = {
  * request - the transcript is the primary result callers need, this is an
  * enhancement on top of it.
  */
-async function assessPronunciation(
-  audioBuffer: ArrayBuffer,
-  referenceText: string,
-  languageCode: string,
-  sampleRateHertz: number
-): Promise<PronunciationResult | null> {
+async function assessPronunciation(audioBuffer: ArrayBuffer, referenceText: string, languageCode: string): Promise<PronunciationResult | null> {
   const region = process.env.AZURE_SPEECH_REGION;
   const key = process.env.AZURE_SPEECH_KEY;
   if (!region || !key) return null;
@@ -90,10 +85,18 @@ async function assessPronunciation(
         method: 'POST',
         headers: {
           'Ocp-Apim-Subscription-Key': key,
-          // Same LINEAR16 WAV bytes already sent to Google (RIFF header and
-          // all - see the comment on the audioBuffer read below), reused
-          // here rather than re-reading the request body.
-          'Content-Type': `audio/wav; codecs=audio/pcm; samplerate=${sampleRateHertz}`,
+          // Same WAV bytes already sent to Google, reused here rather than
+          // re-reading the request body - this IS a full WAV file (RIFF
+          // header + PCM data), so the content type must say so ("audio/wav"
+          // alone, parsed like any WAV file) rather than
+          // "codecs=audio/pcm" (headerless raw PCM) - the latter tells Azure
+          // there's no header to skip, so it tried to align the 44-byte RIFF
+          // header itself as audio samples. Google's STT tolerated that
+          // mismatch; Azure's phoneme-level scoring did not - it returned no
+          // NBest result at all, which assessPronunciation was already
+          // built to treat as a null result, so this failed silently rather
+          // than with a visible error.
+          'Content-Type': 'audio/wav',
           Accept: 'application/json',
           'Pronunciation-Assessment': assessmentConfig,
         },
@@ -203,7 +206,7 @@ export async function POST(req: NextRequest) {
     // Nothing to score without a transcript, and no point spending an Azure
     // call on an empty reference text.
     const pronunciation =
-      shouldAssessPronunciation && transcript ? await assessPronunciation(audioBuffer, transcript, languageCode, sampleRateHertz) : null;
+      shouldAssessPronunciation && transcript ? await assessPronunciation(audioBuffer, transcript, languageCode) : null;
 
     return NextResponse.json({ transcript, pronunciation });
   } catch (e) {
