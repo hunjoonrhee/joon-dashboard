@@ -45,6 +45,88 @@ const TECH_TERM_SPEECH_HINTS = [
   'fullstack',
 ];
 
+type PronunciationWordScore = { word: string; accuracyScore: number; errorType: string };
+type PronunciationResult = {
+  accuracyScore: number;
+  fluencyScore: number;
+  completenessScore: number;
+  pronScore: number;
+  words: PronunciationWordScore[];
+};
+
+/**
+ * Scores the same audio already sent to Google STT against its own
+ * transcript as the reference text - not a "did Azure agree with Google"
+ * check, but a per-word acoustic/phonetic accuracy score for whatever the
+ * user actually said. Best-effort: any failure here (missing config,
+ * network, a malformed Azure response) returns null rather than failing the
+ * request - the transcript is the primary result callers need, this is an
+ * enhancement on top of it.
+ */
+async function assessPronunciation(
+  audioBuffer: ArrayBuffer,
+  referenceText: string,
+  languageCode: string,
+  sampleRateHertz: number
+): Promise<PronunciationResult | null> {
+  const region = process.env.AZURE_SPEECH_REGION;
+  const key = process.env.AZURE_SPEECH_KEY;
+  if (!region || !key) return null;
+
+  const assessmentConfig = Buffer.from(
+    JSON.stringify({
+      ReferenceText: referenceText,
+      GradingSystem: 'HundredMark',
+      Granularity: 'Phoneme',
+      Dimension: 'Comprehensive',
+      EnableMiscue: true,
+    })
+  ).toString('base64');
+
+  try {
+    const res = await fetch(
+      `https://${region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=${languageCode}&format=detailed`,
+      {
+        method: 'POST',
+        headers: {
+          'Ocp-Apim-Subscription-Key': key,
+          // Same LINEAR16 WAV bytes already sent to Google (RIFF header and
+          // all - see the comment on the audioBuffer read below), reused
+          // here rather than re-reading the request body.
+          'Content-Type': `audio/wav; codecs=audio/pcm; samplerate=${sampleRateHertz}`,
+          Accept: 'application/json',
+          'Pronunciation-Assessment': assessmentConfig,
+        },
+        body: Buffer.from(audioBuffer),
+      }
+    );
+
+    if (!res.ok) {
+      console.error('Azure Pronunciation Assessment error:', res.status, await res.text());
+      return null;
+    }
+
+    const data = await res.json();
+    const best = data.NBest?.[0];
+    if (!best?.PronunciationAssessment) return null;
+
+    return {
+      accuracyScore: best.PronunciationAssessment.AccuracyScore ?? 0,
+      fluencyScore: best.PronunciationAssessment.FluencyScore ?? 0,
+      completenessScore: best.PronunciationAssessment.CompletenessScore ?? 0,
+      pronScore: best.PronunciationAssessment.PronScore ?? 0,
+      words: ((best.Words ?? []) as { Word: string; PronunciationAssessment?: { AccuracyScore?: number; ErrorType?: string } }[]).map((w) => ({
+        word: w.Word,
+        accuracyScore: w.PronunciationAssessment?.AccuracyScore ?? 0,
+        errorType: w.PronunciationAssessment?.ErrorType ?? 'None',
+      })),
+    };
+  } catch (e) {
+    console.error('Azure Pronunciation Assessment request failed:', e);
+    return null;
+  }
+}
+
 export async function POST(req: NextRequest) {
   // Shares GOOGLE_TTS_API_KEY with the Text-to-Speech route rather than
   // having its own env var - same Google Cloud project, same key, already
@@ -65,6 +147,10 @@ export async function POST(req: NextRequest) {
   }
   const sampleRateParam = req.nextUrl.searchParams.get('sampleRateHertz');
   const sampleRateHertz = sampleRateParam ? Number(sampleRateParam) : DEFAULT_SAMPLE_RATE_HERTZ;
+  // Opt-in - only the roleplay voice composer wants this (and its extra
+  // Azure round-trip); log/goal-setup dictation has no use for a
+  // pronunciation score and shouldn't pay for one.
+  const shouldAssessPronunciation = req.nextUrl.searchParams.get('assessPronunciation') === 'true';
 
   // The client uploads the raw recorded audio bytes directly (LINEAR16 WAV)
   // rather than JSON+base64 - expo-file-system's upload() sends the file as
@@ -114,7 +200,12 @@ export async function POST(req: NextRequest) {
       .join(' ')
       .trim();
 
-    return NextResponse.json({ transcript });
+    // Nothing to score without a transcript, and no point spending an Azure
+    // call on an empty reference text.
+    const pronunciation =
+      shouldAssessPronunciation && transcript ? await assessPronunciation(audioBuffer, transcript, languageCode, sampleRateHertz) : null;
+
+    return NextResponse.json({ transcript, pronunciation });
   } catch (e) {
     console.error('Speech transcribe route error:', e);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
