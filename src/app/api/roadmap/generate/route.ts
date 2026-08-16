@@ -60,11 +60,38 @@ export async function POST(req: NextRequest) {
   const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   const userId = await getAuthenticatedUserId(req);
 
-  const { goal, careerLevel, locale } = await req.json();
+  // Optional roadmapId: an edit-and-regenerate call for an existing goal
+  // (see growpath-mobile's roadmap edit screen), not a fresh one - the
+  // roadmap's id/adopted status/created_at stay put, only the AI-derived
+  // content (stages/domain/targetLanguage) and the goal/career_level that
+  // produced it are replaced.
+  const { goal, careerLevel, locale, roadmapId } = await req.json();
   const lang = locale === 'de' ? 'German' : locale === 'en' ? 'English' : 'Korean';
 
   if (!goal || !careerLevel) {
     return NextResponse.json({ error: 'goal and careerLevel are required' }, { status: 400 });
+  }
+
+  if (roadmapId) {
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    // Ownership check before spending a Gemini call on a regenerate - a
+    // roadmapId is client-supplied and must not let one user overwrite
+    // another user's roadmap by guessing/reusing an id.
+    const { data: existing, error: existingError } = await supabaseAdmin
+      .from('ai_roadmaps')
+      .select('id')
+      .eq('id', roadmapId)
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (existingError) {
+      console.error('Supabase error:', existingError);
+      return NextResponse.json({ error: 'DB lookup failed' }, { status: 500 });
+    }
+    if (!existing) {
+      return NextResponse.json({ error: 'Roadmap not found' }, { status: 404 });
+    }
   }
 
   const userPrompt = `Current level: ${careerLevel}
@@ -131,19 +158,26 @@ Generate a learning roadmap from the current level to the final goal. Adapt the 
       return NextResponse.json({ stages, domain, targetLanguage });
     }
 
-    const { data, error } = await supabaseAdmin
-      .from('ai_roadmaps')
-      .insert({
-        goal,
-        career_level: careerLevel,
-        stages,
-        adopted: false,
-        user_id: userId,
-        domain,
-        target_language: targetLanguage,
-      })
-      .select()
-      .single();
+    const { data, error } = roadmapId
+      ? await supabaseAdmin
+          .from('ai_roadmaps')
+          .update({ goal, career_level: careerLevel, stages, domain, target_language: targetLanguage })
+          .eq('id', roadmapId)
+          .select()
+          .single()
+      : await supabaseAdmin
+          .from('ai_roadmaps')
+          .insert({
+            goal,
+            career_level: careerLevel,
+            stages,
+            adopted: false,
+            user_id: userId,
+            domain,
+            target_language: targetLanguage,
+          })
+          .select()
+          .single();
 
     if (error) {
       console.error('Supabase error:', error);
