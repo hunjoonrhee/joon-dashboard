@@ -24,9 +24,14 @@ Rules:
 - Adapt the structure naturally to the domain: technical skills for coding, vocabulary/grammar for languages, techniques for music, etc.
 - For technical domains: always reflect the CURRENT latest version of frameworks and tools (e.g. Angular Signals instead of Zone.js, React hooks instead of class components). Do not include outdated APIs or deprecated patterns.
 - If the current level mentions a specific framework (e.g. Angular, React, Vue), the first 1-2 stages must include that framework's latest core concepts and sub-features as skills and tags.
+- Also classify the goal itself:
+  - "domain": exactly one of "dev", "language", "art", "other" - whichever best describes the overall goal.
+  - "targetLanguage": if reaching this goal requires developing proficiency in a specific human language (a pure language-learning goal, OR a goal in another domain that also requires a language - e.g. "German-speaking lead architect" is domain "dev" with targetLanguage "German"), set it to that language's English name (e.g. "German", "Japanese"). Otherwise null. Do not set this for a programming language.
 
 JSON schema:
 {
+  "domain": "dev" | "language" | "art" | "other",
+  "targetLanguage": "string or null",
   "stages": [
     {
       "level": 1,
@@ -114,10 +119,16 @@ Generate a learning roadmap from the current level to the final goal. Adapt the 
 
     const parsed = JSON.parse(jsonMatch[0]);
     const stages: RoadmapStage[] = parsed.stages;
+    // Defensive against the model drifting from the instructed enum -
+    // an unrecognized value falls back to 'other' rather than persisting
+    // garbage a mobile client would fail to match against its own Domain type.
+    const VALID_DOMAINS = ['dev', 'language', 'art', 'other'];
+    const domain: string = VALID_DOMAINS.includes(parsed.domain) ? parsed.domain : 'other';
+    const targetLanguage: string | null = typeof parsed.targetLanguage === 'string' && parsed.targetLanguage.trim() ? parsed.targetLanguage.trim() : null;
 
     // 비회원 체험 — DB 저장 스킵
     if (!userId) {
-      return NextResponse.json({ stages });
+      return NextResponse.json({ stages, domain, targetLanguage });
     }
 
     const { data, error } = await supabaseAdmin
@@ -128,6 +139,8 @@ Generate a learning roadmap from the current level to the final goal. Adapt the 
         stages,
         adopted: false,
         user_id: userId,
+        domain,
+        target_language: targetLanguage,
       })
       .select()
       .single();
