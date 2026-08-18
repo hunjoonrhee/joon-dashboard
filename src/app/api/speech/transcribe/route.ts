@@ -43,6 +43,17 @@ const TECH_TERM_SPEECH_HINTS = [
   'frontend',
   'backend',
   'fullstack',
+  // Common two/three-word combinations, not just isolated tokens - an
+  // out-of-vocabulary word sequence like "Angular Computed" competes with
+  // the whole sentence's Korean language model, so boosting each word
+  // alone still lets a more probable all-Korean reading win. Boosting the
+  // actual sequence gives it a real foothold at that position too.
+  'Angular Signals',
+  'Angular Computed',
+  'React Hooks',
+  'Vue Composition API',
+  'TypeScript Generics',
+  'Node.js Backend',
 ];
 
 export async function POST(req: NextRequest) {
@@ -96,7 +107,12 @@ export async function POST(req: NextRequest) {
           // as "it merged my sentences into one" even though every word was
           // transcribed correctly.
           enableAutomaticPunctuation: true,
-          speechContexts: [{ phrases: TECH_TERM_SPEECH_HINTS, boost: 15 }],
+          // 20 is Google's documented ceiling for a meaningfully stronger
+          // pull without the model starting to force-fit the hint list onto
+          // audio that doesn't actually contain it - 15 wasn't winning
+          // against a fluent all-Korean reading of the same audio often
+          // enough (see task #22 follow-up).
+          speechContexts: [{ phrases: TECH_TERM_SPEECH_HINTS, boost: 20 }],
         },
         audio: { content: audioBase64 },
       }),
