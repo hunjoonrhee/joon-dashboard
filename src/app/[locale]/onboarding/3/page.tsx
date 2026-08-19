@@ -1,6 +1,7 @@
 'use client';
 
 import AddSessionModal from '@/components/AddSessionModal';
+import { CompassDial } from '@/components/compass-dial';
 import { supabase as supabaseClient, upsertWithUser } from '@/lib/supabase';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
 import { PenLine, Rocket, Sparkles, Trophy } from 'lucide-react';
@@ -217,15 +218,15 @@ export default function Onboarding3() {
               <p className="text-sm text-ink-dim">{t('step3CtaSub')}</p>
             </div>
 
-            <div className="bg-surf-2 border border-border rounded-xl p-4 flex flex-col gap-1">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs text-ink-dim">{t('step3CtaProgress')}</p>
-                <span className="text-xs font-bold text-pri">0 / 3</span>
+            <div className="bg-surf-2 border border-border rounded-xl p-4 flex items-center gap-3">
+              <CompassDial percent={0} size={44} showLabel={false} className="flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-ink-dim">{t('step3CtaProgress')}</p>
+                  <span className="text-xs font-bold text-pri flex-shrink-0">0 / 3</span>
+                </div>
+                <p className="text-xs text-ink-faint mt-1">{t('step3CtaProgressSub')}</p>
               </div>
-              <div className="h-1.5 bg-border rounded-full overflow-hidden">
-                <div className="h-full w-0 bg-pri rounded-full" />
-              </div>
-              <p className="text-xs text-ink-faint mt-1">{t('step3CtaProgressSub')}</p>
             </div>
 
             <button

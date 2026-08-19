@@ -1,5 +1,6 @@
 'use client';
 
+import { CompassDial } from '@/components/compass-dial';
 import { useModalStore } from '@/store/modalStore';
 import type { AiRoadmap, Goal, Session } from '@/types';
 import { AlertTriangle, Bot, BookOpen, FileText, GraduationCap, Play, TrendingUp } from 'lucide-react';
@@ -128,27 +129,24 @@ export default function CoachCard({ sessions, goals, adoptedRoadmap, onRefresh, 
       </div>
 
       {!hasEnoughData && (
-        <div className="flex flex-col gap-2 py-1">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-ink-dim">
-              {t('insufficientData', {
-                current: sessions.length,
-                min: MIN_SESSIONS,
-              })}
+        <div className="flex items-center gap-3 py-1">
+          <CompassDial percent={progressPct} size={44} showLabel={false} className="flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-ink-dim">
+                {t('insufficientData', {
+                  current: sessions.length,
+                  min: MIN_SESSIONS,
+                })}
+              </p>
+              <span className="text-xs font-bold text-pri flex-shrink-0">
+                {sessions.length}/{MIN_SESSIONS}
+              </span>
+            </div>
+            <p className="text-xs text-ink-faint mt-1">
+              {t('insufficientGuide', { remaining: MIN_SESSIONS - sessions.length })}
             </p>
-            <span className="text-xs font-bold text-pri">
-              {sessions.length}/{MIN_SESSIONS}
-            </span>
           </div>
-          <div className="h-1.5 bg-surf-2 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-pri rounded-full transition-all duration-500"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-          <p className="text-xs text-ink-faint">
-            {t('insufficientGuide', { remaining: MIN_SESSIONS - sessions.length })}
-          </p>
         </div>
       )}
 
