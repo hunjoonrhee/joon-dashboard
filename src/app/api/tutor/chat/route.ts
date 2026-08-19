@@ -322,12 +322,20 @@ export async function POST(req: NextRequest) {
         summary.tags = summary.tags.map((tag: unknown) => (typeof tag === 'string' ? stripDialogueTags(tag) : tag));
       }
       if (Array.isArray(summary.vocabWords)) {
-        summary.vocabWords = summary.vocabWords.map((vocabWord: { word?: unknown; meaning?: unknown; example?: unknown }) => ({
-          ...vocabWord,
-          word: typeof vocabWord.word === 'string' ? stripDialogueTags(vocabWord.word) : vocabWord.word,
-          meaning: typeof vocabWord.meaning === 'string' ? stripDialogueTags(vocabWord.meaning) : vocabWord.meaning,
-          example: typeof vocabWord.example === 'string' ? stripDialogueTags(vocabWord.example) : vocabWord.example,
-        }));
+        summary.vocabWords = summary.vocabWords.map((vocabWord: unknown) => {
+          // A malformed entry (e.g. null) used to pass through harmlessly to
+          // growpath-mobile's parseSummary, which already guards against it
+          // (src/lib/roleplay.ts) - don't turn that into a hard failure that
+          // loses the whole summary just to strip tags from the good entries.
+          if (!vocabWord || typeof vocabWord !== 'object') return vocabWord;
+          const { word, meaning, example } = vocabWord as { word?: unknown; meaning?: unknown; example?: unknown };
+          return {
+            ...vocabWord,
+            word: typeof word === 'string' ? stripDialogueTags(word) : word,
+            meaning: typeof meaning === 'string' ? stripDialogueTags(meaning) : meaning,
+            example: typeof example === 'string' ? stripDialogueTags(example) : example,
+          };
+        });
       }
     }
 
