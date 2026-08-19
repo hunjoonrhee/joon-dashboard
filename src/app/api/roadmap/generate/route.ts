@@ -104,7 +104,13 @@ export async function POST(req: NextRequest) {
   const MAX_BIO_CHARS = 600;
   let bio: string | null = null;
   if (userId) {
-    const { data: bioRow } = await supabaseAdmin.from('settings').select('value').eq('user_id', userId).eq('key', 'bio').maybeSingle();
+    const { data: bioRow, error: bioError } = await supabaseAdmin.from('settings').select('value').eq('user_id', userId).eq('key', 'bio').maybeSingle();
+    if (bioError) {
+      // Non-fatal - the roadmap still generates without bio context, but
+      // this failure mode (as opposed to "no bio saved") should be visible
+      // in logs like every other DB call in this route.
+      console.error('Supabase error (bio lookup):', bioError);
+    }
     const bioValue = bioRow?.value?.trim();
     if (bioValue) {
       bio = bioValue.slice(0, MAX_BIO_CHARS);
