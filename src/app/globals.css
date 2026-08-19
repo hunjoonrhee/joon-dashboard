@@ -104,3 +104,18 @@ input:-webkit-autofill:focus {
   -webkit-text-fill-color: var(--color-ink) !important;
   caret-color: var(--color-ink);
 }
+
+/* Sonar-ping pair behind the celebration dial - two instances staggered via animation-delay. */
+@keyframes celebration-ring {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+.celebration-ring {
+  animation: celebration-ring 1700ms ease-out infinite;
+}

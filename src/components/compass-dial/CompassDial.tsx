@@ -19,6 +19,8 @@ export type CompassDialProps = {
   textColor?: string;
   subLabelColor?: string;
   className?: string;
+  /** Renders this in the dial's center instead of the percent/label text - e.g. a badge icon for a celebration card. Takes priority over showLabel. */
+  centerIcon?: React.ReactNode;
 };
 
 export function CompassDial({
@@ -35,6 +37,7 @@ export function CompassDial({
   textColor = 'var(--color-ink)',
   subLabelColor = 'var(--color-ink-dim)',
   className,
+  centerIcon,
 }: CompassDialProps) {
   const gradientId = `compass-dial-gradient-${useId().replace(/:/g, '')}`;
   const safePercent = Number.isFinite(percent) ? percent : 0;
@@ -47,8 +50,8 @@ export function CompassDial({
   const ticks = computeTicks(size, radius, clampedPercent);
   const progressEnd = computeProgressEndpoint(size, radius, clampedPercent);
 
-  return (
-    <svg width={size} height={size} className={className}>
+  const dial = (
+    <svg width={size} height={size} className={centerIcon ? undefined : className}>
       <defs>
         <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor={colorFrom} />
@@ -87,12 +90,12 @@ export function CompassDial({
       <circle cx={progressEnd.x} cy={progressEnd.y} r={size * 0.055} fill={colorTo} opacity={0.28} />
       <circle cx={progressEnd.x} cy={progressEnd.y} r={size * 0.032} fill={markerFill} />
 
-      {showLabel && (
+      {!centerIcon && showLabel && (
         <text x={cx} y={cy - size * 0.02} textAnchor="middle" fontSize={size * 0.19} fontWeight={800} fill={textColor}>
           {Math.round(clampedPercent)} %
         </text>
       )}
-      {showLabel && label && (
+      {!centerIcon && showLabel && label && (
         <text
           x={cx}
           y={cy + size * 0.11}
@@ -105,5 +108,16 @@ export function CompassDial({
         </text>
       )}
     </svg>
+  );
+
+  if (!centerIcon) return dial;
+
+  return (
+    <div className={className} style={{ position: 'relative', width: size, height: size, display: 'inline-block' }}>
+      {dial}
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {centerIcon}
+      </div>
+    </div>
   );
 }

@@ -1,15 +1,15 @@
 'use client';
 
 import AddSessionModal from '@/components/AddSessionModal';
+import { useUser } from '@/components/UserProvider';
 import { supabase } from '@/lib/supabase';
 import type { Goal, Note, ProjectTask, Session, TodayItem, Topic } from '@/types';
-import { Flame, PartyPopper, TrendingUp, type LucideIcon } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import CoachCard from '../CoachCard';
 import HeroCard from './home/HeroCard';
 import { useAdoptedRoadmap } from './home/hooks/useAdoptedRoadmap';
 import { useHomeStats } from './home/hooks/useHomeStats';
+import { useAchievementDetectors } from './home/useAchievementDetectors';
 import NotesPreviewCard from './home/NotesPreviewCard';
 import TilPreviewCard from './home/TilPreviewCard';
 import TodayCard from './home/TodayCard';
@@ -36,14 +36,16 @@ export default function HomeTab({
   notes = [],
   onRefresh,
 }: Props) {
-  const t = useTranslations('home');
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [completedItemName, setCompletedItemName] = useState('');
 
+  const user = useUser();
   const { adoptedRoadmap, adoptedRoadmapId } = useAdoptedRoadmap(settings);
 
   const { sessions, streak, maxStreak, monthCount, overallPct, completedTopics, gapPct, week, weeklyStats } =
     useHomeStats({ adoptedRoadmapId, adoptedRoadmap, topics, goals, allSessions });
+
+  useAchievementDetectors(user?.id, allSessions, goals, adoptedRoadmap);
 
   const focusGoals = goals.filter((g) => g.is_focus);
   const totalTopics = topics.filter((t) => focusGoals.some((g) => g.id === t.goal_id));
@@ -72,15 +74,6 @@ export default function HomeTab({
     }
     onRefresh();
   };
-
-  const achievements: { icon: LucideIcon; msg: string }[] = [];
-  if (completedTopics.length > 0)
-    achievements.push({
-      icon: PartyPopper,
-      msg: `${focusGoals[0]?.name ?? ''} ${t('achievementTopics', { count: completedTopics.length })}`,
-    });
-  if (streak >= 3) achievements.push({ icon: Flame, msg: t('achievementStreak', { count: streak }) });
-  if (monthCount >= 5) achievements.push({ icon: TrendingUp, msg: t('achievementMonth', { count: monthCount }) });
 
   return (
     <div className="flex flex-col gap-4">
@@ -117,20 +110,6 @@ export default function HomeTab({
         <TilPreviewCard sessions={sessions} onAddStudy={() => setShowSessionModal(true)} />
         <NotesPreviewCard notes={notes} />
       </div>
-
-      {achievements.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          {achievements.map(({ icon: Icon, msg }, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-2 text-sm font-medium px-3 py-2.5 rounded-xl border bg-surf-2 border-border text-ink"
-            >
-              <Icon size={16} strokeWidth={1.8} className="text-pri flex-shrink-0" />
-              {msg}
-            </div>
-          ))}
-        </div>
-      )}
 
       {showSessionModal && (
         <AddSessionModal

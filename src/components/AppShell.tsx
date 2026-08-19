@@ -1,10 +1,12 @@
 'use client';
 
 import AddSessionModal from '@/components/AddSessionModal';
+import { CelebrationOverlay } from '@/components/celebration/CelebrationOverlay';
 import NavBar from '@/components/NavBar';
 import Sidebar from '@/components/Sidebar';
 import GoalModal from '@/components/tabs/roadmap/GoalModal';
 import { ToastProvider } from '@/components/Toast';
+import { CelebrationProvider } from '@/lib/celebration-context';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useModalStore } from '@/store/modalStore';
 import { useTranslations } from 'next-intl';
@@ -14,6 +16,7 @@ import { useState } from 'react';
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const tNav = useTranslations('nav');
   const tCommon = useTranslations('common');
+  const tAchievements = useTranslations('achievements');
 
   // /ko/dashboard/study → segment = 'study'
   // /ko/dashboard → segment = ''
@@ -29,6 +32,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     roadmap: tNav('roadmap'),
     projects: tNav('projects'),
     settings: tNav('settings'),
+    achievements: tAchievements('title'),
   };
 
   const pageTitle = pageTitles[segment] ?? '';
@@ -71,39 +75,43 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <ToastProvider>
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <div className="flex-1 lg:ml-56 flex flex-col min-h-screen">
-          <NavBar />
-          <div className="hidden lg:flex items-center justify-between px-6 h-[57px] bg-surf border-b border-border sticky top-0 z-10">
-            <h1 className="text-base font-bold text-ink">{pageTitle}</h1>
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-ink-faint" suppressHydrationWarning>
-                {today}
-              </span>
-              <button
-                onClick={handleHeaderBtn}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-pri text-on-pri text-sm font-semibold hover:opacity-90 transition-colors"
-              >
-                {btnConfig.label}
-              </button>
-              <button
-                onClick={handleSignOut}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surf-2 text-ink-dim text-sm font-medium hover:bg-border transition-colors"
-              >
-                {tCommon('logout')}
-              </button>
+      <CelebrationProvider>
+        <div className="flex min-h-screen">
+          <Sidebar />
+          <div className="flex-1 lg:ml-56 flex flex-col min-h-screen">
+            <NavBar />
+            <div className="hidden lg:flex items-center justify-between px-6 h-[57px] bg-surf border-b border-border sticky top-0 z-10">
+              <h1 className="text-base font-bold text-ink">{pageTitle}</h1>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-ink-faint" suppressHydrationWarning>
+                  {today}
+                </span>
+                <button
+                  onClick={handleHeaderBtn}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-pri text-on-pri text-sm font-semibold hover:opacity-90 transition-colors"
+                >
+                  {btnConfig.label}
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surf-2 text-ink-dim text-sm font-medium hover:bg-border transition-colors"
+                >
+                  {tCommon('logout')}
+                </button>
+              </div>
             </div>
+            <main className="flex-1 bg-bg">{children}</main>
           </div>
-          <main className="flex-1 bg-bg">{children}</main>
+
+          {studyModalOpen && <AddSessionModal onClose={closeStudyModal} onSaved={closeStudyModal} />}
+
+          {showGoalModal && (
+            <GoalModal mode="add" onClose={() => setShowGoalModal(false)} onSaved={() => setShowGoalModal(false)} />
+          )}
+
+          <CelebrationOverlay />
         </div>
-
-        {studyModalOpen && <AddSessionModal onClose={closeStudyModal} onSaved={closeStudyModal} />}
-
-        {showGoalModal && (
-          <GoalModal mode="add" onClose={() => setShowGoalModal(false)} onSaved={() => setShowGoalModal(false)} />
-        )}
-      </div>
+      </CelebrationProvider>
     </ToastProvider>
   );
 }

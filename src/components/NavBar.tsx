@@ -3,7 +3,7 @@
 import { navItems } from '@/lib/nav-items';
 import { supabase } from '@/lib/supabase';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
-import { Compass, LogOut, Settings } from 'lucide-react';
+import { Compass, LogOut, Settings, Trophy } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -99,6 +99,12 @@ export default function NavBar() {
               </button>
             ))}
           </div>
+          <button
+            onClick={() => navigate('/dashboard/achievements')}
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-ink-faint hover:text-ink hover:bg-surf-2 transition-colors"
+          >
+            <Trophy size={16} />
+          </button>
           <button
             onClick={() => navigate('/dashboard/settings')}
             className="w-8 h-8 flex items-center justify-center rounded-lg text-ink-faint hover:text-ink hover:bg-surf-2 transition-colors"

@@ -9,6 +9,7 @@
     "mainSection": "메인",
     "planSection": "계획",
     "settings": "설정",
+    "achievements": "성과",
     "addStudy": "+ 공부기록 추가",
     "addNote": "+ 새 노트",
     "addGoal": "+ 목표 추가",
@@ -308,6 +309,85 @@
     "save": "저장",
     "saving": "저장 중...",
     "saved": "저장됐어요!"
+  },
+  "achievements": {
+    "title": "성과",
+    "back": "뒤로",
+    "unlockedCount": "{unlocked} / {total} 달성",
+    "sectionMilestone": "마일스톤",
+    "sectionPersonalRecord": "퍼스널 레코드",
+    "sectionGoal": "목표 달성",
+    "badges": {
+      "streak3": "3일 연속",
+      "streak7": "7일 연속",
+      "streak30": "30일 연속",
+      "streak100": "100일 연속",
+      "records10": "기록 10회",
+      "records50": "기록 50회",
+      "records100": "기록 100회",
+      "hours10": "10시간 공부",
+      "hours50": "50시간 공부",
+      "hours100": "100시간 공부",
+      "prLongestSession": "최장 세션",
+      "prPronunciation": "발음 점수",
+      "prSavedWords": "저장한 단어",
+      "goalStageComplete": "단계 완료",
+      "goalRoadmap100": "로드맵 완주"
+    },
+    "detail": {
+      "longestSession": "{minutes}분",
+      "pronunciation": "{score}점",
+      "savedWords": "{count}개"
+    },
+    "celebration": {
+      "streakMilestone": {
+        "eyebrow": "STREAK",
+        "title": "{count}일 연속 공부했어요!",
+        "subtitle": "꾸준함이 진짜 실력을 만들어요. 이 페이스 유지해봐요.",
+        "dialCaption": "일 연속"
+      },
+      "recordsMilestone": {
+        "eyebrow": "MILESTONE",
+        "title": "공부 기록 {count}개 달성!",
+        "subtitle": "쌓인 기록만큼 실력도 쌓이고 있어요.",
+        "dialCaption": "기록"
+      },
+      "hoursMilestone": {
+        "eyebrow": "MILESTONE",
+        "title": "누적 {count}시간 공부했어요!",
+        "subtitle": "시간이 증명하는 노력이에요.",
+        "dialCaption": "시간"
+      },
+      "longestSession": {
+        "eyebrow": "PERSONAL RECORD",
+        "title": "최장 세션 기록 경신!",
+        "subtitle": "이번엔 {minutes}분 동안 집중했어요."
+      },
+      "pronunciation": {
+        "eyebrow": "PERSONAL RECORD",
+        "title": "발음 점수 신기록!",
+        "subtitle": "이번 최고 점수는 {score}점이에요."
+      },
+      "savedWords": {
+        "eyebrow": "PERSONAL RECORD",
+        "title": "단어장에 단어를 저장했어요",
+        "subtitle": "지금까지 {count}개 저장했어요."
+      },
+      "stageComplete": {
+        "eyebrow": "GOAL",
+        "title": "로드맵 단계를 완료했어요!",
+        "subtitle": "다음 단계로 넘어갈 준비가 됐어요."
+      },
+      "roadmapComplete": {
+        "eyebrow": "GOAL",
+        "title": "로드맵을 완주했어요!",
+        "subtitle": "처음 세운 목표까지 다 왔어요."
+      },
+      "previewCloseCta": "닫기",
+      "goToStudyCta": "공부 기록 보러가기",
+      "viewAchievementsCta": "성과 보러가기",
+      "goToRoadmapCta": "로드맵 보러가기"
+    }
   },
   "coach": {
     "title": "AI 코치",

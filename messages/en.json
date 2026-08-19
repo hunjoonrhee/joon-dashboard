@@ -9,6 +9,7 @@
     "mainSection": "Main",
     "planSection": "Planning",
     "settings": "Settings",
+    "achievements": "Achievements",
     "addStudy": "+ Add study entry",
     "addNote": "+ New Note",
     "addGoal": "+ Add Goal",
@@ -308,6 +309,85 @@
     "save": "Save",
     "saving": "Saving...",
     "saved": "Saved!"
+  },
+  "achievements": {
+    "title": "Achievements",
+    "back": "Back",
+    "unlockedCount": "{unlocked} / {total} unlocked",
+    "sectionMilestone": "Milestones",
+    "sectionPersonalRecord": "Personal Records",
+    "sectionGoal": "Goals",
+    "badges": {
+      "streak3": "3-day streak",
+      "streak7": "7-day streak",
+      "streak30": "30-day streak",
+      "streak100": "100-day streak",
+      "records10": "10 sessions",
+      "records50": "50 sessions",
+      "records100": "100 sessions",
+      "hours10": "10 hours studied",
+      "hours50": "50 hours studied",
+      "hours100": "100 hours studied",
+      "prLongestSession": "Longest session",
+      "prPronunciation": "Best pronunciation",
+      "prSavedWords": "Saved words",
+      "goalStageComplete": "Stage complete",
+      "goalRoadmap100": "Roadmap complete"
+    },
+    "detail": {
+      "longestSession": "{minutes} min",
+      "pronunciation": "{score} pts",
+      "savedWords": "{count}"
+    },
+    "celebration": {
+      "streakMilestone": {
+        "eyebrow": "STREAK",
+        "title": "{count}-day streak!",
+        "subtitle": "Consistency is what actually builds skill. Keep this pace up.",
+        "dialCaption": "days"
+      },
+      "recordsMilestone": {
+        "eyebrow": "MILESTONE",
+        "title": "{count} study entries logged!",
+        "subtitle": "Your skills are stacking up right along with your log.",
+        "dialCaption": "entries"
+      },
+      "hoursMilestone": {
+        "eyebrow": "MILESTONE",
+        "title": "{count} hours studied!",
+        "subtitle": "That's time proving the effort you're putting in.",
+        "dialCaption": "hours"
+      },
+      "longestSession": {
+        "eyebrow": "PERSONAL RECORD",
+        "title": "New longest-session record!",
+        "subtitle": "You stayed focused for {minutes} minutes this time."
+      },
+      "pronunciation": {
+        "eyebrow": "PERSONAL RECORD",
+        "title": "New pronunciation high score!",
+        "subtitle": "Your best score this time was {score}."
+      },
+      "savedWords": {
+        "eyebrow": "PERSONAL RECORD",
+        "title": "You saved a word to your vocab list",
+        "subtitle": "You've saved {count} so far."
+      },
+      "stageComplete": {
+        "eyebrow": "GOAL",
+        "title": "Roadmap stage complete!",
+        "subtitle": "You're ready to move on to the next stage."
+      },
+      "roadmapComplete": {
+        "eyebrow": "GOAL",
+        "title": "Roadmap complete!",
+        "subtitle": "You made it all the way to your original goal."
+      },
+      "previewCloseCta": "Close",
+      "goToStudyCta": "View study log",
+      "viewAchievementsCta": "View achievements",
+      "goToRoadmapCta": "View roadmap"
+    }
   },
   "coach": {
     "title": "AI Coach",

@@ -3,7 +3,7 @@
 import { navItems } from '@/lib/nav-items';
 import { supabase } from '@/lib/supabase';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
-import { Compass, LogOut, Settings } from 'lucide-react';
+import { Compass, LogOut, Settings, Trophy } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -86,6 +86,14 @@ export default function Sidebar() {
             {role && <div className="text-xs text-ink-faint truncate">{role}</div>}
           </div>
         </div>
+
+        <button
+          onClick={() => navigate('/dashboard/achievements')}
+          className="flex items-center gap-2 px-3 py-2 rounded-xl text-ink-faint hover:text-ink hover:bg-surf-2 w-full transition-colors"
+        >
+          <Trophy size={15} />
+          <span className="text-sm">{t('achievements')}</span>
+        </button>
 
         <button
           onClick={() => navigate('/dashboard/settings')}

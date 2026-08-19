@@ -9,6 +9,7 @@
     "mainSection": "Haupt",
     "planSection": "Planung",
     "settings": "Einstellungen",
+    "achievements": "Erfolge",
     "addStudy": "+ Lerneintrag hinzufügen",
     "addNote": "+ Neue Notiz",
     "addGoal": "+ Ziel hinzufügen",
@@ -308,6 +309,85 @@
     "save": "Speichern",
     "saving": "Speichert...",
     "saved": "Gespeichert!"
+  },
+  "achievements": {
+    "title": "Erfolge",
+    "back": "Zurück",
+    "unlockedCount": "{unlocked} / {total} freigeschaltet",
+    "sectionMilestone": "Meilensteine",
+    "sectionPersonalRecord": "Persönliche Rekorde",
+    "sectionGoal": "Ziele",
+    "badges": {
+      "streak3": "3 Tage in Folge",
+      "streak7": "7 Tage in Folge",
+      "streak30": "30 Tage in Folge",
+      "streak100": "100 Tage in Folge",
+      "records10": "10 Einträge",
+      "records50": "50 Einträge",
+      "records100": "100 Einträge",
+      "hours10": "10 Stunden gelernt",
+      "hours50": "50 Stunden gelernt",
+      "hours100": "100 Stunden gelernt",
+      "prLongestSession": "Längste Sitzung",
+      "prPronunciation": "Beste Aussprache",
+      "prSavedWords": "Gespeicherte Wörter",
+      "goalStageComplete": "Stufe abgeschlossen",
+      "goalRoadmap100": "Roadmap abgeschlossen"
+    },
+    "detail": {
+      "longestSession": "{minutes} Min.",
+      "pronunciation": "{score} Punkte",
+      "savedWords": "{count}"
+    },
+    "celebration": {
+      "streakMilestone": {
+        "eyebrow": "STREAK",
+        "title": "{count} Tage in Folge gelernt!",
+        "subtitle": "Beständigkeit bringt dich wirklich weiter. Bleib dran.",
+        "dialCaption": "Tage"
+      },
+      "recordsMilestone": {
+        "eyebrow": "MEILENSTEIN",
+        "title": "{count} Lerneinträge erreicht!",
+        "subtitle": "Mit jedem Eintrag wächst auch dein Können.",
+        "dialCaption": "Einträge"
+      },
+      "hoursMilestone": {
+        "eyebrow": "MEILENSTEIN",
+        "title": "{count} Stunden gelernt!",
+        "subtitle": "Die Zeit zeigt, wie viel Mühe du investierst.",
+        "dialCaption": "Stunden"
+      },
+      "longestSession": {
+        "eyebrow": "PERSÖNLICHER REKORD",
+        "title": "Neuer Rekord für die längste Sitzung!",
+        "subtitle": "Diesmal warst du {minutes} Minuten fokussiert."
+      },
+      "pronunciation": {
+        "eyebrow": "PERSÖNLICHER REKORD",
+        "title": "Neue Bestwertung bei der Aussprache!",
+        "subtitle": "Dein bester Wert diesmal: {score} Punkte."
+      },
+      "savedWords": {
+        "eyebrow": "PERSÖNLICHER REKORD",
+        "title": "Du hast ein Wort gespeichert",
+        "subtitle": "Bisher hast du {count} gespeichert."
+      },
+      "stageComplete": {
+        "eyebrow": "ZIEL",
+        "title": "Roadmap-Stufe abgeschlossen!",
+        "subtitle": "Du bist bereit für die nächste Stufe."
+      },
+      "roadmapComplete": {
+        "eyebrow": "ZIEL",
+        "title": "Roadmap abgeschlossen!",
+        "subtitle": "Du hast dein ursprüngliches Ziel erreicht."
+      },
+      "previewCloseCta": "Schließen",
+      "goToStudyCta": "Lernverlauf ansehen",
+      "viewAchievementsCta": "Erfolge ansehen",
+      "goToRoadmapCta": "Roadmap ansehen"
+    }
   },
   "coach": {
     "title": "KI-Coach",
