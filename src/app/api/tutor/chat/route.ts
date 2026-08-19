@@ -137,11 +137,11 @@ Session control:
 - Only generate [SUMMARY] when the user explicitly requests to end the session.
 - When user ends session, generate: [SUMMARY]{"concepts":["concept1"],"tags":["tag1"],"tilNote":"one sentence summary of what was covered and any gaps noticed"${
     targetLanguage
-      ? `,"vocabWords":[{"word":"a ${targetLanguage} word or phrase from this session","meaning":"its meaning in ${lang}","example":"an example sentence using it in ${targetLanguage}, ideally quoted or adapted from this actual conversation"}]`
+      ? `,"vocabWords":[{"word":"a ${targetLanguage} word or phrase from this session","meaning":"its meaning in ${lang}","example":"a complete, standalone ${targetLanguage} sentence using it - reuse one from this conversation only if it's already a full, natural sentence on its own; otherwise write a new complete sentence rather than reusing a short or partial fragment"}]`
       : ''
   }}[/SUMMARY]${
     targetLanguage
-      ? ` For vocabWords: pick 3-5 of the most useful ${targetLanguage} words/phrases from this session - prioritize ones the user got wrong or that came up more than once. Use an empty array if nothing stood out.`
+      ? ` For vocabWords: pick 3-5 of the most useful ${targetLanguage} words/phrases from this session - prioritize ones the user got wrong or that came up more than once. Use an empty array if nothing stood out. Never include [DIALOGUE] or [/DIALOGUE] tags anywhere inside the [SUMMARY] JSON (not in word, meaning, example, tilNote, tags, or concepts) - those tags mark spoken dialogue in ordinary chat replies only, and have no meaning inside structured JSON fields.`
       : ''
   }`;
 };
@@ -301,6 +301,43 @@ export async function POST(req: NextRequest) {
 
     const summaryMatch = raw.match(/\[SUMMARY\]([\s\S]*?)\[\/SUMMARY\]/);
     const summary = summaryMatch ? JSON.parse(summaryMatch[1]) : null;
+
+    // The prompt asks the model not to leak [DIALOGUE] tags into the summary
+    // JSON, but - same unreliable-instruction problem the dialogueText logic
+    // below works around - it occasionally still does: the tags are
+    // reinforced on every other turn of the conversation, so the habit
+    // leaks into the summary too. Mechanical backstop, same philosophy as
+    // looksLikeCompleteSentence/isQuotedUserText further down: strip them
+    // from every string field the summary can contain rather than trusting
+    // the instruction alone. This is what a saved vocab word's example
+    // sentence (see growpath-mobile's saveRoleplayVocabWords) actually ends
+    // up as, so a stray tag here shows up verbatim in the user's vocab list.
+    const stripDialogueTags = (value: string) => value.replace(/\[\/?DIALOGUE\]/g, '').trim();
+    if (summary) {
+      if (typeof summary.tilNote === 'string') summary.tilNote = stripDialogueTags(summary.tilNote);
+      if (Array.isArray(summary.concepts)) {
+        summary.concepts = summary.concepts.map((c: unknown) => (typeof c === 'string' ? stripDialogueTags(c) : c));
+      }
+      if (Array.isArray(summary.tags)) {
+        summary.tags = summary.tags.map((tag: unknown) => (typeof tag === 'string' ? stripDialogueTags(tag) : tag));
+      }
+      if (Array.isArray(summary.vocabWords)) {
+        summary.vocabWords = summary.vocabWords.map((vocabWord: unknown) => {
+          // A malformed entry (e.g. null) used to pass through harmlessly to
+          // growpath-mobile's parseSummary, which already guards against it
+          // (src/lib/roleplay.ts) - don't turn that into a hard failure that
+          // loses the whole summary just to strip tags from the good entries.
+          if (!vocabWord || typeof vocabWord !== 'object') return vocabWord;
+          const { word, meaning, example } = vocabWord as { word?: unknown; meaning?: unknown; example?: unknown };
+          return {
+            ...vocabWord,
+            word: typeof word === 'string' ? stripDialogueTags(word) : word,
+            meaning: typeof meaning === 'string' ? stripDialogueTags(meaning) : meaning,
+            example: typeof example === 'string' ? stripDialogueTags(example) : example,
+          };
+        });
+      }
+    }
 
     // Roleplay turns mix ${targetLanguage} in-character dialogue with
     // ${lang} meta-commentary in one reply (see buildSystemPrompt) - a TTS
