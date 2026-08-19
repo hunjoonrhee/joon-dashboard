@@ -27,6 +27,7 @@ export default function SettingsPage() {
     name: '',
     big_goal: '',
     big_goal_sub: '',
+    bio: '',
     monthly_session_target: '',
   });
   const [saving, setSaving] = useState(false);
@@ -57,6 +58,7 @@ export default function SettingsPage() {
           name: map.name ?? '',
           big_goal: map.big_goal ?? '',
           big_goal_sub: map.big_goal_sub ?? '',
+          bio: map.bio ?? '',
           monthly_session_target: map.monthly_session_target ?? '',
         });
       }
@@ -153,6 +155,17 @@ export default function SettingsPage() {
                 placeholder={t('bigGoalSubPlaceholder')}
                 value={form.big_goal_sub}
                 onChange={(e) => setForm({ ...form, big_goal_sub: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>{t('bio')}</label>
+              <p className="text-xs text-ink-faint mb-1">{t('bioHint')}</p>
+              <textarea
+                className={`${inputCls} min-h-[90px] resize-none`}
+                placeholder={t('bioPlaceholder')}
+                value={form.bio}
+                onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                maxLength={600}
               />
             </div>
             <div>

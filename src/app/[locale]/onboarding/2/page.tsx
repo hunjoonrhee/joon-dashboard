@@ -1,8 +1,11 @@
 'use client';
 
+import { upsertWithUser } from '@/lib/supabase';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+
+const MAX_BIO_CHARS = 600;
 
 export default function Onboarding2() {
   const router = useRouter();
@@ -10,11 +13,21 @@ export default function Onboarding2() {
   const t = useTranslations('onboarding');
   const [goal, setGoal] = useState('');
   const [level, setLevel] = useState('');
+  const [bio, setBio] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!goal.trim() || !level.trim()) return;
     sessionStorage.setItem('ob_goal', goal.trim());
     sessionStorage.setItem('ob_level', level.trim());
+    // Bio must land in `settings` before navigating - onboarding/3 kicks off
+    // roadmap generation on mount, and /api/roadmap/generate reads bio
+    // server-side at that point (see MAX_BIO_CHARS comment there).
+    if (bio.trim()) {
+      setSaving(true);
+      await upsertWithUser('settings', { key: 'bio', value: bio.trim() }, { onConflict: 'key,user_id' });
+      setSaving(false);
+    }
     router.push(`/${locale}/onboarding/3`);
   };
 
@@ -57,6 +70,17 @@ export default function Onboarding2() {
               }}
             />
           </div>
+          <div>
+            <label className="text-xs text-ink-dim mb-1 block">{t('bioLabel')}</label>
+            <p className="text-xs text-ink-faint mb-2">{t('bioHint')}</p>
+            <textarea
+              className={`${inputCls} min-h-[70px] resize-none`}
+              placeholder={t('bioPlaceholder')}
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              maxLength={MAX_BIO_CHARS}
+            />
+          </div>
         </div>
 
         <div className="flex gap-3">
@@ -68,7 +92,7 @@ export default function Onboarding2() {
           </button>
           <button
             onClick={handleNext}
-            disabled={!goal.trim() || !level.trim()}
+            disabled={!goal.trim() || !level.trim() || saving}
             className="flex-1 py-3 rounded-xl bg-pri hover:opacity-90 disabled:opacity-40 text-sm font-bold text-on-pri transition-colors"
           >
             {t('generateBtn')}
