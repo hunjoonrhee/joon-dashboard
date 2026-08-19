@@ -2,7 +2,7 @@
 
 import { goalStatusStyle } from '@/lib/statusConfig';
 import type { AiRoadmap, Goal, Topic } from '@/types';
-import { ChevronDown, ChevronRight, Pencil, Plus, Star } from 'lucide-react';
+import { ChevronDown, ChevronRight, Pencil, Plus, Star, Target } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
@@ -73,48 +73,44 @@ export default function MyGoalsView({
     return (
       <div
         key={g.id}
-        className={`bg-white rounded-xl border overflow-hidden ${
-          g.status === 'in_progress'
-            ? 'border-indigo-200'
-            : g.status === 'completed'
-              ? 'border-green-200'
-              : 'border-gray-200'
-        } ${isDone ? 'opacity-70' : ''} ${isSubGoal ? 'border-l-4 border-l-indigo-300' : ''}`}
+        className={`bg-surf rounded-xl border overflow-hidden ${
+          g.status === 'in_progress' ? 'border-pri/40' : g.status === 'completed' ? 'border-green-200' : 'border-border'
+        } ${isDone ? 'opacity-70' : ''} ${isSubGoal ? 'border-l-4 border-l-pri/40' : ''}`}
       >
         <div className="p-3">
           <div className="flex items-center gap-2">
             <div
               className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                g.status === 'completed' ? 'bg-green-400' : g.status === 'in_progress' ? 'bg-indigo-500' : 'bg-gray-200'
+                g.status === 'completed' ? 'bg-green-400' : g.status === 'in_progress' ? 'bg-pri' : 'bg-border'
               }`}
             />
             <div className="flex-1 min-w-0 cursor-pointer" onClick={() => router.push(`goals/${g.id}`)}>
               <div className="flex items-center gap-1.5">
-                {g.is_focus && <Star size={11} className="text-indigo-500 flex-shrink-0" fill="currentColor" />}
+                {g.is_focus && <Star size={11} className="text-pri flex-shrink-0" fill="currentColor" />}
                 <p
                   className={`text-sm font-semibold truncate ${
                     g.status === 'completed'
-                      ? 'line-through text-gray-400'
+                      ? 'line-through text-ink-faint'
                       : g.status === 'planned'
-                        ? 'text-gray-400'
-                        : 'text-gray-800'
+                        ? 'text-ink-faint'
+                        : 'text-ink'
                   }`}
                 >
                   {g.name}
                 </p>
               </div>
-              {g.description && <p className="text-xs text-gray-400 mt-0.5 truncate">{g.description}</p>}
+              {g.description && <p className="text-xs text-ink-faint mt-0.5 truncate">{g.description}</p>}
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0">
-              {goalTopics.length > 0 && <span className="text-xs font-semibold text-indigo-500">{pct}%</span>}
+              {goalTopics.length > 0 && <span className="text-xs font-semibold text-pri">{pct}%</span>}
               <span className={`text-xs px-2 py-0.5 rounded-full ${goalStatusStyle[g.status]}`}>
                 {tStatus(g.status)}
               </span>
-              <button onClick={() => onEdit(g)} className="text-gray-400 hover:text-indigo-500 transition-colors">
+              <button onClick={() => onEdit(g)} className="text-ink-faint hover:text-pri transition-colors">
                 <Pencil size={13} />
               </button>
               {goalTopics.length > 0 && (
-                <button onClick={() => onToggleGoal(g.id)} className="text-gray-400">
+                <button onClick={() => onToggleGoal(g.id)} className="text-ink-faint">
                   {isOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
                 </button>
               )}
@@ -122,31 +118,31 @@ export default function MyGoalsView({
           </div>
           {goalTopics.length > 0 && (
             <div className="flex items-center gap-2 mt-2 ml-5">
-              <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
+              <div className="flex-1 h-1 bg-surf-2 rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all ${g.status === 'completed' ? 'bg-green-400' : 'bg-indigo-500'}`}
+                  className={`h-full rounded-full transition-all ${g.status === 'completed' ? 'bg-green-400' : 'bg-pri'}`}
                   style={{ width: `${pct}%` }}
                 />
               </div>
-              <span className="text-xs text-gray-300">
+              <span className="text-xs text-ink-faint">
                 {goalTopics.filter((tp) => tp.completed).length}/{goalTopics.length}
               </span>
             </div>
           )}
         </div>
         {isOpen && (
-          <div className="border-t border-gray-100 px-3 py-2 flex flex-col gap-3">
+          <div className="border-t border-border px-3 py-2 flex flex-col gap-3">
             {categories.map((cat) => {
               const catTopics = goalTopics.filter((tp) => tp.category === cat);
               const catPct = getCatPct(g.id, cat);
               return (
                 <div key={cat}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-500">{cat}</span>
-                    <span className="text-xs text-gray-400">{catPct}%</span>
+                    <span className="text-xs font-medium text-ink-dim">{cat}</span>
+                    <span className="text-xs text-ink-faint">{catPct}%</span>
                   </div>
-                  <div className="h-1 bg-gray-100 rounded-full overflow-hidden mb-1.5">
-                    <div className="h-full bg-indigo-400 rounded-full" style={{ width: `${catPct}%` }} />
+                  <div className="h-1 bg-surf-2 rounded-full overflow-hidden mb-1.5">
+                    <div className="h-full bg-pri-2 rounded-full" style={{ width: `${catPct}%` }} />
                   </div>
                   <div className="flex flex-col gap-1">
                     {catTopics.map((topic) => (
@@ -156,12 +152,12 @@ export default function MyGoalsView({
                         onClick={() => onToggleTopic(topic)}
                       >
                         <span
-                          className={`text-xs flex-shrink-0 w-4 ${topic.completed ? 'text-green-500' : 'text-indigo-400'}`}
+                          className={`text-xs flex-shrink-0 w-4 ${topic.completed ? 'text-green-500' : 'text-pri-2'}`}
                         >
                           {topic.completed ? '✓' : '○'}
                         </span>
                         <span
-                          className={`text-xs flex-1 ${topic.completed ? 'line-through text-gray-300' : 'text-gray-600'}`}
+                          className={`text-xs flex-1 ${topic.completed ? 'line-through text-ink-faint' : 'text-ink-dim'}`}
                         >
                           {topic.name}
                         </span>
@@ -180,8 +176,8 @@ export default function MyGoalsView({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-gray-700">{t('finalGoalTitle', { goal: finalGoal })}</p>
-        <button onClick={onAdd} className="text-indigo-500 hover:text-indigo-700 transition-colors">
+        <p className="text-sm font-semibold text-ink">{t('finalGoalTitle', { goal: finalGoal })}</p>
+        <button onClick={onAdd} className="text-pri hover:opacity-80 transition-colors">
           <Plus size={18} />
         </button>
       </div>
@@ -201,20 +197,20 @@ export default function MyGoalsView({
                     headerGoal?.status === 'completed'
                       ? 'bg-green-500 text-white'
                       : headerGoal?.status === 'in_progress'
-                        ? 'bg-indigo-500 text-white'
-                        : 'bg-gray-200 text-gray-500'
+                        ? 'bg-pri text-on-pri'
+                        : 'bg-surf-2 text-ink-dim'
                   }`}
                 >
                   {stage.level}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-gray-600 truncate">{stage.title}</p>
-                  <p className="text-xs text-gray-400 truncate">{stage.description}</p>
+                  <p className="text-xs font-semibold text-ink-dim truncate">{stage.title}</p>
+                  <p className="text-xs text-ink-faint truncate">{stage.description}</p>
                 </div>
                 {headerGoal && (
                   <button
                     onClick={() => onEdit(headerGoal)}
-                    className="text-gray-300 hover:text-indigo-500 transition-colors flex-shrink-0"
+                    className="text-ink-faint hover:text-pri transition-colors flex-shrink-0"
                   >
                     <Pencil size={12} />
                   </button>
@@ -223,7 +219,7 @@ export default function MyGoalsView({
 
               {/* 유저가 이 단계에 연결한 하위 목표들 */}
               {subGoals.length > 0 && (
-                <div className="ml-8 flex flex-col gap-2 border-l-2 border-indigo-100 pl-3">
+                <div className="ml-8 flex flex-col gap-2 border-l-2 border-border pl-3">
                   {subGoals.map((g) => renderGoalCard(g, false, true))}
                 </div>
               )}
@@ -235,7 +231,7 @@ export default function MyGoalsView({
       {independentGoals.length > 0 && (
         <div className="flex flex-col gap-2">
           {adoptedRoadmap && (
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-1">{t('otherGoals')}</p>
+            <p className="text-xs font-bold text-ink-faint uppercase tracking-wider mt-1">{t('otherGoals')}</p>
           )}
           {independentGoals.map((g) => renderGoalCard(g))}
         </div>
@@ -243,13 +239,13 @@ export default function MyGoalsView({
 
       {/* 최종 목표 카드 */}
       <div className="flex justify-start pl-4 py-0.5">
-        <div className="w-px h-3 bg-gray-200" />
+        <div className="w-px h-3 bg-border" />
       </div>
-      <div className="bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-200 rounded-xl p-3 flex items-center gap-3">
-        <div className="w-3 h-3 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex-shrink-0" />
+      <div className="bg-surf-2 border border-pri/30 rounded-xl p-3 flex items-center gap-3">
+        <Target size={18} strokeWidth={1.8} className="text-pri flex-shrink-0" />
         <div>
-          <p className="text-sm font-bold text-indigo-800">{finalGoal} 🎯</p>
-          <p className="text-xs text-indigo-500 mt-0.5">{t('finalGoalSub')}</p>
+          <p className="text-sm font-bold text-pri">{finalGoal}</p>
+          <p className="text-xs text-ink-dim mt-0.5">{t('finalGoalSub')}</p>
         </div>
       </div>
 
@@ -258,7 +254,7 @@ export default function MyGoalsView({
         <div className="mt-2">
           <button
             onClick={onToggleCompleted}
-            className="flex items-center gap-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition-colors"
+            className="flex items-center gap-1.5 text-xs font-bold text-ink-faint uppercase tracking-wider hover:text-ink-dim transition-colors"
           >
             {showCompleted ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
             {t('completedGoals')} ({completedGoals.length})

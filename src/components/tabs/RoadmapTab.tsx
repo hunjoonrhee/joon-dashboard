@@ -154,12 +154,12 @@ export default function RoadmapTab({ goals, topics, sessions = [], onRefresh, se
 
   return (
     <>
-      <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-4">
+      <div className="flex gap-1 bg-surf-2 rounded-xl p-1 mb-4">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setView(tab.key)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-colors ${view === tab.key ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400'}`}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-colors ${view === tab.key ? 'bg-surf text-ink shadow-sm' : 'text-ink-faint'}`}
           >
             {tab.icon} {tab.label}
           </button>

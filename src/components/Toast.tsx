@@ -1,5 +1,6 @@
 'use client';
 
+import { Check, Info, X } from 'lucide-react';
 import { createContext, useCallback, useContext, useState } from 'react';
 
 type ToastType = 'success' | 'error' | 'info';
@@ -33,16 +34,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     }, 3000);
   }, []);
 
-  const icons = { success: '✓', error: '✕', info: 'ℹ' };
+  const icons = { success: Check, error: X, info: Info };
   const colors = {
-    success: 'bg-green-50 border-green-200 text-green-800',
+    success: 'bg-surf-2 border-border text-ink',
     error: 'bg-red-50 border-red-200 text-red-800',
-    info: 'bg-indigo-50 border-indigo-200 text-indigo-800',
+    info: 'bg-surf-2 border-border text-ink',
   };
   const iconColors = {
-    success: 'bg-green-400',
-    error: 'bg-red-400',
-    info: 'bg-indigo-400',
+    success: 'bg-pri text-on-pri',
+    error: 'bg-red-400 text-white',
+    info: 'bg-pri text-on-pri',
   };
 
   return (
@@ -51,22 +52,25 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
       {/* Toast 렌더 */}
       <div className="fixed bottom-24 lg:bottom-6 right-4 z-[200] flex flex-col gap-2 pointer-events-none">
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className={`flex items-start gap-3 px-4 py-3 rounded-xl border shadow-lg max-w-xs pointer-events-auto animate-in slide-in-from-right-4 fade-in duration-200 ${colors[toast.type]}`}
-          >
+        {toasts.map((toast) => {
+          const Icon = icons[toast.type];
+          return (
             <div
-              className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5 ${iconColors[toast.type]}`}
+              key={toast.id}
+              className={`flex items-start gap-3 px-4 py-3 rounded-xl border shadow-lg max-w-xs pointer-events-auto animate-in slide-in-from-right-4 fade-in duration-200 ${colors[toast.type]}`}
             >
-              {icons[toast.type]}
+              <div
+                className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${iconColors[toast.type]}`}
+              >
+                <Icon size={12} strokeWidth={2.5} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold">{toast.message}</p>
+                {toast.sub && <p className="text-xs mt-0.5 opacity-70">{toast.sub}</p>}
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold">{toast.message}</p>
-              {toast.sub && <p className="text-xs mt-0.5 opacity-70">{toast.sub}</p>}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </ToastContext.Provider>
   );

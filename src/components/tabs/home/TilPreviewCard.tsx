@@ -1,6 +1,7 @@
 'use client';
 
 import type { Session } from '@/types';
+import { Lightbulb } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import type { Components } from 'react-markdown';
@@ -66,8 +67,8 @@ const previewMarkdownComponents: Components = {
     return (
       <code
         style={{
-          background: '#ede9fe',
-          color: '#4f46e5',
+          background: 'var(--color-surf-2)',
+          color: 'var(--color-pri)',
           padding: '1px 4px',
           borderRadius: '3px',
           fontSize: '0.8em',
@@ -117,12 +118,12 @@ export default function TilPreviewCard({ sessions, onAddStudy }: Props) {
     });
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
+    <div className="bg-surf rounded-xl border border-border p-4">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t('recentTil')}</p>
+        <p className="text-xs font-bold text-ink-faint uppercase tracking-wider">{t('recentTil')}</p>
         <button
           onClick={() => router.push(`/${locale}/dashboard/study`)}
-          className="text-xs text-indigo-500 font-medium hover:text-indigo-700"
+          className="text-xs text-pri font-medium hover:opacity-80"
         >
           {t('viewAll')}
         </button>
@@ -130,33 +131,33 @@ export default function TilPreviewCard({ sessions, onAddStudy }: Props) {
 
       {tilSessions.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-4 text-center">
-          <span className="text-2xl opacity-40">💡</span>
-          <p className="text-sm font-semibold text-gray-700">{t('tilEmpty')}</p>
-          <p className="text-xs text-gray-400 leading-relaxed">{t('tilEmptySub')}</p>
+          <Lightbulb size={24} strokeWidth={1.8} className="text-ink-faint" />
+          <p className="text-sm font-semibold text-ink">{t('tilEmpty')}</p>
+          <p className="text-xs text-ink-faint leading-relaxed">{t('tilEmptySub')}</p>
           <button
             onClick={onAddStudy}
-            className="mt-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 transition-colors"
+            className="mt-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-pri bg-surf-2 border border-border hover:bg-border transition-colors"
           >
             {t('addStudy')}
           </button>
         </div>
       ) : (
-        <div className="flex flex-col divide-y divide-gray-100">
+        <div className="flex flex-col divide-y divide-border">
           {tilSessions.map((s) => (
             <div
               key={s.id}
-              className="py-2.5 cursor-pointer hover:bg-gray-50 rounded-lg px-1 transition-colors"
+              className="py-2.5 cursor-pointer hover:bg-surf-2 rounded-lg px-1 transition-colors"
               onClick={() => router.push(`/${locale}/dashboard/til/${s.id}`)}
             >
-              <p className="text-xs text-gray-400 mb-1">{dateLabel(s.date)}</p>
-              <p className="text-sm font-semibold text-gray-800 mb-1.5 truncate">{s.title}</p>
+              <p className="text-xs text-ink-faint mb-1">{dateLabel(s.date)}</p>
+              <p className="text-sm font-semibold text-ink mb-1.5 truncate">{s.title}</p>
               <div className="overflow-hidden" style={{ maxHeight: '120px' }}>
                 <ReactMarkdown components={previewMarkdownComponents}>{s.til!}</ReactMarkdown>
               </div>
               {s.tags.length > 0 && (
                 <div className="flex gap-1 flex-wrap mt-1.5">
                   {s.tags.slice(0, 2).map((tag) => (
-                    <span key={tag} className="text-xs px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600">
+                    <span key={tag} className="text-xs px-1.5 py-0.5 rounded-full bg-surf-2 text-pri">
                       {tag}
                     </span>
                   ))}

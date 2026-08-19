@@ -1,8 +1,10 @@
 'use client';
 
+import { CompassDial } from '@/components/compass-dial';
 import { calcGapAnalysis, getSourceWeight, type SkillWithSource, type TrustSource } from '@/lib/gapAnalysis';
 import { supabase } from '@/lib/supabase';
 import type { AiRoadmap } from '@/types';
+import { Award, BarChart2, BookOpen, Circle, Zap, type LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
@@ -16,6 +18,13 @@ interface SourceLabelConfig {
   label: string;
   color: string;
 }
+
+const sourceIcon: Record<TrustSource, LucideIcon> = {
+  cert: Award,
+  practical: Zap,
+  study: BookOpen,
+  none: Circle,
+};
 
 export default function GapAnalysisView({ adoptedRoadmap, studiedTags, onGoToAi }: Props) {
   const t = useTranslations('roadmap');
@@ -41,11 +50,11 @@ export default function GapAnalysisView({ adoptedRoadmap, studiedTags, onGoToAi 
   if (!adoptedRoadmap) {
     return (
       <div className="flex flex-col items-center gap-3 py-8 text-center">
-        <span className="text-3xl opacity-30">📊</span>
-        <p className="text-sm font-semibold text-gray-700">{t('noAdoptedRoadmap')}</p>
+        <BarChart2 size={28} strokeWidth={1.8} className="text-ink-faint" />
+        <p className="text-sm font-semibold text-ink">{t('noAdoptedRoadmap')}</p>
         <button
           onClick={onGoToAi}
-          className="px-4 py-2 rounded-lg bg-indigo-500 text-white text-xs font-semibold hover:bg-indigo-600 transition-colors"
+          className="px-4 py-2 rounded-lg bg-pri text-on-pri text-xs font-semibold hover:opacity-90 transition-colors"
         >
           {t('generateFirst')}
         </button>
@@ -65,12 +74,14 @@ export default function GapAnalysisView({ adoptedRoadmap, studiedTags, onGoToAi 
     practicalTags,
   });
 
+  const gapDialColor = gapPct >= 70 ? 'var(--color-ok)' : gapPct >= 40 ? 'var(--color-amber)' : '#e26a5c';
+
   const sourceLabel = (source: TrustSource): SourceLabelConfig => {
     if (source === 'cert') return { label: t('sourceCert'), color: 'bg-green-50 text-green-600 border-green-100' };
     if (source === 'practical')
       return { label: t('sourcePractical'), color: 'bg-amber-50 text-amber-600 border-amber-100' };
-    if (source === 'study') return { label: t('sourceStudy'), color: 'bg-indigo-50 text-indigo-500 border-indigo-100' };
-    return { label: t('sourceNone'), color: 'bg-gray-50 text-gray-400 border-gray-100' };
+    if (source === 'study') return { label: t('sourceStudy'), color: 'bg-surf-2 text-pri border-border' };
+    return { label: t('sourceNone'), color: 'bg-surf-2 text-ink-faint border-border' };
   };
 
   const getSkillsForStage = (stageSkills: AiRoadmap['stages'][0]['skills']): SkillWithSource[] =>
@@ -79,42 +90,36 @@ export default function GapAnalysisView({ adoptedRoadmap, studiedTags, onGoToAi 
   return (
     <div className="flex flex-col gap-4">
       {/* 전체 일치도 */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-sm font-bold text-gray-700">{t('gapTitle')}</p>
-          <span
-            className={`text-lg font-bold ${gapPct >= 70 ? 'text-green-500' : gapPct >= 40 ? 'text-amber-500' : 'text-red-400'}`}
-          >
-            {gapPct}%
-          </span>
-        </div>
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
-          <div
-            className={`h-full rounded-full transition-all ${gapPct >= 70 ? 'bg-green-400' : gapPct >= 40 ? 'bg-amber-400' : 'bg-red-400'}`}
-            style={{ width: `${gapPct}%` }}
+      <div className="bg-surf border border-border rounded-xl p-4">
+        <div className="flex items-center gap-4">
+          <CompassDial
+            percent={gapPct}
+            size={88}
+            showLabel
+            colorFrom={gapDialColor}
+            colorTo={gapDialColor}
+            tickActiveColor={gapDialColor}
+            className="flex-shrink-0"
           />
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-ink mb-1">{t('gapTitle')}</p>
+            <p className="text-xs text-ink-faint">
+              {t('gapSummary', {
+                studied: Math.round(totalWeight * 10) / 10,
+                total: maxWeight,
+              })}
+              {' · '}
+              {adoptedRoadmap.goal}
+            </p>
+          </div>
         </div>
-        <p className="text-xs text-gray-400">
-          {t('gapSummary', {
-            studied: Math.round(totalWeight * 10) / 10,
-            total: maxWeight,
-          })}
-          {' · '}
-          {adoptedRoadmap.goal}
-        </p>
-        <div className="flex gap-3 flex-wrap mt-3 pt-3 border-t border-gray-100">
-          {(
-            [
-              { source: 'cert' as TrustSource, icon: '🏆' },
-              { source: 'practical' as TrustSource, icon: '⚡' },
-              { source: 'study' as TrustSource, icon: '📖' },
-              { source: 'none' as TrustSource, icon: '○' },
-            ] as const
-          ).map(({ source, icon }) => {
+        <div className="flex gap-3 flex-wrap mt-3 pt-3 border-t border-border">
+          {(['cert', 'practical', 'study', 'none'] as const).map((source) => {
             const { label, color } = sourceLabel(source);
+            const Icon = sourceIcon[source];
             return (
               <span key={source} className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border ${color}`}>
-                <span>{icon}</span>
+                <Icon size={11} strokeWidth={2} />
                 {label}
               </span>
             );
@@ -129,15 +134,15 @@ export default function GapAnalysisView({ adoptedRoadmap, studiedTags, onGoToAi 
         const stagePct = stageSkills.length === 0 ? 0 : Math.round((stageWeight / stageSkills.length) * 100);
 
         return (
-          <div key={stage.level} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-              <p className="text-xs font-bold text-gray-600">{stage.title}</p>
+          <div key={stage.level} className="bg-surf border border-border rounded-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+              <p className="text-xs font-bold text-ink-dim">{stage.title}</p>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-ink-faint">
                   {stageSkills.filter((s) => s.source !== 'none').length}/{stageSkills.length}
                 </span>
                 <span
-                  className={`text-xs font-bold ${stagePct >= 70 ? 'text-green-500' : stagePct >= 40 ? 'text-amber-500' : 'text-gray-400'}`}
+                  className={`text-xs font-bold ${stagePct >= 70 ? 'text-green-500' : stagePct >= 40 ? 'text-amber' : 'text-ink-faint'}`}
                 >
                   {stagePct}%
                 </span>
@@ -147,7 +152,7 @@ export default function GapAnalysisView({ adoptedRoadmap, studiedTags, onGoToAi 
               {stageSkills.map((skill, i) => {
                 const { label, color } = sourceLabel(skill.source);
                 return (
-                  <div key={i} className="flex items-start gap-2 py-2 border-b border-gray-50 last:border-0">
+                  <div key={i} className="flex items-start gap-2 py-2 border-b border-border last:border-0">
                     <div
                       className={`w-3.5 h-3.5 rounded-full flex-shrink-0 mt-0.5 ${
                         skill.source === 'cert'
@@ -155,14 +160,14 @@ export default function GapAnalysisView({ adoptedRoadmap, studiedTags, onGoToAi 
                           : skill.source === 'practical'
                             ? 'bg-amber-400'
                             : skill.source === 'study'
-                              ? 'bg-indigo-400'
-                              : 'bg-gray-200'
+                              ? 'bg-pri-2'
+                              : 'bg-border'
                       }`}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-gray-700">{skill.name}</p>
+                      <p className="text-xs font-medium text-ink">{skill.name}</p>
                       {skill.source === 'none' && (
-                        <p className="text-xs text-gray-400 mt-0.5">
+                        <p className="text-xs text-ink-faint mt-0.5">
                           {t('requiredTags')}: {skill.tags.slice(0, 3).join(', ')}
                         </p>
                       )}
@@ -176,7 +181,7 @@ export default function GapAnalysisView({ adoptedRoadmap, studiedTags, onGoToAi 
         );
       })}
 
-      <div className="bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 text-xs text-gray-400">{t('gapNote')}</div>
+      <div className="bg-surf-2 border border-border rounded-lg px-3 py-2 text-xs text-ink-faint">{t('gapNote')}</div>
     </div>
   );
 }

@@ -75,27 +75,27 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <Sidebar />
         <div className="flex-1 lg:ml-56 flex flex-col min-h-screen">
           <NavBar />
-          <div className="hidden lg:flex items-center justify-between px-6 h-[57px] bg-white border-b border-gray-100 sticky top-0 z-10">
-            <h1 className="text-base font-bold text-gray-800">{pageTitle}</h1>
+          <div className="hidden lg:flex items-center justify-between px-6 h-[57px] bg-surf border-b border-border sticky top-0 z-10">
+            <h1 className="text-base font-bold text-ink">{pageTitle}</h1>
             <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-400" suppressHydrationWarning>
+              <span className="text-sm text-ink-faint" suppressHydrationWarning>
                 {today}
               </span>
               <button
                 onClick={handleHeaderBtn}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-600 transition-colors"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-pri text-on-pri text-sm font-semibold hover:opacity-90 transition-colors"
               >
                 {btnConfig.label}
               </button>
               <button
                 onClick={handleSignOut}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-100 text-gray-500 text-sm font-medium hover:bg-gray-200 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surf-2 text-ink-dim text-sm font-medium hover:bg-border transition-colors"
               >
                 {tCommon('logout')}
               </button>
             </div>
           </div>
-          <main className="flex-1 bg-gray-50">{children}</main>
+          <main className="flex-1 bg-bg">{children}</main>
         </div>
 
         {studyModalOpen && <AddSessionModal onClose={closeStudyModal} onSaved={closeStudyModal} />}

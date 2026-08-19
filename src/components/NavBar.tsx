@@ -1,19 +1,12 @@
 'use client';
 
+import { navItems } from '@/lib/nav-items';
 import { supabase } from '@/lib/supabase';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
-import { Settings } from 'lucide-react';
+import { Compass, LogOut, Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-
-const tabs = [
-  { key: 'home', path: '/dashboard', icon: '🏠' },
-  { key: 'study', path: '/dashboard/study', icon: '📖' },
-  { key: 'notes', path: '/dashboard/notes', icon: '✍️' },
-  { key: 'roadmap', path: '/dashboard/roadmap', icon: '🗺' },
-  { key: 'projects', path: '/dashboard/projects', icon: '🚀' },
-];
 
 export default function NavBar() {
   const pathname = usePathname();
@@ -62,38 +55,44 @@ export default function NavBar() {
     <>
       {/* 모바일 하단 탭 */}
       <div
-        className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-10 flex"
+        className="lg:hidden fixed bottom-0 left-0 right-0 bg-surf border-t border-border z-10 flex"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}
       >
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => navigate(tab.path)}
-            className={`flex-1 flex flex-col items-center justify-center py-3 gap-0.5 transition-colors ${
-              isActive(tab.path) ? 'text-indigo-500' : 'text-gray-400'
-            }`}
-          >
-            <span className="text-lg leading-none">{tab.icon}</span>
-            <span className={`text-xs ${isActive(tab.path) ? 'font-bold' : 'font-medium'}`}>{t(tab.key)}</span>
-          </button>
-        ))}
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.path);
+          return (
+            <button
+              key={item.key}
+              onClick={() => navigate(item.path)}
+              className={`flex-1 flex flex-col items-center justify-center py-3 gap-0.5 transition-colors ${
+                active ? 'text-pri' : 'text-ink-faint'
+              }`}
+            >
+              <Icon size={20} strokeWidth={1.8} />
+              <span className={`text-xs ${active ? 'font-bold' : 'font-medium'}`}>{t(item.key)}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* 모바일 상단 헤더 */}
-      <div className="lg:hidden bg-white border-b border-gray-100 h-12 flex items-center justify-between px-4 sticky top-0 z-10">
+      <div className="lg:hidden bg-surf border-b border-border h-12 flex items-center justify-between px-4 sticky top-0 z-10">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-indigo-500 rounded-lg flex items-center justify-center text-xs">🧭</div>
-          <span className="text-sm font-bold text-gray-800">Growpath</span>
+          <div className="w-6 h-6 bg-pri rounded-lg flex items-center justify-center text-on-pri">
+            <Compass size={13} strokeWidth={1.8} />
+          </div>
+          <span className="text-sm font-bold text-ink">Growpath</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex gap-0.5 bg-gray-100 rounded-lg p-0.5">
+          <div className="flex gap-0.5 bg-surf-2 rounded-lg p-0.5">
             {(['ko', 'de', 'en'] as const).map((l) => (
               <button
                 key={l}
                 onClick={() => switchLocale(l)}
                 className={`text-xs px-2 py-1 rounded-md transition-colors ${
-                  locale === l ? 'bg-white text-gray-800 font-semibold shadow-sm' : 'text-gray-400'
+                  locale === l ? 'bg-surf text-ink font-semibold shadow-sm' : 'text-ink-faint'
                 }`}
               >
                 {l === 'ko' ? '한' : l === 'de' ? 'DE' : 'EN'}
@@ -102,15 +101,15 @@ export default function NavBar() {
           </div>
           <button
             onClick={() => navigate('/dashboard/settings')}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-ink-faint hover:text-ink hover:bg-surf-2 transition-colors"
           >
             <Settings size={17} />
           </button>
           <button
             onClick={handleSignOut}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors text-xs"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-ink-faint hover:text-red-500 hover:bg-red-50 transition-colors"
           >
-            ⎋
+            <LogOut size={15} />
           </button>
         </div>
       </div>

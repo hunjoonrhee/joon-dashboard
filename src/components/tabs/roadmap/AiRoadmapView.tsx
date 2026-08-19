@@ -73,10 +73,10 @@ export default function AiRoadmapView({ adoptedRoadmap, settings, onAdopt, onRef
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-bold text-indigo-500 uppercase tracking-widest">{t('aiRoadmap')}</p>
+        <p className="text-xs font-bold text-pri uppercase tracking-widest">{t('aiRoadmap')}</p>
         <button
           onClick={() => setShowForm((v) => !v)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500 text-white text-xs font-semibold hover:bg-indigo-600 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pri text-on-pri text-xs font-semibold hover:opacity-90 transition-colors"
         >
           <Plus size={13} />
           {t('newRoadmap')}
@@ -84,40 +84,40 @@ export default function AiRoadmapView({ adoptedRoadmap, settings, onAdopt, onRef
       </div>
 
       {showForm && (
-        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col gap-3">
+        <div className="bg-surf-2 border border-border rounded-xl p-4 flex flex-col gap-3">
           <div className="flex gap-2">
             <div className="flex flex-col gap-1 flex-[2]">
-              <label className="text-xs text-gray-400">{t('goalLabel')}</label>
+              <label className="text-xs text-ink-faint">{t('goalLabel')}</label>
               <input
                 type="text"
                 value={goal}
                 onChange={(e) => setGoal(e.target.value)}
                 placeholder={t('selectPath')}
-                className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400 bg-white"
+                className="border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-pri bg-surf text-ink"
               />
             </div>
             <div className="flex flex-col gap-1 flex-1">
-              <label className="text-xs text-gray-400">{t('careerLevelLabel')}</label>
+              <label className="text-xs text-ink-faint">{t('careerLevelLabel')}</label>
               <input
                 type="text"
                 value={careerLevel}
                 onChange={(e) => setCareerLevel(e.target.value)}
                 placeholder={t('careerLevelPlaceholder')}
-                className="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400 bg-white"
+                className="border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-pri bg-surf text-ink"
               />
             </div>
           </div>
           <div className="flex gap-2 justify-end">
             <button
               onClick={() => setShowForm(false)}
-              className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-500 hover:bg-gray-100 transition-colors"
+              className="px-3 py-1.5 rounded-lg border border-border text-sm text-ink-dim hover:bg-border transition-colors"
             >
               {t('cancel') ?? '취소'}
             </button>
             <button
               onClick={generate}
               disabled={loading || !goal.trim() || !careerLevel.trim()}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-600 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-pri text-on-pri text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-colors"
             >
               {loading ? (
                 <>
@@ -138,7 +138,7 @@ export default function AiRoadmapView({ adoptedRoadmap, settings, onAdopt, onRef
 
       {roadmaps.length === 0 && !showForm && (
         <div className="text-center py-8">
-          <p className="text-sm text-gray-400">{t('noRoadmapsYet')}</p>
+          <p className="text-sm text-ink-faint">{t('noRoadmapsYet')}</p>
         </div>
       )}
 
@@ -149,28 +149,28 @@ export default function AiRoadmapView({ adoptedRoadmap, settings, onAdopt, onRef
           <div
             key={roadmap.id}
             className={`border rounded-xl overflow-hidden transition-all ${
-              adopted ? 'border-indigo-400 border-2' : 'border-gray-200'
+              adopted ? 'border-pri border-2' : 'border-border'
             }`}
           >
             <div
               className={`flex items-center gap-3 px-4 py-3 cursor-pointer ${
-                adopted ? 'bg-indigo-50' : 'bg-white hover:bg-gray-50'
+                adopted ? 'bg-surf-2' : 'bg-surf hover:bg-surf-2'
               }`}
               onClick={() => setExpandedId(expanded ? null : roadmap.id)}
             >
-              <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${adopted ? 'bg-indigo-500' : 'bg-gray-300'}`} />
+              <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${adopted ? 'bg-pri' : 'bg-border'}`} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <p className={`text-sm font-semibold truncate ${adopted ? 'text-indigo-800' : 'text-gray-800'}`}>
+                  <p className={`text-sm font-semibold truncate ${adopted ? 'text-pri' : 'text-ink'}`}>
                     {roadmap.goal}
                   </p>
                   {adopted && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-600 font-medium flex-shrink-0">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-surf text-pri font-medium flex-shrink-0">
                       {t('adopted')}
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-ink-faint">
                   {roadmap.career_level} · {roadmap.stages.length}
                   {t('stagesLabel')}
                 </p>
@@ -192,20 +192,20 @@ export default function AiRoadmapView({ adoptedRoadmap, settings, onAdopt, onRef
                     e.stopPropagation();
                     handleDelete(roadmap.id);
                   }}
-                  className="text-gray-300 hover:text-red-400 transition-colors p-1"
+                  className="text-ink-faint hover:text-red-400 transition-colors p-1"
                 >
                   <Trash2 size={13} />
                 </button>
                 {expanded ? (
-                  <ChevronDown size={15} className="text-gray-400" />
+                  <ChevronDown size={15} className="text-ink-faint" />
                 ) : (
-                  <ChevronRight size={15} className="text-gray-400" />
+                  <ChevronRight size={15} className="text-ink-faint" />
                 )}
               </div>
             </div>
 
             {expanded && (
-              <div className="border-t border-gray-100">
+              <div className="border-t border-border">
                 {roadmap.stages.map((stage: RoadmapStage) => (
                   <StageCard
                     key={stage.level}
@@ -231,36 +231,36 @@ function StageCard({ stage, isLast, onRefresh }: { stage: RoadmapStage; isLast: 
 
   return (
     <>
-      <div className={`border-b border-gray-50 last:border-0 ${isLast ? 'bg-indigo-50' : ''}`}>
+      <div className={`border-b border-border last:border-0 ${isLast ? 'bg-surf-2' : ''}`}>
         <div
-          className={`flex items-center justify-between px-4 py-2.5 ${!isLast ? 'cursor-pointer hover:bg-gray-50' : ''}`}
+          className={`flex items-center justify-between px-4 py-2.5 ${!isLast ? 'cursor-pointer hover:bg-surf-2' : ''}`}
           onClick={() => !isLast && setOpen((v) => !v)}
         >
           <div>
-            <p className={`text-xs font-semibold ${isLast ? 'text-indigo-700' : 'text-gray-700'}`}>
+            <p className={`text-xs font-semibold ${isLast ? 'text-pri' : 'text-ink-dim'}`}>
               {stage.level}. {t('stageUnit')} · {stage.title}
             </p>
-            <p className="text-xs text-gray-400 mt-0.5">{stage.description}</p>
+            <p className="text-xs text-ink-faint mt-0.5">{stage.description}</p>
           </div>
           {isLast ? (
-            <Trophy size={14} className="text-indigo-400 flex-shrink-0" />
+            <Trophy size={14} className="text-pri flex-shrink-0" />
           ) : (
-            <span className="text-xs text-gray-400">{open ? t('collapseBtn') : t('expandBtn')}</span>
+            <span className="text-xs text-ink-faint">{open ? t('collapseBtn') : t('expandBtn')}</span>
           )}
         </div>
 
         {open && !isLast && (
-          <div className="px-4 pb-3 flex flex-col gap-2 border-t border-gray-50">
+          <div className="px-4 pb-3 flex flex-col gap-2 border-t border-border">
             {stage.skills.map((skill, i) => (
               <div key={i} className="flex items-start gap-2 pt-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-300 flex-shrink-0 mt-1.5" />
+                <div className="w-1.5 h-1.5 rounded-full bg-pri-2 flex-shrink-0 mt-1.5" />
                 <div>
-                  <p className="text-xs font-medium text-gray-700">{skill.name}</p>
-                  {skill.description && <p className="text-xs text-gray-400 mt-0.5">{skill.description}</p>}
+                  <p className="text-xs font-medium text-ink-dim">{skill.name}</p>
+                  {skill.description && <p className="text-xs text-ink-faint mt-0.5">{skill.description}</p>}
                   {skill.tags.length > 0 && (
                     <div className="flex gap-1 flex-wrap mt-1">
                       {skill.tags.map((tag) => (
-                        <span key={tag} className="text-xs px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-500">
+                        <span key={tag} className="text-xs px-1.5 py-0.5 rounded-full bg-surf text-pri">
                           {tag}
                         </span>
                       ))}
@@ -271,7 +271,7 @@ function StageCard({ stage, isLast, onRefresh }: { stage: RoadmapStage; isLast: 
             ))}
             <button
               onClick={() => setGoalModal(true)}
-              className="flex items-center gap-1.5 mt-1 text-xs text-indigo-500 hover:text-indigo-700 transition-colors"
+              className="flex items-center gap-1.5 mt-1 text-xs text-pri hover:opacity-80 transition-colors"
             >
               <Plus size={12} />
               {t('addToGoals')}

@@ -1,23 +1,88 @@
 @import 'tailwindcss';
 @plugin "@tailwindcss/typography";
 
+/* Lets `data-theme="dark"`/`data-theme="light"` on <html> override prefers-color-scheme,
+   same tri-state (system/light/dark) the growpath-mobile app uses. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-bg: #f4f6f1;
+  --color-surf: #ffffff;
+  --color-surf-2: #e4efe7;
+  --color-pri: #2f5d50;
+  --color-pri-2: #4e8c71;
+  --color-pri-filled: #2f5d50;
+  --color-on-pri: #f4f6f1;
+  --color-ok: #2f5d50;
+  --color-amber: #d18b3c;
+  --color-ink: #1e2a24;
+  --color-ink-dim: #5c6b62;
+  --color-ink-faint: #93a099;
+  --color-border: #e4e9e0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-bg: #121815;
+    --color-surf: #1a211d;
+    --color-surf-2: #222b26;
+    --color-pri: #6fbf95;
+    --color-pri-2: #9fd9b8;
+    --color-pri-filled: #1e4438;
+    --color-on-pri: #10201a;
+    --color-ok: #6fbf95;
+    --color-amber: #e0a75b;
+    --color-ink: #e9efe9;
+    --color-ink-dim: #9ba89f;
+    --color-ink-faint: #6e7c74;
+    --color-border: #2a342d;
+  }
+}
+
+:root[data-theme='dark'] {
+  --color-bg: #121815;
+  --color-surf: #1a211d;
+  --color-surf-2: #222b26;
+  --color-pri: #6fbf95;
+  --color-pri-2: #9fd9b8;
+  --color-pri-filled: #1e4438;
+  --color-on-pri: #10201a;
+  --color-ok: #6fbf95;
+  --color-amber: #e0a75b;
+  --color-ink: #e9efe9;
+  --color-ink-dim: #9ba89f;
+  --color-ink-faint: #6e7c74;
+  --color-border: #2a342d;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-ink);
+  --color-bg: var(--color-bg);
+  --color-surf: var(--color-surf);
+  --color-surf-2: var(--color-surf-2);
+  --color-pri: var(--color-pri);
+  --color-pri-2: var(--color-pri-2);
+  --color-pri-filled: var(--color-pri-filled);
+  --color-on-pri: var(--color-on-pri);
+  --color-ok: var(--color-ok);
+  --color-amber: var(--color-amber);
+  --color-ink: var(--color-ink);
+  --color-ink-dim: var(--color-ink-dim);
+  --color-ink-faint: var(--color-ink-faint);
+  --color-border: var(--color-border);
+  --font-sans: var(--font-plex-kr);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: rgb(249 250 251);
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family:
+    var(--font-sans),
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
 }
 
 /* 모바일 하단 navbar 높이만큼 padding — 콘텐츠가 가려지지 않도록 */
@@ -29,13 +94,13 @@ body {
 
 input::placeholder,
 textarea::placeholder {
-  color: #9ca3af;
+  color: var(--color-ink-faint);
 }
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 1000px rgb(31, 41, 55) inset !important;
-  -webkit-text-fill-color: white !important;
-  caret-color: white;
+  -webkit-box-shadow: 0 0 0 1000px var(--color-surf-2) inset !important;
+  -webkit-text-fill-color: var(--color-ink) !important;
+  caret-color: var(--color-ink);
 }

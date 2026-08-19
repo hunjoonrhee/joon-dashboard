@@ -6,7 +6,7 @@ interface Props {
 export default function FormField({ label, children }: Props) {
   return (
     <div>
-      <label className="text-xs text-gray-500 mb-1 block">{label}</label>
+      <label className="text-xs text-ink-dim mb-1 block">{label}</label>
       {children}
     </div>
   );

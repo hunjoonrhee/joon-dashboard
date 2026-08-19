@@ -3,6 +3,7 @@
 import AddSessionModal from '@/components/AddSessionModal';
 import { supabase as supabaseClient, upsertWithUser } from '@/lib/supabase';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
+import { PenLine, Rocket, Sparkles, Trophy } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -134,22 +135,22 @@ export default function Onboarding3() {
   const goToDashboard = () => router.push(`/${locale}/dashboard`);
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
-      <div className="bg-gray-900 border border-white/7 rounded-2xl p-8 max-w-md w-full">
+    <div className="min-h-screen bg-bg flex items-center justify-center p-6">
+      <div className="bg-surf border border-border rounded-2xl p-8 max-w-md w-full">
         <div className="flex gap-1.5 mb-6">
-          <div className="flex-1 h-1 rounded-full bg-indigo-500" />
-          <div className="flex-1 h-1 rounded-full bg-indigo-500" />
-          <div className="flex-1 h-1 rounded-full bg-indigo-500" />
+          <div className="flex-1 h-1 rounded-full bg-pri" />
+          <div className="flex-1 h-1 rounded-full bg-pri" />
+          <div className="flex-1 h-1 rounded-full bg-pri" />
         </div>
-        <p className="text-xs text-gray-500 mb-1">{t('step3of3')}</p>
+        <p className="text-xs text-ink-faint mb-1">{t('step3of3')}</p>
 
         {step === 'roadmap' && (
           <>
             {loading ? (
               <div className="text-center py-10">
-                <div className="text-4xl mb-4 animate-pulse">✦</div>
-                <h2 className="text-lg font-bold text-white mb-2">{t('step3Loading')}</h2>
-                <p className="text-sm text-gray-500">{t('step3LoadingSub')}</p>
+                <Sparkles size={32} strokeWidth={1.8} className="text-pri mx-auto mb-4 animate-pulse" />
+                <h2 className="text-lg font-bold text-ink mb-2">{t('step3Loading')}</h2>
+                <p className="text-sm text-ink-faint">{t('step3LoadingSub')}</p>
               </div>
             ) : error ? (
               <div className="text-center py-8">
@@ -160,42 +161,46 @@ export default function Onboarding3() {
                     const l = sessionStorage.getItem('ob_level') ?? '';
                     generateRoadmap(g, l);
                   }}
-                  className="px-4 py-2 bg-indigo-500 rounded-lg text-sm font-medium text-white"
+                  className="px-4 py-2 bg-pri rounded-lg text-sm font-medium text-on-pri"
                 >
                   {t('step3Error')}
                 </button>
               </div>
             ) : (
               <>
-                <h2 className="text-xl font-bold text-white mb-1">{goal} 🎉</h2>
-                <p className="text-sm text-gray-500 mb-5">
+                <h2 className="text-xl font-bold text-ink mb-1">{goal}</h2>
+                <p className="text-sm text-ink-faint mb-5">
                   {stages.length} {t('step3Stages')}
                 </p>
 
                 <div className="flex flex-col gap-2 mb-6 max-h-64 overflow-y-auto">
-                  {stages.map((stage, i) => (
-                    <div key={i} className="flex items-start gap-3 p-3 bg-gray-800 rounded-xl border border-white/5">
-                      <div
-                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${i === stages.length - 1 ? 'bg-indigo-500 text-white' : 'bg-gray-700 text-gray-400'}`}
-                      >
-                        {stage.level}
-                      </div>
-                      <div>
-                        <p
-                          className={`text-sm font-semibold ${i === stages.length - 1 ? 'text-indigo-300' : 'text-white'}`}
+                  {stages.map((stage, i) => {
+                    const isLast = i === stages.length - 1;
+                    return (
+                      <div key={i} className="flex items-start gap-3 p-3 bg-surf-2 rounded-xl border border-border">
+                        <div
+                          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${isLast ? 'bg-pri text-on-pri' : 'bg-border text-ink-dim'}`}
                         >
-                          {stage.title} {i === stages.length - 1 && '🏆'}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-0.5">{stage.description}</p>
+                          {stage.level}
+                        </div>
+                        <div>
+                          <p
+                            className={`text-sm font-semibold flex items-center gap-1 ${isLast ? 'text-pri' : 'text-ink'}`}
+                          >
+                            {stage.title}
+                            {isLast && <Trophy size={13} strokeWidth={1.8} />}
+                          </p>
+                          <p className="text-xs text-ink-faint mt-0.5">{stage.description}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <button
                   onClick={handleStart}
                   disabled={saving}
-                  className="w-full py-3 rounded-xl bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 text-sm font-bold text-white transition-colors"
+                  className="w-full py-3 rounded-xl bg-pri hover:opacity-90 disabled:opacity-50 text-sm font-bold text-on-pri transition-colors"
                 >
                   {saving ? t('step3Saving') : t('step3SaveBtn')}
                 </button>
@@ -207,32 +212,33 @@ export default function Onboarding3() {
         {step === 'cta' && (
           <div className="flex flex-col gap-4">
             <div className="text-center py-4">
-              <div className="text-4xl mb-3">🚀</div>
-              <h2 className="text-xl font-bold text-white mb-2">{t('step3CtaTitle')}</h2>
-              <p className="text-sm text-gray-400">{t('step3CtaSub')}</p>
+              <Rocket size={32} strokeWidth={1.8} className="text-pri mx-auto mb-3" />
+              <h2 className="text-xl font-bold text-ink mb-2">{t('step3CtaTitle')}</h2>
+              <p className="text-sm text-ink-dim">{t('step3CtaSub')}</p>
             </div>
 
-            <div className="bg-gray-800 border border-white/5 rounded-xl p-4 flex flex-col gap-1">
+            <div className="bg-surf-2 border border-border rounded-xl p-4 flex flex-col gap-1">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs text-gray-400">{t('step3CtaProgress')}</p>
-                <span className="text-xs font-bold text-indigo-400">0 / 3</span>
+                <p className="text-xs text-ink-dim">{t('step3CtaProgress')}</p>
+                <span className="text-xs font-bold text-pri">0 / 3</span>
               </div>
-              <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                <div className="h-full w-0 bg-indigo-500 rounded-full" />
+              <div className="h-1.5 bg-border rounded-full overflow-hidden">
+                <div className="h-full w-0 bg-pri rounded-full" />
               </div>
-              <p className="text-xs text-gray-500 mt-1">{t('step3CtaProgressSub')}</p>
+              <p className="text-xs text-ink-faint mt-1">{t('step3CtaProgressSub')}</p>
             </div>
 
             <button
               onClick={() => setShowSessionModal(true)}
-              className="w-full py-3 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-sm font-bold text-white transition-colors"
+              className="w-full py-3 rounded-xl bg-pri hover:opacity-90 text-sm font-bold text-on-pri transition-colors flex items-center justify-center gap-2"
             >
-              📝 {t('step3CtaAddSession')}
+              <PenLine size={15} strokeWidth={1.8} />
+              {t('step3CtaAddSession')}
             </button>
 
             <button
               onClick={goToDashboard}
-              className="w-full py-2.5 rounded-xl border border-white/10 text-sm text-gray-400 hover:text-white hover:border-white/20 transition-colors"
+              className="w-full py-2.5 rounded-xl border border-border text-sm text-ink-dim hover:text-ink hover:border-pri/40 transition-colors"
             >
               {t('step3CtaSkip')}
             </button>

@@ -33,7 +33,7 @@
     "currentStreak": "현재 Streak",
     "completedTopics": "완료한 토픽",
     "streakDays": "일",
-    "streakActive": "지금 불타고 있어요 🔥",
+    "streakActive": "지금 불타고 있어요",
     "streakNone": "아직 Streak이 없어요",
     "streakStart": "오늘 공부하면 시작돼요!",
     "streakBest": "최고 기록",
@@ -57,8 +57,8 @@
     "weeklyTopics": "완료 토픽",
     "gapLabel": "공부 방향 일치도",
     "noRoadmap": "AI 로드맵 미채택 — 로드맵 탭에서 생성해보세요",
-    "recentNotes": "✍️ 최근 노트",
-    "recentTil": "💡 최근 TIL",
+    "recentNotes": "최근 노트",
+    "recentTil": "최근 TIL",
     "viewAll": "전체 보기",
     "tilCollection": "💡 TIL 모음",
     "tilKnowledgeTitle": "TIL 모음 — 지식 자산",
@@ -279,6 +279,12 @@
     "bigGoalSubPlaceholder": "예: 시니어 → 리드 → 아키텍트",
     "monthlyTarget": "월간 세션 목표 (회)",
     "language": "언어 설정",
+    "appearance": "화면 테마",
+    "theme": {
+      "system": "시스템",
+      "light": "라이트",
+      "dark": "다크"
+    },
     "certifications": "자격증 / 인증",
     "addCert": "자격증 추가",
     "cancel": "취소",
@@ -315,8 +321,7 @@
     "addStudy": "공부 기록 추가",
     "insufficientData": "공부 기록이 {current}개예요. {min}개 이상 쌓이면 AI가 분석해드릴게요.",
     "resources": "학습 리소스",
-        "insufficientGuide": "공부기록 {remaining}개만 더 추가하면 AI 코치가 활성화돼요"
-
+    "insufficientGuide": "공부기록 {remaining}개만 더 추가하면 AI 코치가 활성화돼요"
   },
   "til": {
     "write": "쓰기",

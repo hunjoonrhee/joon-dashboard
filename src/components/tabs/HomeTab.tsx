@@ -3,6 +3,7 @@
 import AddSessionModal from '@/components/AddSessionModal';
 import { supabase } from '@/lib/supabase';
 import type { Goal, Note, ProjectTask, Session, TodayItem, Topic } from '@/types';
+import { Flame, PartyPopper, TrendingUp, type LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import CoachCard from '../CoachCard';
@@ -72,11 +73,14 @@ export default function HomeTab({
     onRefresh();
   };
 
-  const achievements: string[] = [];
+  const achievements: { icon: LucideIcon; msg: string }[] = [];
   if (completedTopics.length > 0)
-    achievements.push(`🎉 ${focusGoals[0]?.name ?? ''} ${t('achievementTopics', { count: completedTopics.length })}`);
-  if (streak >= 3) achievements.push(`🔥 ${t('achievementStreak', { count: streak })}`);
-  if (monthCount >= 5) achievements.push(`📈 ${t('achievementMonth', { count: monthCount })}`);
+    achievements.push({
+      icon: PartyPopper,
+      msg: `${focusGoals[0]?.name ?? ''} ${t('achievementTopics', { count: completedTopics.length })}`,
+    });
+  if (streak >= 3) achievements.push({ icon: Flame, msg: t('achievementStreak', { count: streak }) });
+  if (monthCount >= 5) achievements.push({ icon: TrendingUp, msg: t('achievementMonth', { count: monthCount }) });
 
   return (
     <div className="flex flex-col gap-4">
@@ -116,18 +120,12 @@ export default function HomeTab({
 
       {achievements.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          {achievements.map((msg, i) => (
+          {achievements.map(({ icon: Icon, msg }, i) => (
             <div
               key={i}
-              className="text-sm font-medium px-3 py-2.5 rounded-xl border"
-              style={{
-                background:
-                  i === 0 ? 'rgba(16,185,129,0.08)' : i === 1 ? 'rgba(249,115,22,0.08)' : 'rgba(99,102,241,0.08)',
-                borderColor:
-                  i === 0 ? 'rgba(16,185,129,0.2)' : i === 1 ? 'rgba(249,115,22,0.2)' : 'rgba(99,102,241,0.2)',
-                color: i === 0 ? '#065f46' : i === 1 ? '#9a3412' : '#312e81',
-              }}
+              className="flex items-center gap-2 text-sm font-medium px-3 py-2.5 rounded-xl border bg-surf-2 border-border text-ink"
             >
+              <Icon size={16} strokeWidth={1.8} className="text-pri flex-shrink-0" />
               {msg}
             </div>
           ))}
