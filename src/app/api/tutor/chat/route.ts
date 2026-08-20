@@ -142,7 +142,12 @@ Session control:
       : ''
   }}[/SUMMARY]${
     targetLanguage
-      ? ` For vocabWords: pick 3-5 of the most useful ${targetLanguage} words/phrases from this session - prioritize ones the user got wrong or that came up more than once. Use an empty array if nothing stood out. Never include [DIALOGUE] or [/DIALOGUE] tags anywhere inside the [SUMMARY] JSON (not in word, meaning, example, tilNote, tags, or concepts) - those tags mark spoken dialogue in ordinary chat replies only, and have no meaning inside structured JSON fields.`
+      ? ` For vocabWords, these get saved to the user's permanent vocab review deck, so hold them to a real bar - a word that isn't worth reviewing later is worse than no word at all:
+- Pick 0-5 ${targetLanguage} words/phrases, calibrated to the user's level (${userContext.careerLevel}): not so basic they already know it cold, not so obscure/technical it won't come up again in ordinary ${targetLanguage} use. Prioritize ones the user got wrong or that came up more than once.
+- Skip filler words and interjections (e.g. "Nö", "äh", "na ja", "genau") - not real vocabulary to study.
+- Skip narrow compounds or jargon specific to this one conversation's context (e.g. an app-feature name like "Baumstrukturseite") that a learner won't encounter or need outside this exact scenario - only include compounds/terms that are genuinely common in everyday ${targetLanguage}.
+- Skip proper nouns and anything already fully explained by its own literal parts (a learner who knows the parts doesn't need the whole flagged separately).
+- If the session was too short, too basic, or nothing meets this bar, return an empty array - do not pad it out to hit a target count. Never include [DIALOGUE] or [/DIALOGUE] tags anywhere inside the [SUMMARY] JSON (not in word, meaning, example, tilNote, tags, or concepts) - those tags mark spoken dialogue in ordinary chat replies only, and have no meaning inside structured JSON fields.`
       : ''
   }`;
 };

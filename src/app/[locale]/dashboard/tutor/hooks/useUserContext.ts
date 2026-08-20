@@ -21,12 +21,13 @@ export async function loadUserContext(topic: string): Promise<UserContext> {
     const [settingsRes, sessionsRes, roadmapRes, projectsRes] = await Promise.all([
       supabase.from('settings').select('key, value').in('key', ['career_level', 'adopted_roadmap_id']),
       supabase.from('sessions').select('tags, date, til').order('date', { ascending: false }).limit(30),
-      supabase.from('ai_roadmaps').select('id, goal, stages, target_language').eq('adopted', true).single(),
+      supabase.from('ai_roadmaps').select('id, goal, stages, target_language, career_level').eq('adopted', true).single(),
       supabase.from('projects').select('name').eq('status', 'in_progress').limit(5),
     ]);
 
-    const careerLevel =
-      settingsRes.data?.find((s: { key: string; value: string }) => s.key === 'career_level')?.value ?? 'Not specified';
+    const settingsCareerLevel = settingsRes.data?.find(
+      (s: { key: string; value: string }) => s.key === 'career_level'
+    )?.value;
 
     const sessions = sessionsRes.data ?? [];
     const recentTags = [...new Set(sessions.flatMap((s: { tags: string[] }) => s.tags))] as string[];
@@ -45,6 +46,12 @@ export async function loadUserContext(topic: string): Promise<UserContext> {
       : [];
 
     const projects = (projectsRes.data ?? []).map((p: { name: string }) => p.name);
+
+    // adoptedRoadmap.career_level reflects the level actually assessed for the
+    // roadmap currently being practiced (e.g. "독일어 C1"); settings.career_level
+    // is a one-time onboarding snapshot that never gets updated afterward and
+    // can go stale the moment the user adopts a different or refined roadmap.
+    const careerLevel = adoptedRoadmap?.career_level || settingsCareerLevel || 'Not specified';
 
     return {
       careerLevel,
