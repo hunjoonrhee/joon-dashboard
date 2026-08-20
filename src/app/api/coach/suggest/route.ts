@@ -1,3 +1,5 @@
+import { getAuthenticatedUserId } from '@/lib/api-auth';
+import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
 import { NextRequest, NextResponse } from 'next/server';
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
@@ -51,6 +53,18 @@ export async function POST(req: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return NextResponse.json({ error: 'GEMINI_API_KEY not set' }, { status: 500 });
+  }
+
+  // Was previously wide open - no identity check at all, callable by anyone
+  // with the URL, spending real Gemini quota with no attribution.
+  const userId = await getAuthenticatedUserId(req);
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const withinLimit = await checkRateLimit(getRateLimitIdentifier(userId, req), 'coach-suggest');
+  if (!withinLimit) {
+    return NextResponse.json({ error: 'Daily usage limit reached. Please try again tomorrow.' }, { status: 429 });
   }
 
   const { sessions, adoptedRoadmap, goals, locale, careerLevel } = await req.json();

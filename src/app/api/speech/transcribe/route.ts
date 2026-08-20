@@ -1,4 +1,5 @@
 import { getAuthenticatedUserId } from '@/lib/api-auth';
+import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
 import { NextRequest, NextResponse } from 'next/server';
 
 const OPENAI_TRANSCRIBE_URL = 'https://api.openai.com/v1/audio/transcriptions';
@@ -28,6 +29,11 @@ export async function POST(req: NextRequest) {
   const userId = await getAuthenticatedUserId(req);
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const withinLimit = await checkRateLimit(getRateLimitIdentifier(userId, req), 'speech-transcribe');
+  if (!withinLimit) {
+    return NextResponse.json({ error: 'Daily usage limit reached. Please try again tomorrow.' }, { status: 429 });
   }
 
   const languageCode = req.nextUrl.searchParams.get('languageCode');

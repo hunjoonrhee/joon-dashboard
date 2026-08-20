@@ -1,4 +1,5 @@
 import { getAuthenticatedUserId } from '@/lib/api-auth';
+import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
 import { NextRequest, NextResponse } from 'next/server';
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
@@ -193,6 +194,11 @@ export async function POST(req: NextRequest) {
   const userId = await getAuthenticatedUserId(req);
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const withinLimit = await checkRateLimit(getRateLimitIdentifier(userId, req), 'tutor-chat');
+  if (!withinLimit) {
+    return NextResponse.json({ error: 'Daily usage limit reached. Please try again tomorrow.' }, { status: 429 });
   }
 
   const { topic, messages, locale, userContext, requestSummary, codeReview, code, targetLanguage } = await req.json();

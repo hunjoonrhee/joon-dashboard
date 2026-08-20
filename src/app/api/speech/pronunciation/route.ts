@@ -1,5 +1,6 @@
 import { getAuthenticatedUserId } from '@/lib/api-auth';
 import { assessPronunciation } from '@/lib/azure-pronunciation';
+import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Split out from /api/speech/transcribe (which only does Google STT) so the
@@ -11,6 +12,11 @@ export async function POST(req: NextRequest) {
   const userId = await getAuthenticatedUserId(req);
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const withinLimit = await checkRateLimit(getRateLimitIdentifier(userId, req), 'speech-pronunciation');
+  if (!withinLimit) {
+    return NextResponse.json({ error: 'Daily usage limit reached. Please try again tomorrow.' }, { status: 429 });
   }
 
   const languageCode = req.nextUrl.searchParams.get('languageCode');

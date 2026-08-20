@@ -1,4 +1,5 @@
 import { getAuthenticatedUserId } from '@/lib/api-auth';
+import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
 import { NextRequest, NextResponse } from 'next/server';
 
 const OPENAI_SPEECH_URL = 'https://api.openai.com/v1/audio/speech';
@@ -23,6 +24,11 @@ export async function GET(req: NextRequest) {
   const userId = await getAuthenticatedUserId(req);
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const withinLimit = await checkRateLimit(getRateLimitIdentifier(userId, req), 'speech-synthesize');
+  if (!withinLimit) {
+    return NextResponse.json({ error: 'Daily usage limit reached. Please try again tomorrow.' }, { status: 429 });
   }
 
   const text = req.nextUrl.searchParams.get('text');

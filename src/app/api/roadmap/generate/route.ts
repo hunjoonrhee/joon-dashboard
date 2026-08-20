@@ -1,4 +1,5 @@
 import { getAuthenticatedUserId } from '@/lib/api-auth';
+import { checkRateLimit, getRateLimitIdentifier } from '@/lib/rate-limit';
 import type { RoadmapStage } from '@/types';
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
@@ -60,6 +61,16 @@ export async function POST(req: NextRequest) {
   // Service role 클라이언트 — RLS 우회, user_id는 검증된 세션에서만 가져옴 (body의 userId는 신뢰하지 않음 - 클라이언트가 임의로 다른 사람의 id를 보낼 수 있음)
   const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   const userId = await getAuthenticatedUserId(req);
+
+  // Anonymous /try trial callers get a stricter per-IP cap than logged-in
+  // regenerate calls, since there's no account to hold accountable.
+  const withinLimit = await checkRateLimit(
+    getRateLimitIdentifier(userId, req),
+    userId ? 'roadmap-generate' : 'roadmap-generate-trial'
+  );
+  if (!withinLimit) {
+    return NextResponse.json({ error: 'Daily usage limit reached. Please try again tomorrow.' }, { status: 429 });
+  }
 
   // Optional roadmapId: an edit-and-regenerate call for an existing goal
   // (see growpath-mobile's roadmap edit screen), not a fresh one - the
