@@ -25,9 +25,9 @@ export const priorityLabel = {
 } as const;
 
 export const projectStatusStyle = {
-  in_progress: 'bg-indigo-50 text-indigo-600',
+  in_progress: 'bg-pri/10 text-pri',
   completed: 'bg-green-50 text-green-600',
-  planned: 'bg-gray-100 text-gray-500',
+  planned: 'bg-surf-2 text-ink-faint',
 } as const;
 
 export const projectStatusLabel = {
@@ -38,8 +38,8 @@ export const projectStatusLabel = {
 
 export const taskStatusStyle = {
   completed: 'bg-green-50 text-green-600',
-  in_progress: 'bg-indigo-50 text-indigo-600',
-  planned: 'bg-gray-100 text-gray-400',
+  in_progress: 'bg-pri/10 text-pri',
+  planned: 'bg-surf-2 text-ink-faint',
 } as const;
 
 export const taskStatusLabel = {

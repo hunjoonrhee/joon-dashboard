@@ -55,7 +55,7 @@ export default function TilPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 size={20} className="animate-spin text-gray-300" />
+        <Loader2 size={20} className="animate-spin text-ink-faint" />
       </div>
     );
   }
@@ -63,7 +63,7 @@ export default function TilPage() {
   if (!session) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-sm text-gray-400">{t('notFound')}</p>
+        <p className="text-sm text-ink-faint">{t('notFound')}</p>
       </div>
     );
   }
@@ -74,7 +74,7 @@ export default function TilPage() {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 transition-colors text-sm"
+          className="flex items-center gap-1.5 text-ink-faint hover:text-ink-dim transition-colors text-sm"
         >
           <ArrowLeft size={15} />
           {t('back')}
@@ -82,7 +82,7 @@ export default function TilPage() {
         <button
           onClick={save}
           disabled={saving}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-600 disabled:opacity-50 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-pri text-on-pri text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-colors"
         >
           {saving ? <Loader2 size={14} className="animate-spin" /> : saved ? <Check size={14} /> : null}
           {saved ? t('saved') : saving ? t('saving') : t('save')}
@@ -91,11 +91,11 @@ export default function TilPage() {
 
       {/* 세션 정보 */}
       <div className="mb-4">
-        <h1 className="text-xl font-bold text-gray-800 mb-1">{session.title}</h1>
+        <h1 className="text-xl font-bold text-ink mb-1">{session.title}</h1>
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs text-gray-400">{session.date}</span>
+          <span className="text-xs text-ink-faint">{session.date}</span>
           {session.duration_minutes && (
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-ink-faint">
               · {session.duration_minutes}
               {t('minutes')}
             </span>
@@ -112,7 +112,7 @@ export default function TilPage() {
       <TilEditor value={til} onChange={setTil} minHeight="calc(100vh - 220px)" />
 
       {/* 저장 단축키 안내 */}
-      <p className="text-xs text-gray-300 mt-2 text-right">{t('saveHint')}</p>
+      <p className="text-xs text-ink-faint mt-2 text-right">{t('saveHint')}</p>
     </div>
   );
 }

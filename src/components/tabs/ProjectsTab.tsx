@@ -186,10 +186,10 @@ export default function ProjectsTab({ projects, projectTasks, onRefresh, trigger
     <>
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t('title')}</p>
+          <p className="text-xs font-bold text-ink-faint uppercase tracking-wider">{t('title')}</p>
           <button
             onClick={() => openProjectModal('add')}
-            className="text-indigo-500 hover:text-indigo-700 transition-colors"
+            className="text-pri hover:opacity-80 transition-colors"
           >
             <Plus size={18} />
           </button>

@@ -1,6 +1,7 @@
 'use client';
 
 import type { Note } from '@/types';
+import { PenLine } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 
 interface Props {
@@ -21,39 +22,41 @@ export default function NoteList({ notes, selectedId, onSelect, onNew }: Props) 
     });
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
+    <div className="bg-surf rounded-xl border border-border p-4">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">✍️ {t('title')}</p>
-        <button onClick={onNew} className="text-xs text-indigo-500 font-bold hover:text-indigo-700 transition-colors">
+        <p className="text-xs font-bold text-ink-faint uppercase tracking-wider flex items-center gap-1">
+          <PenLine size={12} /> {t('title')}
+        </p>
+        <button onClick={onNew} className="text-xs text-pri font-bold hover:opacity-80 transition-colors">
           {t('newNote')}
         </button>
       </div>
       {notes.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-8 text-center">
-          <div className="text-3xl">✍️</div>
-          <p className="text-sm font-medium text-gray-600">{t('empty')}</p>
-          <p className="text-xs text-gray-400 leading-relaxed whitespace-pre-line">{t('emptySub')}</p>
+          <PenLine size={28} strokeWidth={1.8} className="text-ink-faint" />
+          <p className="text-sm font-medium text-ink-dim">{t('empty')}</p>
+          <p className="text-xs text-ink-faint leading-relaxed whitespace-pre-line">{t('emptySub')}</p>
           <button
             onClick={onNew}
-            className="mt-2 px-4 py-2 rounded-lg bg-indigo-500 text-white text-xs font-bold hover:bg-indigo-600 transition-colors"
+            className="mt-2 px-4 py-2 rounded-lg bg-pri text-on-pri text-xs font-bold hover:opacity-90 transition-colors"
           >
             {t('firstNote')}
           </button>
         </div>
       ) : (
-        <div className="flex flex-col divide-y divide-gray-50">
+        <div className="flex flex-col divide-y divide-border">
           {notes.map((note) => (
             <div
               key={note.id}
               onClick={() => onSelect(note)}
-              className={`py-3 cursor-pointer transition-colors rounded-lg px-2 -mx-2 ${selectedId === note.id ? 'bg-indigo-50' : 'hover:bg-gray-50'}`}
+              className={`py-3 cursor-pointer transition-colors rounded-lg px-2 -mx-2 ${selectedId === note.id ? 'bg-pri/10' : 'hover:bg-surf-2'}`}
             >
               <div className="flex items-center gap-1.5 mb-1">
                 {note.mood && <span className="text-sm">{note.mood}</span>}
-                <p className="text-sm font-semibold text-gray-800 truncate flex-1">{note.title || t('untitled')}</p>
+                <p className="text-sm font-semibold text-ink truncate flex-1">{note.title || t('untitled')}</p>
               </div>
-              <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">{note.content}</p>
-              <p className="text-xs text-gray-300 mt-1">{dateLabel(note.updated_at)}</p>
+              <p className="text-xs text-ink-faint line-clamp-2 leading-relaxed">{note.content}</p>
+              <p className="text-xs text-ink-faint mt-1">{dateLabel(note.updated_at)}</p>
             </div>
           ))}
         </div>

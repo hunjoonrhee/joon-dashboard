@@ -18,21 +18,21 @@ export default function TilList({ sessions }: Props) {
     new Date(d).toLocaleDateString(locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US');
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
-      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">{t('tilKnowledgeTitle')}</p>
+    <div className="bg-surf rounded-xl border border-border p-4">
+      <p className="text-xs font-bold text-ink-faint uppercase tracking-wider mb-3">{t('tilKnowledgeTitle')}</p>
       {sessions.length === 0 ? (
-        <p className="text-sm text-gray-400">{t('tilEmpty')}</p>
+        <p className="text-sm text-ink-faint">{t('tilEmpty')}</p>
       ) : (
-        <div className="flex flex-col divide-y divide-gray-100">
+        <div className="flex flex-col divide-y divide-border">
           {sessions.map((s) => (
             <div
               key={s.id}
               className="py-3 cursor-pointer"
               onClick={() => router.push(`/${locale}/dashboard/til/${s.id}`)}
             >
-              <p className="text-xs text-gray-400 mb-1">{dateLabel(s.date)}</p>
-              <p className="text-sm font-medium text-gray-800 mb-1">{s.title}</p>
-              <p className="text-xs text-gray-500 line-clamp-2">{s.til}</p>
+              <p className="text-xs text-ink-faint mb-1">{dateLabel(s.date)}</p>
+              <p className="text-sm font-medium text-ink mb-1">{s.title}</p>
+              <p className="text-xs text-ink-dim line-clamp-2">{s.til}</p>
               {s.tags.length > 0 && (
                 <div className="flex gap-1 flex-wrap mt-2">
                   {s.tags.map((tag) => (

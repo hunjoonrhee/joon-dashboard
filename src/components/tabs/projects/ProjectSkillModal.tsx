@@ -80,7 +80,7 @@ export default function ProjectSkillModal({ projectId, projectName, onClose, onS
 
   return (
     <Modal title={t('skillModalTitle')} onClose={onClose}>
-      <p className="text-xs text-gray-400 -mt-1 mb-4">
+      <p className="text-xs text-ink-faint -mt-1 mb-4">
         {projectName} — {t('skillModalSub')}
       </p>
 
@@ -89,7 +89,7 @@ export default function ProjectSkillModal({ projectId, projectName, onClose, onS
           {selected.map((tag) => (
             <span
               key={tag}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500 text-white"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-pri text-on-pri"
             >
               {tag}
               <button onClick={() => toggle(tag)} className="hover:opacity-70">
@@ -102,7 +102,7 @@ export default function ProjectSkillModal({ projectId, projectName, onClose, onS
 
       {tagPool.length > 0 && (
         <div className="mb-3">
-          <p className="text-xs text-gray-400 mb-2">{t('roadmapTags')}</p>
+          <p className="text-xs text-ink-faint mb-2">{t('roadmapTags')}</p>
           <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto">
             {tagPool.map((tag) => (
               <button
@@ -110,8 +110,8 @@ export default function ProjectSkillModal({ projectId, projectName, onClose, onS
                 onClick={() => toggle(tag)}
                 className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
                   selected.includes(tag)
-                    ? 'bg-indigo-500 text-white border-indigo-500'
-                    : 'bg-white text-gray-500 border-gray-200 hover:border-indigo-300 hover:text-indigo-500'
+                    ? 'bg-pri text-on-pri border-pri'
+                    : 'bg-surf text-ink-faint border-border hover:border-pri/40 hover:text-pri'
                 }`}
               >
                 {tag}
@@ -133,19 +133,19 @@ export default function ProjectSkillModal({ projectId, projectName, onClose, onS
             }
           }}
           placeholder={t('customTagPlaceholder')}
-          className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
+          className="flex-1 border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-pri bg-surf text-ink"
         />
         <button
           onClick={addCustom}
-          className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-500 hover:border-indigo-300 hover:text-indigo-500 transition-colors"
+          className="px-3 py-2 rounded-lg border border-border text-sm text-ink-faint hover:border-pri/40 hover:text-pri transition-colors"
         >
           +
         </button>
       </div>
-      <p className="text-xs text-gray-300 mb-4">{t('skillModalNote')}</p>
+      <p className="text-xs text-ink-faint mb-4">{t('skillModalNote')}</p>
 
       <div className="flex justify-between pt-1">
-        <button onClick={onClose} className="text-xs text-gray-400 hover:text-gray-600">
+        <button onClick={onClose} className="text-xs text-ink-faint hover:text-ink-dim">
           {t('skipForNow')}
         </button>
         <div className="flex gap-2">

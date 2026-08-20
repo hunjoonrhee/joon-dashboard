@@ -4,7 +4,7 @@ import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles';
 import { supabase } from '@/lib/supabase';
 import { insertWithUser } from '@/lib/supabase';
 import type { Session, StudyForm } from '@/types';
-import { Trash2 } from 'lucide-react';
+import { NotebookPen, Trash2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import Modal from '../Modal';
@@ -133,16 +133,16 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
   return (
     <>
       {/* 서브탭 */}
-      <div className="flex gap-1 bg-white border border-gray-200 rounded-xl p-1 mb-4">
+      <div className="flex gap-1 bg-surf border border-border rounded-xl p-1 mb-4">
         <button
           onClick={() => setSubTab('sessions')}
-          className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${subTab === 'sessions' ? 'bg-indigo-500 text-white' : 'text-gray-400 hover:text-gray-600'}`}
+          className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center justify-center gap-1 ${subTab === 'sessions' ? 'bg-pri text-on-pri' : 'text-ink-faint hover:text-ink-dim'}`}
         >
-          📝 {t('title')}
+          <NotebookPen size={12} /> {t('title')}
         </button>
         <button
           onClick={() => setSubTab('til')}
-          className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${subTab === 'til' ? 'bg-indigo-500 text-white' : 'text-gray-400 hover:text-gray-600'}`}
+          className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${subTab === 'til' ? 'bg-pri text-on-pri' : 'text-ink-faint hover:text-ink-dim'}`}
         >
           {t('tilCollection')}
         </button>
@@ -176,7 +176,7 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
                   <button
                     key={d}
                     onClick={() => setSelectedDate(d)}
-                    className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedDate === d ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500'}`}
+                    className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedDate === d ? 'border-pri bg-pri/10 text-pri' : 'border-border text-ink-faint'}`}
                   >
                     {d === 'today' ? '오늘' : d === 'yesterday' ? '어제' : '직접'}
                   </button>
@@ -198,7 +198,7 @@ export default function StudyTab({ sessions, onRefresh }: Props) {
                   <button
                     key={d}
                     onClick={() => setSelectedDuration(d)}
-                    className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedDuration === d ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500'}`}
+                    className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedDuration === d ? 'border-pri bg-pri/10 text-pri' : 'border-border text-ink-faint'}`}
                   >
                     {d === 'custom' ? '직접' : `${d}분`}
                   </button>

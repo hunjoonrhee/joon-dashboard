@@ -5,7 +5,7 @@ import { cancelBtnCls, inputCls, labelCls, saveBtnCls } from '@/lib/styles';
 import { insertWithUser, supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import { de, enUS, ko } from 'date-fns/locale';
-import { X } from 'lucide-react';
+import { CheckCircle2, Lightbulb, NotebookPen, Save, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import DatePicker from 'react-datepicker';
@@ -123,20 +123,22 @@ export default function AddSessionModal({ onClose, onSaved, initialTitle }: Prop
   return (
     <div className="fixed inset-0 bg-black/40 flex items-end lg:items-center justify-center z-50 p-4" onClick={onClose}>
       <div
-        className="bg-white rounded-2xl w-full max-w-lg p-5 flex flex-col gap-3 max-h-[90vh] overflow-y-auto"
+        className="bg-surf rounded-2xl w-full max-w-lg p-5 flex flex-col gap-3 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <p className="text-base font-bold text-gray-800">📝 {tStudy('addModal')}</p>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <p className="text-base font-bold text-ink flex items-center gap-1.5">
+            <NotebookPen size={17} strokeWidth={1.8} className="text-pri" /> {tStudy('addModal')}
+          </p>
+          <button onClick={onClose} className="text-ink-faint hover:text-ink-dim transition-colors">
             <X size={18} />
           </button>
         </div>
 
         {initialTitle && (
-          <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-lg">
-            <span className="text-xs text-indigo-500">✓</span>
-            <p className="text-xs text-indigo-700 font-medium">
+          <div className="flex items-center gap-2 px-3 py-2 bg-pri/10 border border-pri/20 rounded-lg">
+            <CheckCircle2 size={14} className="text-pri flex-shrink-0" />
+            <p className="text-xs text-pri font-medium">
               &ldquo;{initialTitle}&rdquo; {t('completedBadge')}
             </p>
           </div>
@@ -164,7 +166,7 @@ export default function AddSessionModal({ onClose, onSaved, initialTitle }: Prop
               <button
                 key={d}
                 onClick={() => setSelectedDate(d)}
-                className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedDate === d ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
+                className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedDate === d ? 'border-pri bg-pri/10 text-pri' : 'border-border text-ink-faint hover:border-ink-faint'}`}
               >
                 {d === 'today' ? t('today') : d === 'yesterday' ? t('yesterday') : t('custom')}
               </button>
@@ -191,7 +193,7 @@ export default function AddSessionModal({ onClose, onSaved, initialTitle }: Prop
               <button
                 key={d}
                 onClick={() => setSelectedDuration(d)}
-                className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedDuration === d ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
+                className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedDuration === d ? 'border-pri bg-pri/10 text-pri' : 'border-border text-ink-faint hover:border-ink-faint'}`}
               >
                 {d === '30' ? t('min30') : d === '60' ? t('min60') : d === '90' ? t('min90') : t('minCustom')}
               </button>
@@ -216,10 +218,10 @@ export default function AddSessionModal({ onClose, onSaved, initialTitle }: Prop
                 return (
                   <span
                     key={tag}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${isCustom ? 'bg-gray-100 text-gray-600 border border-gray-200' : 'bg-indigo-500 text-white'}`}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${isCustom ? 'bg-surf-2 text-ink-dim border border-border' : 'bg-pri text-on-pri'}`}
                   >
                     {tag}
-                    {isCustom && <span className="text-gray-400 text-xs">*</span>}
+                    {isCustom && <span className="text-ink-faint text-xs">*</span>}
                     <button type="button" onClick={() => removeTag(tag)} className="hover:opacity-70">
                       <X size={10} />
                     </button>
@@ -248,7 +250,7 @@ export default function AddSessionModal({ onClose, onSaved, initialTitle }: Prop
               }}
             />
             {tagDropdownOpen && (
-              <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+              <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-surf border border-border rounded-xl shadow-lg overflow-hidden">
                 {filteredTags.length > 0 ? (
                   <div className="max-h-44 overflow-y-auto">
                     {filteredTags.slice(0, 20).map((tag) => (
@@ -256,7 +258,7 @@ export default function AddSessionModal({ onClose, onSaved, initialTitle }: Prop
                         key={tag}
                         type="button"
                         onMouseDown={() => addTag(tag)}
-                        className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                        className="w-full text-left px-3 py-2 text-sm text-ink-dim hover:bg-pri/10 hover:text-pri transition-colors"
                       >
                         {tag}
                       </button>
@@ -266,11 +268,11 @@ export default function AddSessionModal({ onClose, onSaved, initialTitle }: Prop
                   <button
                     type="button"
                     onMouseDown={() => addTag(tagSearch)}
-                    className="w-full text-left px-3 py-2.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
+                    className="w-full text-left px-3 py-2.5 text-sm text-ink-faint hover:bg-surf-2 transition-colors"
                   >
-                    <span className="text-gray-400">{t('tagCustomAdd')}: </span>
-                    <span className="font-medium text-gray-700">{tagSearch.trim()}</span>
-                    <span className="text-xs text-gray-400 ml-1">{t('tagGapNote')}</span>
+                    <span className="text-ink-faint">{t('tagCustomAdd')}: </span>
+                    <span className="font-medium text-ink-dim">{tagSearch.trim()}</span>
+                    <span className="text-xs text-ink-faint ml-1">{t('tagGapNote')}</span>
                   </button>
                 ) : null}
               </div>
@@ -279,7 +281,9 @@ export default function AddSessionModal({ onClose, onSaved, initialTitle }: Prop
         </div>
 
         <div>
-          <label className={labelCls}>💡 TIL</label>
+          <label className={`${labelCls} flex items-center gap-1`}>
+            <Lightbulb size={12} className="text-amber" /> TIL
+          </label>
           <textarea
             className={`${inputCls} min-h-[100px] resize-none`}
             value={til}
@@ -291,8 +295,12 @@ export default function AddSessionModal({ onClose, onSaved, initialTitle }: Prop
           <button onClick={onClose} className={cancelBtnCls}>
             {t('cancel')}
           </button>
-          <button onClick={save} disabled={saving || !title.trim()} className={`${saveBtnCls} flex-1`}>
-            {saving ? t('saving') : t('save')} 💾
+          <button
+            onClick={save}
+            disabled={saving || !title.trim()}
+            className={`${saveBtnCls} flex-1 flex items-center justify-center gap-1.5`}
+          >
+            <Save size={13} /> {saving ? t('saving') : t('save')}
           </button>
         </div>
       </div>

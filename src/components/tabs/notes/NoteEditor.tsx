@@ -1,7 +1,7 @@
 'use client';
 
 import type { Note } from '@/types';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, PenLine, Trash2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import ReactMarkdown from 'react-markdown';
 
@@ -39,8 +39,8 @@ export function NoteEditorPanel({
   const tCommon = useTranslations('common');
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col min-h-[500px]">
-      <div className="p-4 border-b border-gray-100">
+    <div className="bg-surf rounded-xl border border-border overflow-hidden flex flex-col min-h-[500px]">
+      <div className="p-4 border-b border-border">
         <div className="flex gap-2 mb-3">
           {moods.map((m) => (
             <button
@@ -54,7 +54,7 @@ export function NoteEditorPanel({
         </div>
         <input
           type="text"
-          className="w-full text-lg font-bold text-gray-800 outline-none placeholder:text-gray-300"
+          className="w-full text-lg font-bold text-ink outline-none placeholder:text-ink-faint bg-surf"
           placeholder={t('editorPlaceholder')}
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
@@ -62,26 +62,26 @@ export function NoteEditorPanel({
       </div>
       <textarea
         autoFocus
-        className="flex-1 w-full p-4 text-sm text-gray-700 outline-none resize-none placeholder:text-gray-300 leading-relaxed min-h-[350px]"
+        className="flex-1 w-full p-4 text-sm text-ink-dim outline-none resize-none placeholder:text-ink-faint leading-relaxed min-h-[350px] bg-surf"
         placeholder={t('bodyPlaceholder')}
         value={content}
         onChange={(e) => onContentChange(e.target.value)}
       />
-      <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
+      <div className="px-4 py-3 border-t border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
           {!isNew && onDelete && (
-            <button onClick={onDelete} className="text-gray-300 hover:text-red-400 transition-colors">
+            <button onClick={onDelete} className="text-ink-faint hover:text-red-400 transition-colors">
               <Trash2 size={15} />
             </button>
           )}
-          <button onClick={onCancel} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+          <button onClick={onCancel} className="text-xs text-ink-faint hover:text-ink-dim transition-colors">
             {tCommon('cancel')}
           </button>
         </div>
         <button
           onClick={onSave}
           disabled={saving}
-          className="px-4 py-1.5 rounded-lg bg-indigo-500 text-white text-xs font-bold hover:bg-indigo-600 transition-colors disabled:opacity-50"
+          className="px-4 py-1.5 rounded-lg bg-pri text-on-pri text-xs font-bold hover:opacity-90 transition-colors disabled:opacity-50"
         >
           {saving ? t('saving') : t('save')}
         </button>
@@ -107,27 +107,27 @@ export function NoteViewPanel({ note, onEdit, onDelete }: ViewProps) {
     });
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col min-h-[500px]">
-      <div className="p-4 border-b border-gray-100 flex items-start justify-between">
+    <div className="bg-surf rounded-xl border border-border overflow-hidden flex flex-col min-h-[500px]">
+      <div className="p-4 border-b border-border flex items-start justify-between">
         <div>
           <div className="flex items-center gap-1.5 mb-1">
             {note.mood && <span className="text-lg">{note.mood}</span>}
-            <h2 className="text-lg font-bold text-gray-800">{note.title || t('untitled')}</h2>
+            <h2 className="text-lg font-bold text-ink">{note.title || t('untitled')}</h2>
           </div>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-ink-faint">
             {dateLabel(note.updated_at)} {t('edited')}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={onEdit} className="text-gray-400 hover:text-indigo-500 transition-colors">
+          <button onClick={onEdit} className="text-ink-faint hover:text-pri transition-colors">
             <Pencil size={15} />
           </button>
-          <button onClick={onDelete} className="text-gray-300 hover:text-red-400 transition-colors">
+          <button onClick={onDelete} className="text-ink-faint hover:text-red-400 transition-colors">
             <Trash2 size={15} />
           </button>
         </div>
       </div>
-      <div className="flex-1 p-4 prose prose-sm max-w-none text-gray-700">
+      <div className="flex-1 p-4 prose prose-sm max-w-none text-ink-dim">
         <ReactMarkdown>{note.content}</ReactMarkdown>
       </div>
     </div>
@@ -138,12 +138,12 @@ export function NoteEmptyPanel({ onNew }: { onNew: () => void }) {
   const t = useTranslations('notes');
   return (
     <div
-      className="bg-white rounded-xl border border-dashed border-gray-200 flex items-center justify-center min-h-[500px] cursor-pointer hover:border-indigo-300 transition-colors"
+      className="bg-surf rounded-xl border border-dashed border-border flex items-center justify-center min-h-[500px] cursor-pointer hover:border-pri/40 transition-colors"
       onClick={onNew}
     >
       <div className="text-center">
-        <div className="text-3xl mb-2">✍️</div>
-        <p className="text-sm text-gray-400 whitespace-pre-line">{t('selectOrNew')}</p>
+        <PenLine size={28} strokeWidth={1.8} className="text-ink-faint mx-auto mb-2" />
+        <p className="text-sm text-ink-faint whitespace-pre-line">{t('selectOrNew')}</p>
       </div>
     </div>
   );
