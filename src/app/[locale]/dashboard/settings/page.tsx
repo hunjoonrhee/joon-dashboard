@@ -2,10 +2,12 @@
 
 import ThemeModeSelector from '@/components/settings/ThemeModeSelector';
 import { useToast } from '@/components/Toast';
+import { useUser } from '@/components/UserProvider';
 import { cardCls, inputCls, labelCls } from '@/lib/styles';
 import { supabase, upsertWithUser } from '@/lib/supabase';
+import { useSubscription } from '@/lib/subscription';
 import type { Certification, Setting } from '@/types';
-import { ArrowLeft, Check, Trash2 } from 'lucide-react';
+import { ArrowLeft, Check, Crown, Trash2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -22,6 +24,9 @@ export default function SettingsPage() {
   const currentLocale = useLocale();
   const t = useTranslations('settings');
   const { show } = useToast();
+  const user = useUser();
+  const { subscription } = useSubscription(user?.id);
+  const [billingLoading, setBillingLoading] = useState(false);
 
   const [form, setForm] = useState({
     name: '',
@@ -108,6 +113,30 @@ export default function SettingsPage() {
     show(t('certDeleted'), { type: 'info' });
   };
 
+  const hasPaidSubscription =
+    subscription?.status === 'active' || subscription?.status === 'trialing' || subscription?.status === 'past_due';
+  const trialDaysLeft =
+    !hasPaidSubscription && subscription?.trial_ends_at
+      ? Math.max(0, Math.ceil((new Date(subscription.trial_ends_at).getTime() - new Date().getTime()) / 86400000))
+      : 0;
+
+  const handleBilling = async () => {
+    setBillingLoading(true);
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (session) headers.Authorization = `Bearer ${session.access_token}`;
+    const endpoint = hasPaidSubscription ? '/api/billing/portal' : '/api/billing/checkout';
+    const res = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify({ locale: currentLocale }) });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      setBillingLoading(false);
+    }
+  };
+
   const switchLocale = (locale: string) => {
     const segments = pathname.split('/');
     segments[1] = locale;
@@ -125,6 +154,27 @@ export default function SettingsPage() {
       </button>
 
       <div className="flex flex-col gap-4">
+        <div className={cardCls}>
+          <div className="flex items-center gap-2 mb-3">
+            <Crown size={16} className="text-pri" />
+            <p className="text-sm font-medium text-ink">{t('proSectionTitle')}</p>
+          </div>
+          <p className="text-sm text-ink-dim mb-4">
+            {hasPaidSubscription
+              ? t('proActiveStatus')
+              : trialDaysLeft > 0
+                ? t('proTrialStatus', { days: trialDaysLeft })
+                : t('proFreeStatus')}
+          </p>
+          <button
+            onClick={handleBilling}
+            disabled={billingLoading}
+            className="w-full py-2.5 rounded-xl bg-pri text-on-pri text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-colors"
+          >
+            {billingLoading ? t('proRedirecting') : hasPaidSubscription ? t('manageBilling') : t('upgradeToProBtn')}
+          </button>
+        </div>
+
         <div className={cardCls}>
           <p className="text-sm font-medium text-ink mb-4">{t('basicSettings')}</p>
           <div className="flex flex-col gap-4">

@@ -1,12 +1,37 @@
 'use client';
 
+import { supabase } from '@/lib/supabase';
 import { Check, Crown, Sparkles } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function TutorGate() {
   const t = useTranslations('tutor');
   const router = useRouter();
+  const locale = useLocale();
+  const [loading, setLoading] = useState(false);
+
+  const handleUpgrade = async () => {
+    setLoading(true);
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const res = await fetch('/api/billing/checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+      },
+      body: JSON.stringify({ locale }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4">
@@ -23,9 +48,13 @@ export default function TutorGate() {
             </li>
           ))}
         </ul>
-        <button className="w-full py-2.5 rounded-xl bg-pri text-on-pri text-sm font-semibold hover:opacity-90 transition-colors mb-2 flex items-center justify-center gap-1.5">
+        <button
+          onClick={handleUpgrade}
+          disabled={loading}
+          className="w-full py-2.5 rounded-xl bg-pri text-on-pri text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-colors mb-2 flex items-center justify-center gap-1.5"
+        >
           <Crown size={14} />
-          {t('upgrade')}
+          {loading ? t('upgrading') : t('upgrade')}
         </button>
         <p className="text-xs text-ink-faint">{t('upgradePrice')}</p>
         <button

@@ -4,6 +4,7 @@ import AddSessionModal from '@/components/AddSessionModal';
 import { useUser } from '@/components/UserProvider';
 import { scopeFocusGoals } from '@/lib/roadmap-progress';
 import { supabase } from '@/lib/supabase';
+import { useSubscription } from '@/lib/subscription';
 import type { Goal, Note, ProjectTask, Session, TodayItem, Topic } from '@/types';
 import { useState } from 'react';
 import CoachCard from '../CoachCard';
@@ -44,6 +45,7 @@ export default function HomeTab({
 
   const user = useUser();
   const { adoptedRoadmap, adoptedRoadmapId } = useAdoptedRoadmap(settings);
+  const { isPro } = useSubscription(user?.id);
 
   const { sessions, streak, maxStreak, monthCount, overallPct, completedTopics, gapPct, week, weeklyStats } =
     useHomeStats({ adoptedRoadmapId, adoptedRoadmap, topics, goals, allSessions });
@@ -101,12 +103,12 @@ export default function HomeTab({
 
       {adoptedRoadmap?.target_language ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <CoachCard sessions={sessions} goals={goals} adoptedRoadmap={adoptedRoadmap} isPro={true} />
+          <CoachCard sessions={sessions} goals={goals} adoptedRoadmap={adoptedRoadmap} isPro={isPro} />
           <HomeVocabCard />
-          <HomeRoleplayCard isPro={true} defaultLanguage={adoptedRoadmap?.target_language} />
+          <HomeRoleplayCard isPro={isPro} defaultLanguage={adoptedRoadmap?.target_language} />
         </div>
       ) : (
-        <CoachCard sessions={sessions} goals={goals} adoptedRoadmap={adoptedRoadmap} isPro={true} />
+        <CoachCard sessions={sessions} goals={goals} adoptedRoadmap={adoptedRoadmap} isPro={isPro} />
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
