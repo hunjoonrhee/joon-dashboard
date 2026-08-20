@@ -3,7 +3,7 @@
 import type { PronunciationResult } from '@/lib/azure-pronunciation';
 import { Code2, Mic, Square } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useVoiceRecorder } from '../hooks/useVoiceRecorder';
 
 interface Props {
@@ -23,6 +23,17 @@ export default function TutorInput({ loading, isEndingSession, languageCode, onS
   const [pendingTranscript, setPendingTranscript] = useState<string | null>(null);
   const [pendingPronunciation, setPendingPronunciation] = useState<PronunciationResult | null>(null);
   const recorder = useVoiceRecorder(languageCode);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Resizes for every source of text change, not just typing - setInput() from the
+  // voice-transcript result doesn't fire a native input event, so relying on onInput
+  // alone left the box clipped at single-line height after a long transcription.
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [input]);
 
   const handleSend = () => {
     if (!input.trim() || loading) return;
@@ -89,6 +100,7 @@ export default function TutorInput({ loading, isEndingSession, languageCode, onS
           </button>
         )}
         <textarea
+          ref={textareaRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
@@ -101,12 +113,7 @@ export default function TutorInput({ loading, isEndingSession, languageCode, onS
           disabled={isEndingSession}
           rows={1}
           className="flex-1 bg-surf-2 border border-border rounded-xl px-4 py-2.5 text-sm text-ink placeholder-ink-faint outline-none focus:border-pri focus:bg-surf transition-colors disabled:opacity-40 resize-none overflow-hidden"
-          style={{ minHeight: '42px', maxHeight: '120px' }}
-          onInput={(e) => {
-            const el = e.currentTarget;
-            el.style.height = 'auto';
-            el.style.height = `${el.scrollHeight}px`;
-          }}
+          style={{ minHeight: '42px', maxHeight: '200px' }}
         />
         <button
           onClick={handleSend}
