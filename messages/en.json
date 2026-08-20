@@ -93,7 +93,9 @@
     "checklist": "Checklist",
     "checklistEmpty": "Add checklist items. Breaking goals into small steps makes them much easier to achieve.",
     "checklistPlaceholder": "Item name...",
-    "checklistCategory": "Category (e.g. theory, practice, research)"
+    "checklistCategory": "Category (e.g. theory, practice, research)",
+    "checklistSuggested": "Suggested done · evidence found",
+    "checklistSuggestedHint": "We found matching tags in your study log, projects, or certifications. Check it off if that's right."
   },
   "status": {
     "in_progress": "In Progress",

@@ -1,24 +1,13 @@
 'use client';
 
+import { getSkillSource } from '@/lib/gapAnalysis';
+import { goalStatusStyle, priorityStyle } from '@/lib/statusConfig';
 import { getCurrentUserId, supabase } from '@/lib/supabase';
-import type { Goal, Topic } from '@/types';
-import { ArrowLeft, Check, Pencil, Plus, Trash2, X } from 'lucide-react';
+import type { AiRoadmap, Goal, Topic } from '@/types';
+import { ArrowLeft, Check, Pencil, Plus, Sparkles, Trash2, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-
-const priorityStyle: Record<Goal['priority'], string> = {
-  urgent: 'bg-red-100 text-red-700',
-  high: 'bg-orange-100 text-orange-700',
-  medium: 'bg-blue-100 text-blue-700',
-  low: 'bg-gray-100 text-gray-500',
-};
-
-const statusStyle: Record<Goal['status'], string> = {
-  in_progress: 'bg-amber-100 text-amber-700',
-  completed: 'bg-green-100 text-green-700',
-  planned: 'bg-gray-100 text-gray-500',
-};
 
 export default function GoalDetail() {
   const { id } = useParams();
@@ -44,6 +33,13 @@ export default function GoalDetail() {
     is_focus: false,
   });
 
+  // Evidence-based completion suggestions: a topic auto-generated from a
+  // roadmap skill (name matches 1:1) gets flagged when the same tag-overlap
+  // evidence gapPct already trusts (cert/project skill tags, or study-log
+  // tags) covers it - suggestion only, the checkbox is still the only thing
+  // that actually marks it done.
+  const [suggestedTopicNames, setSuggestedTopicNames] = useState<Set<string>>(new Set());
+
   useEffect(() => {
     const fetchData = async () => {
       const [{ data: g }, { data: tp }] = await Promise.all([
@@ -62,6 +58,32 @@ export default function GoalDetail() {
       }
       if (tp) setTopics(tp);
       setLoading(false);
+
+      if (g?.roadmap_id && g.stage_level !== null) {
+        const [{ data: roadmap }, { data: sessions }, { data: certs }, { data: projectSkills }] = await Promise.all([
+          supabase.from('ai_roadmaps').select('stages').eq('id', g.roadmap_id).single(),
+          supabase.from('sessions').select('tags'),
+          supabase.from('certifications').select('tags'),
+          supabase.from('project_skills').select('tags'),
+        ]);
+        const stage = (roadmap as Pick<AiRoadmap, 'stages'> | null)?.stages.find((s) => s.level === g.stage_level);
+        if (stage) {
+          // Deliberately NOT including g.tags here - the auto-generated stage
+          // goal's own tags are just a copy of this same stage's skill tags
+          // (set at adoption time), so including them would make every skill
+          // trivially "match itself" regardless of any real study evidence.
+          const studiedTags = new Set<string>((sessions ?? []).flatMap((s: { tags: string[] }) => s.tags));
+          const certTags = new Set<string>((certs ?? []).flatMap((c: { tags: string[] }) => c.tags));
+          const practicalTags = new Set<string>((projectSkills ?? []).flatMap((ps: { tags: string[] }) => ps.tags));
+
+          const suggested = new Set<string>();
+          for (const skill of stage.skills) {
+            const { source } = getSkillSource(skill.tags, studiedTags, certTags, practicalTags);
+            if (source !== 'none') suggested.add(skill.name);
+          }
+          setSuggestedTopicNames(suggested);
+        }
+      }
     };
     fetchData();
   }, [id]);
@@ -135,14 +157,14 @@ export default function GoalDetail() {
   if (loading)
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-400 text-sm">{tCommon('loadingDots')}</p>
+        <p className="text-ink-faint text-sm">{tCommon('loadingDots')}</p>
       </main>
     );
 
   if (!goal)
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-400 text-sm">{t('empty')}</p>
+        <p className="text-ink-faint text-sm">{t('empty')}</p>
       </main>
     );
 
@@ -150,7 +172,7 @@ export default function GoalDetail() {
     <main className="mx-auto px-4 py-4 max-w-6xl">
       <button
         onClick={() => router.back()}
-        className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 mb-6 transition-colors"
+        className="flex items-center gap-1.5 text-ink-faint hover:text-ink mb-6 transition-colors"
       >
         <ArrowLeft size={16} />
         <span className="text-sm">{tCommon('cancel')}</span>
@@ -158,25 +180,22 @@ export default function GoalDetail() {
 
       <div className="flex flex-col gap-4">
         {/* 기본 정보 */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-surf rounded-xl border border-border p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-gray-700">{t('editModal')}</p>
+            <p className="text-sm font-medium text-ink-dim">{t('editModal')}</p>
             {!editingInfo ? (
-              <button
-                onClick={() => setEditingInfo(true)}
-                className="text-gray-400 hover:text-indigo-500 transition-colors"
-              >
+              <button onClick={() => setEditingInfo(true)} className="text-ink-faint hover:text-pri transition-colors">
                 <Pencil size={15} />
               </button>
             ) : (
               <div className="flex gap-2">
-                <button onClick={cancelInfo} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <button onClick={cancelInfo} className="text-ink-faint hover:text-ink-dim transition-colors">
                   <X size={15} />
                 </button>
                 <button
                   onClick={saveInfo}
                   disabled={saving}
-                  className="text-indigo-500 hover:text-indigo-700 transition-colors disabled:opacity-50"
+                  className="text-pri hover:opacity-80 transition-colors disabled:opacity-50"
                 >
                   <Check size={15} />
                 </button>
@@ -187,28 +206,28 @@ export default function GoalDetail() {
           {editingInfo ? (
             <div className="flex flex-col gap-3">
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">{t('name')}</label>
+                <label className="text-xs text-ink-faint mb-1 block">{t('name')}</label>
                 <input
                   type="text"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
+                  className="w-full border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-pri bg-surf text-ink"
                   value={infoDraft.name}
                   onChange={(e) => setInfoDraft({ ...infoDraft, name: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-500 mb-1 block">{t('description')}</label>
+                <label className="text-xs text-ink-faint mb-1 block">{t('description')}</label>
                 <input
                   type="text"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
+                  className="w-full border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-pri bg-surf text-ink"
                   value={infoDraft.description}
                   onChange={(e) => setInfoDraft({ ...infoDraft, description: e.target.value })}
                 />
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="text-xs text-gray-500 mb-1 block">{t('priority')}</label>
+                  <label className="text-xs text-ink-faint mb-1 block">{t('priority')}</label>
                   <select
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
+                    className="w-full border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-pri bg-surf text-ink"
                     value={infoDraft.priority}
                     onChange={(e) =>
                       setInfoDraft({
@@ -224,9 +243,9 @@ export default function GoalDetail() {
                   </select>
                 </div>
                 <div className="flex-1">
-                  <label className="text-xs text-gray-500 mb-1 block">{t('status')}</label>
+                  <label className="text-xs text-ink-faint mb-1 block">{t('status')}</label>
                   <select
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400"
+                    className="w-full border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-pri bg-surf text-ink"
                     value={infoDraft.status}
                     onChange={(e) =>
                       setInfoDraft({
@@ -248,7 +267,7 @@ export default function GoalDetail() {
                   checked={infoDraft.is_focus}
                   onChange={(e) => setInfoDraft({ ...infoDraft, is_focus: e.target.checked })}
                 />
-                <label htmlFor="is_focus" className="text-sm text-gray-600">
+                <label htmlFor="is_focus" className="text-sm text-ink-dim">
                   {t('focus')}
                 </label>
               </div>
@@ -256,23 +275,20 @@ export default function GoalDetail() {
           ) : (
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
-                <h1 className="text-lg font-semibold text-gray-800">{goal.name}</h1>
-                {goal.description && <p className="text-sm text-gray-500 mt-1">{goal.description}</p>}
-                {goal.is_focus && <p className="text-xs text-indigo-500 mt-2 font-medium">★ {t('focus')}</p>}
+                <h1 className="text-lg font-semibold text-ink">{goal.name}</h1>
+                {goal.description && <p className="text-sm text-ink-faint mt-1">{goal.description}</p>}
+                {goal.is_focus && <p className="text-xs text-pri mt-2 font-medium">★ {t('focus')}</p>}
                 {/* 전체 진행도 */}
                 {topics.length > 0 && (
                   <div className="mt-3">
-                    <div className="flex justify-between text-xs text-gray-400 mb-1">
+                    <div className="flex justify-between text-xs text-ink-faint mb-1">
                       <span>{totalPct}%</span>
                       <span>
                         {topics.filter((tp) => tp.completed).length}/{topics.length}
                       </span>
                     </div>
-                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-indigo-500 rounded-full transition-all"
-                        style={{ width: `${totalPct}%` }}
-                      />
+                    <div className="h-1.5 bg-surf-2 rounded-full overflow-hidden">
+                      <div className="h-full bg-pri rounded-full transition-all" style={{ width: `${totalPct}%` }} />
                     </div>
                   </div>
                 )}
@@ -281,7 +297,7 @@ export default function GoalDetail() {
                 <span className={`text-xs px-2 py-0.5 rounded-full ${priorityStyle[goal.priority]}`}>
                   {tPriority(goal.priority)}
                 </span>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${statusStyle[goal.status]}`}>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${goalStatusStyle[goal.status]}`}>
                   {tStatus(goal.status)}
                 </span>
               </div>
@@ -290,23 +306,20 @@ export default function GoalDetail() {
         </div>
 
         {/* 체크리스트 */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-surf rounded-xl border border-border p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-gray-700">{t('checklist')}</p>
-            <button
-              onClick={() => setAddingTopic(true)}
-              className="text-indigo-500 hover:text-indigo-700 transition-colors"
-            >
+            <p className="text-sm font-medium text-ink-dim">{t('checklist')}</p>
+            <button onClick={() => setAddingTopic(true)} className="text-pri hover:opacity-80 transition-colors">
               <Plus size={18} />
             </button>
           </div>
 
           {addingTopic && (
-            <div className="flex flex-col gap-2 mb-4 p-3 bg-gray-50 rounded-lg">
+            <div className="flex flex-col gap-2 mb-4 p-3 bg-surf-2 rounded-lg">
               <input
                 type="text"
                 autoFocus
-                className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo-400"
+                className="w-full border border-border rounded-lg px-3 py-1.5 text-sm outline-none focus:border-pri bg-surf text-ink"
                 placeholder={t('checklistPlaceholder')}
                 value={newTopic}
                 onChange={(e) => setNewTopic(e.target.value)}
@@ -316,20 +329,16 @@ export default function GoalDetail() {
               />
               <input
                 type="text"
-                className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo-400"
+                className="w-full border border-border rounded-lg px-3 py-1.5 text-sm outline-none focus:border-pri bg-surf text-ink"
                 placeholder={t('checklistCategory')}
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
               />
               <div className="flex gap-2 justify-end">
-                <button onClick={() => setAddingTopic(false)} className="text-gray-400 hover:text-gray-600">
+                <button onClick={() => setAddingTopic(false)} className="text-ink-faint hover:text-ink-dim">
                   <X size={16} />
                 </button>
-                <button
-                  onClick={addTopic}
-                  disabled={saving}
-                  className="text-indigo-500 hover:text-indigo-700 disabled:opacity-50"
-                >
+                <button onClick={addTopic} disabled={saving} className="text-pri hover:opacity-80 disabled:opacity-50">
                   <Check size={16} />
                 </button>
               </div>
@@ -338,10 +347,10 @@ export default function GoalDetail() {
 
           {topics.length === 0 && !addingTopic ? (
             <div className="text-center py-6">
-              <p className="text-sm text-gray-400 leading-relaxed">{t('checklistEmpty')}</p>
+              <p className="text-sm text-ink-faint leading-relaxed">{t('checklistEmpty')}</p>
               <button
                 onClick={() => setAddingTopic(true)}
-                className="mt-3 text-xs text-indigo-500 hover:text-indigo-700 font-medium transition-colors"
+                className="mt-3 text-xs text-pri hover:opacity-80 font-medium transition-colors"
               >
                 + {t('checklistPlaceholder')}
               </button>
@@ -353,39 +362,56 @@ export default function GoalDetail() {
                 const catTopics = topics.filter((tp) => tp.category === cat);
                 return (
                   <div key={cat}>
-                    <div className="flex justify-between text-xs text-gray-600 mb-1">
+                    <div className="flex justify-between text-xs text-ink-dim mb-1">
                       <span className="font-medium">{cat}</span>
                       <span>{pct}%</span>
                     </div>
-                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-2">
-                      <div className="h-full bg-indigo-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                    <div className="h-1.5 bg-surf-2 rounded-full overflow-hidden mb-2">
+                      <div className="h-full bg-pri rounded-full transition-all" style={{ width: `${pct}%` }} />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      {catTopics.map((tp) => (
-                        <div key={tp.id} className="flex items-center justify-between group">
-                          <div
-                            className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
-                            onClick={() => toggleTopic(tp)}
-                          >
-                            <div
-                              className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${tp.completed ? 'bg-indigo-500 border-indigo-500' : 'border-gray-300 hover:border-indigo-300'}`}
-                            >
-                              {tp.completed && <span className="text-white text-xs">✓</span>}
+                      {catTopics.map((tp) => {
+                        const isSuggested = !tp.completed && suggestedTopicNames.has(tp.name);
+                        return (
+                          <div key={tp.id} className="flex flex-col group">
+                            <div className="flex items-center justify-between">
+                              <div
+                                className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
+                                onClick={() => toggleTopic(tp)}
+                              >
+                                <div
+                                  className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
+                                    tp.completed
+                                      ? 'bg-pri border-pri'
+                                      : isSuggested
+                                        ? 'border-amber'
+                                        : 'border-border hover:border-pri/50'
+                                  }`}
+                                >
+                                  {tp.completed && <Check size={11} className="text-on-pri" strokeWidth={3} />}
+                                </div>
+                                <span
+                                  className={`text-sm truncate ${tp.completed ? 'line-through text-ink-faint' : 'text-ink-dim'}`}
+                                >
+                                  {tp.name}
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => removeTopic(tp)}
+                                className="text-ink-faint hover:text-red-400 transition-colors ml-2 flex-shrink-0 opacity-0 group-hover:opacity-100"
+                              >
+                                <Trash2 size={13} />
+                              </button>
                             </div>
-                            <span
-                              className={`text-sm truncate ${tp.completed ? 'line-through text-gray-300' : 'text-gray-700'}`}
-                            >
-                              {tp.name}
-                            </span>
+                            {isSuggested && (
+                              <div className="flex items-center gap-1 ml-6 mt-0.5" title={t('checklistSuggestedHint')}>
+                                <Sparkles size={11} className="text-amber flex-shrink-0" />
+                                <span className="text-xs text-amber">{t('checklistSuggested')}</span>
+                              </div>
+                            )}
                           </div>
-                          <button
-                            onClick={() => removeTopic(tp)}
-                            className="text-gray-200 hover:text-red-400 transition-colors ml-2 flex-shrink-0 opacity-0 group-hover:opacity-100"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 );

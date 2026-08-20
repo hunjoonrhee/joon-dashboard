@@ -48,7 +48,14 @@ export default function RoadmapTab({ goals, topics, sessions = [], onRefresh, se
       });
   }, [settings.adopted_roadmap_id]);
 
-  const studiedTags = new Set([...sessions.flatMap((s) => s.tags), ...goals.flatMap((g) => g.tags ?? [])]);
+  // Auto-generated stage goals copy `tags` straight from that stage's own
+  // skills at adoption time - including them here would let every skill
+  // trivially "match itself" with zero real evidence, so only manually
+  // added goals' tags (a deliberate user choice) count as study evidence.
+  const studiedTags = new Set([
+    ...sessions.flatMap((s) => s.tags),
+    ...goals.filter((g) => !g.is_auto_generated).flatMap((g) => g.tags ?? []),
+  ]);
 
   const finalGoal = settings.big_goal ?? '리드 아키텍트';
 

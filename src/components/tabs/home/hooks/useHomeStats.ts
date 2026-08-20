@@ -80,7 +80,14 @@ export function useHomeStats({
 
   const gapPct = (() => {
     if (!adoptedRoadmap) return null;
-    const studiedTags = new Set([...roadmapSessions.flatMap((s) => s.tags), ...goals.flatMap((g) => g.tags ?? [])]);
+    // Auto-generated stage goals get `tags` copied straight from that
+    // stage's own skills at adoption time, so including them here would let
+    // every skill trivially "match itself" with zero real evidence behind
+    // it - only manually-created goals' tags (a deliberate user choice) count.
+    const studiedTags = new Set([
+      ...roadmapSessions.flatMap((s) => s.tags),
+      ...goals.filter((g) => !g.is_auto_generated).flatMap((g) => g.tags ?? []),
+    ]);
     const { gapPct } = calcGapAnalysis({ adoptedRoadmap, studiedTags, certTags, practicalTags });
     return gapPct;
   })();

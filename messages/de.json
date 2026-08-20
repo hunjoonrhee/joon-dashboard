@@ -93,7 +93,9 @@
     "checklist": "Checkliste",
     "checklistEmpty": "Fügen Sie Checklistenpunkte hinzu. Kleine Schritte machen Ziele leichter erreichbar.",
     "checklistPlaceholder": "Aufgabe eingeben...",
-    "checklistCategory": "Kategorie (z.B. Theorie, Praxis, Recherche)"
+    "checklistCategory": "Kategorie (z.B. Theorie, Praxis, Recherche)",
+    "checklistSuggested": "Als erledigt vorgeschlagen · Nachweis gefunden",
+    "checklistSuggestedHint": "Wir haben passende Tags in deinem Lerntagebuch, Projekten oder Zertifikaten gefunden. Hake es ab, wenn das stimmt."
   },
   "status": {
     "in_progress": "In Bearbeitung",

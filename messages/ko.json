@@ -93,7 +93,9 @@
     "checklist": "체크리스트",
     "checklistEmpty": "체크리스트 항목을 추가해보세요. 목표를 작은 단계로 쪼개면 달성하기 훨씬 쉬워요.",
     "checklistPlaceholder": "항목 이름...",
-    "checklistCategory": "카테고리 (예: 이론, 실습, 리서치)"
+    "checklistCategory": "카테고리 (예: 이론, 실습, 리서치)",
+    "checklistSuggested": "완료 제안 · 근거 있음",
+    "checklistSuggestedHint": "공부기록/프로젝트/자격증에서 이 항목과 겹치는 태그를 찾았어요. 맞으면 체크해서 확정하세요."
   },
   "status": {
     "in_progress": "진행 중",
