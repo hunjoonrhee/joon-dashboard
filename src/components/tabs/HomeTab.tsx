@@ -102,7 +102,7 @@ export default function HomeTab({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <CoachCard sessions={sessions} goals={goals} adoptedRoadmap={adoptedRoadmap} isPro={true} />
           <HomeVocabCard />
-          <HomeRoleplayCard isPro={true} />
+          <HomeRoleplayCard isPro={true} defaultLanguage={adoptedRoadmap?.target_language} />
         </div>
       ) : (
         <CoachCard sessions={sessions} goals={goals} adoptedRoadmap={adoptedRoadmap} isPro={true} />

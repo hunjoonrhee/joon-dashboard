@@ -16,7 +16,12 @@ export interface UserContext {
   adoptedRoadmapId: string | null;
 }
 
-export async function loadUserContext(topic: string): Promise<UserContext> {
+/**
+ * languageOverride lets a session practice a language other than the adopted
+ * roadmap's own target_language (mobile lets the user pick language + scenario
+ * before starting a roleplay, independent of what roadmap happens to be adopted).
+ */
+export async function loadUserContext(topic: string, languageOverride?: string | null): Promise<UserContext> {
   try {
     const [settingsRes, sessionsRes, roadmapRes, projectsRes] = await Promise.all([
       supabase.from('settings').select('key, value').in('key', ['career_level', 'adopted_roadmap_id']),
@@ -60,7 +65,7 @@ export async function loadUserContext(topic: string): Promise<UserContext> {
       projects,
       goal: adoptedRoadmap?.goal ?? topic,
       tilHistory,
-      targetLanguage: adoptedRoadmap?.target_language ?? null,
+      targetLanguage: languageOverride ?? adoptedRoadmap?.target_language ?? null,
       adoptedRoadmapId: adoptedRoadmap?.id ?? null,
     };
   } catch {
@@ -71,7 +76,7 @@ export async function loadUserContext(topic: string): Promise<UserContext> {
       projects: [],
       goal: topic,
       tilHistory: [],
-      targetLanguage: null,
+      targetLanguage: languageOverride ?? null,
       adoptedRoadmapId: null,
     };
   }

@@ -19,6 +19,7 @@ export default function TutorPage() {
   const searchParams = useSearchParams();
   const topic = searchParams.get('topic') ?? '';
   const isGate = searchParams.get('gate') === 'true';
+  const languageOverride = searchParams.get('lang');
 
   const [pageState, setPageState] = useState<PageState>(isGate ? 'gate' : 'loading');
   const [userContext, setUserContext] = useState<UserContext | null>(null);
@@ -27,11 +28,11 @@ export default function TutorPage() {
 
   useEffect(() => {
     if (isGate || !topic) return;
-    loadUserContext(topic).then((ctx) => {
+    loadUserContext(topic, languageOverride).then((ctx) => {
       setUserContext(ctx);
       setPageState('session');
     });
-  }, [topic, isGate]);
+  }, [topic, isGate, languageOverride]);
 
   const {
     messages,

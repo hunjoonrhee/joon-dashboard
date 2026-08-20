@@ -27,3 +27,6 @@ export function getLanguageCode(targetLanguage: string | null): string | null {
   if (!targetLanguage) return null;
   return LANGUAGE_CODES[targetLanguage] ?? null;
 }
+
+/** English names, same casing ai_roadmaps.target_language and vocab_words.language already store - for a language picker, not for display translation. */
+export const SUPPORTED_LANGUAGES = Object.keys(LANGUAGE_CODES);

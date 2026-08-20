@@ -1,5 +1,6 @@
 'use client';
 
+import { SUPPORTED_LANGUAGES } from '@/lib/language-codes';
 import { MessageCircle, Play } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
@@ -7,14 +8,19 @@ import { useState } from 'react';
 
 interface Props {
   isPro?: boolean;
+  /** Preselects the language dropdown - defaults to the adopted roadmap's own target_language, but the user can still practice a different language for this one-off session (mobile parity). */
+  defaultLanguage?: string | null;
 }
 
-/** Lets the user pick their own roleplay scenario in free text (mobile parity) instead of only ever entering via CoachCard's AI-suggested topic. */
-export default function HomeRoleplayCard({ isPro = false }: Props) {
+/** Lets the user pick their own roleplay language + scenario in free text (mobile parity) instead of only ever entering via CoachCard's AI-suggested topic in whatever language the adopted roadmap happens to be. */
+export default function HomeRoleplayCard({ isPro = false, defaultLanguage }: Props) {
   const t = useTranslations('home');
   const router = useRouter();
   const locale = useLocale();
   const [scenario, setScenario] = useState('');
+  const [language, setLanguage] = useState(
+    defaultLanguage && SUPPORTED_LANGUAGES.includes(defaultLanguage) ? defaultLanguage : SUPPORTED_LANGUAGES[0]
+  );
 
   const handleStart = () => {
     const topic = scenario.trim();
@@ -23,7 +29,7 @@ export default function HomeRoleplayCard({ isPro = false }: Props) {
       router.push(`/${locale}/dashboard/tutor?gate=true`);
       return;
     }
-    router.push(`/${locale}/dashboard/tutor?topic=${encodeURIComponent(topic)}`);
+    router.push(`/${locale}/dashboard/tutor?topic=${encodeURIComponent(topic)}&lang=${encodeURIComponent(language)}`);
   };
 
   return (
@@ -34,6 +40,18 @@ export default function HomeRoleplayCard({ isPro = false }: Props) {
       </div>
 
       <p className="text-xs text-ink-faint">{t('roleplaySubtitle')}</p>
+
+      <select
+        value={language}
+        onChange={(e) => setLanguage(e.target.value)}
+        className="bg-surf-2 border border-border rounded-lg px-2.5 py-1.5 text-xs text-ink outline-none focus:border-pri transition-colors"
+      >
+        {SUPPORTED_LANGUAGES.map((lang) => (
+          <option key={lang} value={lang}>
+            {lang}
+          </option>
+        ))}
+      </select>
 
       <textarea
         value={scenario}
