@@ -1,5 +1,6 @@
 'use client';
 
+import { stripDialogueTags } from '@/lib/vocab';
 import type { VocabWord } from '@/types';
 import { useTranslations } from 'next-intl';
 
@@ -31,7 +32,9 @@ export default function VocabCard({ word, flipped, onFlip }: Props) {
           style={{ transform: 'rotateY(180deg)' }}
         >
           <span className="text-lg font-semibold text-pri">{word.meaning}</span>
-          {word.example_sentence && <p className="text-sm text-ink-dim leading-relaxed">{word.example_sentence}</p>}
+          {word.example_sentence && (
+            <p className="text-sm text-ink-dim leading-relaxed">{stripDialogueTags(word.example_sentence)}</p>
+          )}
         </div>
       </div>
     </div>

@@ -5,7 +5,7 @@ import VocabCard from '@/components/vocab/VocabCard';
 import VocabReviewActions from '@/components/vocab/VocabReviewActions';
 import { useDueVocabWords, useVocabWords } from '@/lib/queries';
 import { cardCls, inputCls, labelCls } from '@/lib/styles';
-import { createVocabWord, deleteVocabWord, reviewVocabWord } from '@/lib/vocab';
+import { createVocabWord, deleteVocabWord, reviewVocabWord, stripDialogueTags } from '@/lib/vocab';
 import type { VocabWord } from '@/types';
 import { ArrowLeft, BookMarked, ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -183,7 +183,7 @@ function VocabList({
               </div>
               {expanded && w.example_sentence && (
                 <div className="px-3 pb-3 pt-0 border-t border-border">
-                  <p className="text-xs text-ink-dim mt-2 leading-relaxed">{w.example_sentence}</p>
+                  <p className="text-xs text-ink-dim mt-2 leading-relaxed">{stripDialogueTags(w.example_sentence)}</p>
                 </div>
               )}
             </div>

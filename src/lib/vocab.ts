@@ -2,6 +2,13 @@ import { computeNextReview } from '@/lib/spaced-repetition';
 import { getCurrentUserId, supabase, upsertWithUser } from '@/lib/supabase';
 import type { VocabWord } from '@/types';
 
+/**
+ * Display-time backstop for words saved before /api/tutor/chat's [DIALOGUE]
+ * stripping existed - old rows can still have the raw tags sitting in
+ * example_sentence, visible to the user on the vocab list/review screens.
+ */
+export const stripDialogueTags = (value: string) => value.replace(/\[\/?DIALOGUE\]/g, '').trim();
+
 export async function fetchAllVocabWords(): Promise<VocabWord[]> {
   const { data } = await supabase.from('vocab_words').select('*').order('created_at', { ascending: false });
   return (data ?? []) as VocabWord[];

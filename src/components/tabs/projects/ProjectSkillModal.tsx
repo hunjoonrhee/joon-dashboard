@@ -28,11 +28,12 @@ export default function ProjectSkillModal({ projectId, projectName, onClose, onS
 
   useEffect(() => {
     const load = async () => {
-      const { data: setting } = await supabase
-        .from('settings')
-        .select('value')
-        .eq('key', 'adopted_roadmap_id')
-        .single();
+      const [{ data: setting }, { data: existing }] = await Promise.all([
+        supabase.from('settings').select('value').eq('key', 'adopted_roadmap_id').single(),
+        supabase.from('project_skills').select('tags').eq('project_id', projectId).maybeSingle(),
+      ]);
+      if (existing?.tags) setSelected(existing.tags);
+
       if (!setting?.value) return;
       const { data: roadmap } = await supabase.from('ai_roadmaps').select('stages').eq('id', setting.value).single();
       if (!roadmap?.stages) return;
@@ -42,7 +43,7 @@ export default function ProjectSkillModal({ projectId, projectName, onClose, onS
       setTagPool(tags.sort());
     };
     load();
-  }, []);
+  }, [projectId]);
 
   const toggle = (tag: string) => {
     setSelected((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]));
