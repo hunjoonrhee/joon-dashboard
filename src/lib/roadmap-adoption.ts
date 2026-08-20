@@ -1,27 +1,6 @@
+import { buildTopicPayloadsFromStages } from '@/lib/roadmap-progress';
 import { getCurrentUserId, insertWithUser, supabase } from '@/lib/supabase';
-import type { AiRoadmap, RoadmapStage } from '@/types';
-
-/**
- * Builds one Topic insert payload per skill across all stages, so the
- * checklist a user actually checks off (topics -> overallPct) starts out
- * matching what the AI roadmap already generated (stage.skills), instead of
- * requiring the user to hand-retype the whole curriculum before the
- * progress dial can ever move. `category` defaults to 'general' - skills
- * don't carry their own sub-grouping, same default the manual add-topic
- * flow already uses.
- */
-function buildTopicPayloadsFromStages(stages: RoadmapStage[], goalIdByStageLevel: Map<number, string>) {
-  return stages.flatMap((stage) => {
-    const goalId = goalIdByStageLevel.get(stage.level);
-    if (!goalId) return [];
-    return stage.skills.map((skill) => ({
-      name: skill.name,
-      category: 'general',
-      goal_id: goalId,
-      completed: false,
-    }));
-  });
-}
+import type { AiRoadmap } from '@/types';
 
 /**
  * The shared "make this roadmap the adopted one" sequence: un-adopts every

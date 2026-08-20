@@ -2,6 +2,7 @@
 
 import AddSessionModal from '@/components/AddSessionModal';
 import { useUser } from '@/components/UserProvider';
+import { scopeFocusGoals } from '@/lib/roadmap-progress';
 import { supabase } from '@/lib/supabase';
 import type { Goal, Note, ProjectTask, Session, TodayItem, Topic } from '@/types';
 import { useState } from 'react';
@@ -49,10 +50,7 @@ export default function HomeTab({
 
   useAchievementDetectors(user?.id, allSessions, goals, adoptedRoadmap);
 
-  // Same scoping as useHomeStats - switching the adopted roadmap doesn't
-  // clear is_focus on a previously-adopted roadmap's leftover goal, so a
-  // stale one can't be filtered out by is_focus alone.
-  const focusGoals = goals.filter((g) => g.is_focus && (g.roadmap_id === null || g.roadmap_id === adoptedRoadmapId));
+  const focusGoals = scopeFocusGoals(goals, adoptedRoadmapId);
   const totalTopics = topics.filter((t) => focusGoals.some((g) => g.id === t.goal_id));
 
   const suggestedTopics = totalTopics

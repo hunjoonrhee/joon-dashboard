@@ -2,6 +2,7 @@
 
 import { useSessions } from '@/lib/queries';
 import { calcGapAnalysis } from '@/lib/gapAnalysis';
+import { scopeFocusGoals } from '@/lib/roadmap-progress';
 import { calcMaxStreak, calcStreak } from '@/lib/streak';
 import { supabase } from '@/lib/supabase';
 import type { AiRoadmap, Goal, Session, Topic } from '@/types';
@@ -73,13 +74,7 @@ export function useHomeStats({
   const thisMonth = new Date().getMonth();
   const monthCount = roadmapSessions.filter((s) => new Date(s.date).getMonth() === thisMonth).length;
 
-  // Switching the adopted roadmap (RoadmapTab's "채택하기") only manages
-  // is_focus on the newly-adopted roadmap's own auto-generated goal - it
-  // never clears is_focus on a goal left over from a previously-adopted,
-  // now-unrelated roadmap. Scoping here (not just by is_focus) stops a
-  // stale goal from a roadmap the user isn't even on anymore from leaking
-  // into the progress dial.
-  const focusGoals = goals.filter((g) => g.is_focus && (g.roadmap_id === null || g.roadmap_id === adoptedRoadmapId));
+  const focusGoals = scopeFocusGoals(goals, adoptedRoadmapId);
   const totalTopics = topics.filter((t) => focusGoals.some((g) => g.id === t.goal_id));
   const completedTopics = totalTopics.filter((t) => t.completed);
   const overallPct = totalTopics.length === 0 ? 0 : Math.round((completedTopics.length / totalTopics.length) * 100);
