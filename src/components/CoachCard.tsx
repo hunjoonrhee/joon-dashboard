@@ -109,7 +109,8 @@ export default function CoachCard({ sessions, goals, adoptedRoadmap, onRefresh, 
       router.push(`/${locale}/dashboard/tutor?gate=true`);
       return;
     }
-    router.push(`/${locale}/dashboard/tutor`);
+    const topic = encodeURIComponent(adoptedRoadmap?.goal ?? '');
+    router.push(`/${locale}/dashboard/tutor?topic=${topic}`);
   };
 
   if (!adoptedRoadmap) return null;
