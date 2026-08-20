@@ -32,7 +32,10 @@ growpath-mobile 리디자인 톤(그린/크림, `#2F5D50`) 이식됨 — `indigo
 
 - SRP, 컴포넌트 잘게 분리, TS strict(암묵적 any 금지)
 - i18n 하드코딩 금지 — `messages/{ko,de,en}.json` 3개 동시 업데이트 (AI/DB가 채우는 동적 콘텐츠는 예외)
-- `supabase/migrations` 폴더 없음 — 스키마는 Supabase 대시보드/CLI로 직접 관리
+- 스키마 변경은 `supabase/migrations/YYYYMMDDHHMMSS_description.sql`로 추가 (CLI 미연동 상태라
+  실제 반영은 여전히 Supabase 대시보드 SQL Editor에 파일 내용을 붙여넣는 방식 — 목적은 자동 적용이
+  아니라 변경 이력을 git으로 추적하는 것). 기존 테이블 변경 전 `if not exists`/`if not exists (select
+  1 from pg_constraint ...)` 등으로 재실행해도 안전하게 작성
 
 ## 환경변수
 
