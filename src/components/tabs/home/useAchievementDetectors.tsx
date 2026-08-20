@@ -6,7 +6,7 @@ import { useNewRecordDetector } from '@/hooks/achievements/useNewRecordDetector'
 import { useOneTimeUnlockDetector } from '@/hooks/achievements/useOneTimeUnlockDetector';
 import { computeAchievementStats, type AchievementStats } from '@/lib/achievements';
 import { useCelebration, type CelebrationColorTheme } from '@/lib/celebration-context';
-import { useVocabWordCount } from '@/lib/queries';
+import { usePronunciationBestScore, useVocabWordCount } from '@/lib/queries';
 import { calcStreak } from '@/lib/streak';
 import type { AiRoadmap, Goal, Session } from '@/types';
 import { useLocale, useTranslations } from 'next-intl';
@@ -34,7 +34,14 @@ export function useAchievementDetectors(
   const showCelebration = useCelebration();
 
   const { data: vocabWordCount = 0 } = useVocabWordCount();
-  const stats: AchievementStats = computeAchievementStats(sessions, goals, adoptedRoadmap, vocabWordCount);
+  const { data: bestPronunciation = null } = usePronunciationBestScore();
+  const stats: AchievementStats = computeAchievementStats(
+    sessions,
+    goals,
+    adoptedRoadmap,
+    vocabWordCount,
+    bestPronunciation
+  );
   const currentStreak = calcStreak(sessions);
 
   const goTo = useCallback((path: string) => router.push(`/${locale}${path}`), [router, locale]);
@@ -91,6 +98,22 @@ export function useAchievementDetectors(
         eyebrow: t('celebration.longestSession.eyebrow'),
         title: t('celebration.longestSession.title'),
         subtitle: t('celebration.longestSession.subtitle', { minutes }),
+        centerIcon: <Icon size={56} strokeWidth={1.8} />,
+        colorTheme: 'gold',
+        primaryLabel: t('celebration.viewAchievementsCta'),
+        onPrimary: () => goTo('/dashboard/achievements'),
+      });
+    },
+    [showCelebration, t, goTo]
+  );
+
+  const handleNewPronunciationRecord = useCallback(
+    (score: number) => {
+      const Icon = getBadge('pr-pronunciation').icon;
+      showCelebration({
+        eyebrow: t('celebration.pronunciation.eyebrow'),
+        title: t('celebration.pronunciation.title'),
+        subtitle: t('celebration.pronunciation.subtitle', { score: Math.round(score) }),
         centerIcon: <Icon size={56} strokeWidth={1.8} />,
         colorTheme: 'gold',
         primaryLabel: t('celebration.viewAchievementsCta'),
@@ -162,6 +185,11 @@ export function useAchievementDetectors(
     userId ? `growpath.bestLongestSession.${userId}` : null,
     stats.longestSessionMinutes,
     handleNewLongestSession
+  );
+  useNewRecordDetector(
+    userId ? `growpath.bestPronunciation.${userId}` : null,
+    stats.bestPronunciationScore,
+    handleNewPronunciationRecord
   );
   // Stage completion is "new record" semantics too - currentStageLevel only ever increases as stages complete.
   useNewRecordDetector(

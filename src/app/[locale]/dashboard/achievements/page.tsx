@@ -6,7 +6,7 @@ import { BADGES } from '@/components/achievements/badge-registry';
 import { useAdoptedRoadmap } from '@/components/tabs/home/hooks/useAdoptedRoadmap';
 import { computeAchievementStats, computeUnlockedBadges } from '@/lib/achievements';
 import { useCelebration } from '@/lib/celebration-context';
-import { useGoals, useSessions, useSettings, useVocabWordCount } from '@/lib/queries';
+import { useGoals, usePronunciationBestScore, useSessions, useSettings, useVocabWordCount } from '@/lib/queries';
 import type { BadgeId } from '@/lib/achievements';
 import { ArrowLeft } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -23,8 +23,9 @@ export default function AchievementsPage() {
   const { data: settings = {} } = useSettings();
   const { adoptedRoadmap } = useAdoptedRoadmap(settings);
   const { data: vocabWordCount = 0 } = useVocabWordCount();
+  const { data: bestPronunciation = null } = usePronunciationBestScore();
 
-  const stats = computeAchievementStats(sessions, goals, adoptedRoadmap, vocabWordCount);
+  const stats = computeAchievementStats(sessions, goals, adoptedRoadmap, vocabWordCount, bestPronunciation);
   const unlocked = computeUnlockedBadges(stats);
   const unlockedCount = BADGES.filter((b) => unlocked[b.id]).length;
 

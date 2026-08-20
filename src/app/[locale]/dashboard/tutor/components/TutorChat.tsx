@@ -10,11 +10,20 @@ interface Props {
   loading: boolean;
   isEndingSession: boolean;
   lastError: TutorError | null;
+  languageCode: string | null;
   onQuizSelect: (msgIdx: number, optIdx: number) => void;
   onRetry: () => void;
 }
 
-export default function TutorChat({ messages, loading, isEndingSession, lastError, onQuizSelect, onRetry }: Props) {
+export default function TutorChat({
+  messages,
+  loading,
+  isEndingSession,
+  lastError,
+  languageCode,
+  onQuizSelect,
+  onRetry,
+}: Props) {
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -24,7 +33,7 @@ export default function TutorChat({ messages, loading, isEndingSession, lastErro
   return (
     <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
       {messages.map((msg, i) => (
-        <TutorMessageItem key={i} message={msg} msgIdx={i} onQuizSelect={onQuizSelect} />
+        <TutorMessageItem key={i} message={msg} msgIdx={i} languageCode={languageCode} onQuizSelect={onQuizSelect} />
       ))}
 
       {(loading || isEndingSession) && (

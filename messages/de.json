@@ -614,6 +614,12 @@
   "tutor": {
     "pageTitle": "KI-Tutor",
     "vocabLink": "Vokabeln",
+    "voiceInput": "Spracheingabe",
+    "recording": "Aufnahme läuft...",
+    "transcribing": "Wird transkribiert...",
+    "scoringPronunciation": "Aussprache wird bewertet...",
+    "voiceError": "Mikrofon nicht verfügbar",
+    "pronunciationScore": "Aussprache {score}",
     "sessionWith": "Sitzung: {topic}",
     "elapsed": "{min} Min.",
     "endSession": "Sitzung beenden",

@@ -1,5 +1,6 @@
 'use client';
 
+import { getLanguageCode } from '@/lib/language-codes';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import TutorChat from './components/TutorChat';
@@ -58,6 +59,8 @@ export default function TutorPage() {
     setCodeReviewMode(false);
   };
 
+  const languageCode = getLanguageCode(userContext?.targetLanguage ?? null);
+
   if (pageState === 'loading') {
     return (
       <main className="min-h-screen flex items-center justify-center">
@@ -89,6 +92,7 @@ export default function TutorPage() {
             loading={loading}
             isEndingSession={isEndingSession}
             lastError={lastError}
+            languageCode={languageCode}
             onQuizSelect={handleQuizSelect}
             onRetry={handleRetry}
           />
@@ -99,6 +103,7 @@ export default function TutorPage() {
             <TutorInput
               loading={loading}
               isEndingSession={isEndingSession}
+              languageCode={languageCode}
               onSend={handleSend}
               onCodeReviewOpen={() => setCodeReviewMode(true)}
             />

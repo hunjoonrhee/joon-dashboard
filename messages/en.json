@@ -614,6 +614,12 @@
   "tutor": {
     "pageTitle": "AI Tutor",
     "vocabLink": "Vocab",
+    "voiceInput": "Voice input",
+    "recording": "Recording...",
+    "transcribing": "Transcribing...",
+    "scoringPronunciation": "Scoring pronunciation...",
+    "voiceError": "Couldn't access the microphone",
+    "pronunciationScore": "Pronunciation {score}",
     "sessionWith": "{topic} session",
     "elapsed": "{min}m",
     "endSession": "End session",

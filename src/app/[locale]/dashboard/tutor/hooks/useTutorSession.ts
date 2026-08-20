@@ -1,5 +1,7 @@
 'use client';
 
+import type { PronunciationResult } from '@/lib/azure-pronunciation';
+import { savePronunciationAttempt } from '@/lib/pronunciation';
 import { insertWithUser } from '@/lib/supabase';
 import { saveVocabWords } from '@/lib/vocab';
 import { useLocale, useTranslations } from 'next-intl';
@@ -33,6 +35,10 @@ export interface Message {
   summary?: SummaryData;
   selectedOption?: number;
   isCodeReview?: boolean;
+  /** User messages only - set when sent right after a voice recording whose transcript wasn't edited. */
+  pronunciation?: PronunciationResult;
+  /** Model messages only - the dialogue-only text the server extracted from [DIALOGUE] tags, for TTS playback. */
+  dialogueText?: string;
 }
 
 export interface SavedRecord {
@@ -132,6 +138,7 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
         parts: [{ text: data.text }],
         quiz: data.quiz ?? undefined,
         summary: data.summary ?? undefined,
+        dialogueText: data.dialogueText ?? undefined,
       };
       setMessages((prev) => [...prev, aiMsg]);
       if (data.summary) setSessionSummary(data.summary);
@@ -148,11 +155,12 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
     if (retryFn) retryFn();
   };
 
-  const handleSend = async (text: string) => {
+  const handleSend = async (text: string, pronunciation?: PronunciationResult) => {
     if (!text.trim() || loading) return;
-    const userMsg: Message = { role: 'user', parts: [{ text }] };
+    const userMsg: Message = { role: 'user', parts: [{ text }], pronunciation };
     const next = [...messages, userMsg];
     setMessages(next);
+    if (pronunciation) savePronunciationAttempt(pronunciation.pronScore).catch(() => {});
     await sendToAI(next);
   };
 

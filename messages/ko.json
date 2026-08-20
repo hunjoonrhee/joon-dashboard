@@ -614,6 +614,12 @@
   "tutor": {
     "pageTitle": "AI 튜터",
     "vocabLink": "단어장",
+    "voiceInput": "음성으로 입력",
+    "recording": "녹음 중...",
+    "transcribing": "변환 중...",
+    "scoringPronunciation": "발음 분석 중...",
+    "voiceError": "마이크를 사용할 수 없어요",
+    "pronunciationScore": "발음 {score}점",
     "sessionWith": "{topic} 세션",
     "elapsed": "{min}분",
     "endSession": "세션 종료",

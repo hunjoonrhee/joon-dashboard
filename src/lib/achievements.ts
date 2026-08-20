@@ -1,3 +1,4 @@
+import type { BestPronunciationScore } from '@/lib/pronunciation';
 import { calcMaxStreak } from '@/lib/streak';
 import type { AiRoadmap, Goal, Session } from '@/types';
 
@@ -25,7 +26,6 @@ export type AchievementStats = {
   totalStudyMinutes: number;
   longestSessionMinutes: number | null;
   longestSessionDate: string | null;
-  /** Not persisted anywhere on web yet (pronunciation scoring is request-only, never saved) - always null until a future phase adds storage + a recording UI (no browser audio capture exists yet). */
   bestPronunciationScore: number | null;
   bestPronunciationDate: string | null;
   savedVocabWordCount: number;
@@ -76,7 +76,8 @@ export function computeAchievementStats(
   sessions: Session[],
   goals: Goal[],
   adoptedRoadmap: AiRoadmap | null,
-  vocabWordCount = 0
+  vocabWordCount = 0,
+  bestPronunciation: BestPronunciationScore = null
 ): AchievementStats {
   const longestSession = sessions.reduce<{ minutes: number; date: string } | null>((best, s) => {
     if (s.duration_minutes === null) return best;
@@ -94,8 +95,8 @@ export function computeAchievementStats(
     totalStudyMinutes: sessions.reduce((sum, s) => sum + (s.duration_minutes ?? 0), 0),
     longestSessionMinutes: longestSession?.minutes ?? null,
     longestSessionDate: longestSession?.date ?? null,
-    bestPronunciationScore: null,
-    bestPronunciationDate: null,
+    bestPronunciationScore: bestPronunciation?.score ?? null,
+    bestPronunciationDate: bestPronunciation?.date ?? null,
     savedVocabWordCount: vocabWordCount,
     currentStageLevel: adoptedRoadmap ? 1 + completedStages : null,
     totalStages: adoptedRoadmap ? adoptedRoadmap.stages.length : null,
