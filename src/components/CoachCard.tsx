@@ -104,6 +104,14 @@ export default function CoachCard({ sessions, goals, adoptedRoadmap, onRefresh, 
     router.push(`/${locale}/dashboard/tutor?topic=${topic}`);
   };
 
+  const handleStartTutorDirect = () => {
+    if (!isPro) {
+      router.push(`/${locale}/dashboard/tutor?gate=true`);
+      return;
+    }
+    router.push(`/${locale}/dashboard/tutor`);
+  };
+
   if (!adoptedRoadmap) return null;
 
   return (
@@ -148,6 +156,16 @@ export default function CoachCard({ sessions, goals, adoptedRoadmap, onRefresh, 
             </p>
           </div>
         </div>
+      )}
+
+      {!hasEnoughData && (
+        <button
+          onClick={handleStartTutorDirect}
+          className="flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-pri text-on-pri text-xs font-medium hover:opacity-90 transition-colors self-start"
+        >
+          <Play size={11} fill="currentColor" /> {tTutor('startStudy')}
+          {!isPro && <span className="ml-1 bg-white/20 text-on-pri text-[10px] px-1.5 py-0.5 rounded-full">Pro</span>}
+        </button>
       )}
 
       {hasEnoughData && status === 'idle' && (

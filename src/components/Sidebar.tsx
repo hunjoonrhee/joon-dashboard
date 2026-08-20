@@ -34,7 +34,8 @@ export default function Sidebar() {
 
   const isActive = (path: string) => {
     const fullPath = `/${locale}${path}`;
-    return pathname === fullPath || pathname.startsWith(`/${locale}${path}/`);
+    if (path === '/dashboard') return pathname === fullPath;
+    return pathname === fullPath || pathname.startsWith(`${fullPath}/`);
   };
 
   const navigate = (path: string) => router.push(`/${locale}${path}`);
