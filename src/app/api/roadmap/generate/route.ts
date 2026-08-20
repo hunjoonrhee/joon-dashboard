@@ -77,8 +77,12 @@ export async function POST(req: NextRequest) {
   // roadmap's id/adopted status/created_at stay put, only the AI-derived
   // content (stages/domain/targetLanguage) and the goal/career_level that
   // produced it are replaced.
-  const { goal, careerLevel, locale, roadmapId } = await req.json();
+  const { goal, careerLevel, locale, roadmapId, presetDomain, presetTargetLanguage } = await req.json();
   const lang = locale === 'de' ? 'German' : locale === 'en' ? 'English' : 'Korean';
+
+  const VALID_DOMAINS = ['dev', 'language', 'art', 'other'];
+  const validPresetDomain = VALID_DOMAINS.includes(presetDomain) ? (presetDomain as string) : null;
+  const validPresetTargetLanguage = typeof presetTargetLanguage === 'string' && presetTargetLanguage.trim() ? presetTargetLanguage.trim() : null;
 
   if (!goal || !careerLevel) {
     return NextResponse.json({ error: 'goal and careerLevel are required' }, { status: 400 });
@@ -132,6 +136,13 @@ export async function POST(req: NextRequest) {
 Final goal: ${goal}
 Output language: ${lang}
 ${bio ? `\nLearner background (self-described, optional context - see system instructions for how to use this):\n${bio}` : ''}
+${
+  validPresetTargetLanguage
+    ? validPresetDomain === 'language'
+      ? `\nNote: the learner explicitly told us this goal is about learning ${validPresetTargetLanguage}. Generate all stages/skills accordingly.`
+      : `\nNote: the learner explicitly told us this goal requires proficiency in ${validPresetTargetLanguage} alongside its main domain (e.g. a "${validPresetTargetLanguage}-speaking" professional goal). Reflect that requirement in the roadmap where relevant.`
+    : ''
+}
 Generate a learning roadmap from the current level to the final goal. Adapt the content naturally to the domain (e.g. programming, language learning, music, design, etc.). All stage titles, skill names, and descriptions must be written in ${lang}. Tags must always be in English.`;
 
   const requestBody = JSON.stringify({
@@ -183,9 +194,16 @@ Generate a learning roadmap from the current level to the final goal. Adapt the 
     // Defensive against the model drifting from the instructed enum -
     // an unrecognized value falls back to 'other' rather than persisting
     // garbage a mobile client would fail to match against its own Domain type.
-    const VALID_DOMAINS = ['dev', 'language', 'art', 'other'];
-    const domain: string = VALID_DOMAINS.includes(parsed.domain) ? parsed.domain : 'other';
-    const targetLanguage: string | null = typeof parsed.targetLanguage === 'string' && parsed.targetLanguage.trim() ? parsed.targetLanguage.trim() : null;
+    // A preset from onboarding's step 1 domain card wins outright over the
+    // model's own guess - the user told us directly, so there's nothing to
+    // classify. Same for targetLanguage: trusting free-text inference here
+    // was the bug (a goal mixing dev + language context could get
+    // classified as domain "dev" with targetLanguage left null, silently
+    // hiding the language module gated on it).
+    const domain: string = validPresetDomain ?? (VALID_DOMAINS.includes(parsed.domain) ? parsed.domain : 'other');
+    const targetLanguage: string | null =
+      validPresetTargetLanguage ??
+      (typeof parsed.targetLanguage === 'string' && parsed.targetLanguage.trim() ? parsed.targetLanguage.trim() : null);
 
     // 비회원 체험 — DB 저장 스킵
     if (!userId) {

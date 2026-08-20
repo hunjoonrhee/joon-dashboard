@@ -1,9 +1,10 @@
 'use client';
 
+import { SUPPORTED_LANGUAGES } from '@/lib/language-codes';
 import { upsertWithUser } from '@/lib/supabase';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const MAX_BIO_CHARS = 600;
 
@@ -15,11 +16,32 @@ export default function Onboarding2() {
   const [level, setLevel] = useState('');
   const [bio, setBio] = useState('');
   const [saving, setSaving] = useState(false);
+  const [domain, setDomain] = useState<string | null>(null);
+  // '' means "no specific language" - only meaningful (and optional) outside
+  // the language domain, where the goal might still require one (e.g. "German-
+  // speaking lead developer" is domain "dev" but still needs targetLanguage set,
+  // same case the roadmap generator's own system prompt already calls out).
+  const [targetLanguage, setTargetLanguage] = useState('');
+
+  // Step 1's domain card ("언어 학습" etc.) otherwise never reaches the AI
+  // roadmap generator - without this, target_language is left entirely to
+  // the model guessing from freeform goal/level text, which can misclassify
+  // and silently leave HomeTab's language-module gate (target_language) off.
+  useEffect(() => {
+    const d = sessionStorage.getItem('ob_domain');
+    setDomain(d);
+    if (d === 'lang') setTargetLanguage(SUPPORTED_LANGUAGES[0]);
+  }, []);
+
+  const isLanguageDomain = domain === 'lang';
 
   const handleNext = async () => {
     if (!goal.trim() || !level.trim()) return;
     sessionStorage.setItem('ob_goal', goal.trim());
     sessionStorage.setItem('ob_level', level.trim());
+    if (targetLanguage) {
+      sessionStorage.setItem('ob_target_language', targetLanguage);
+    }
     // Bio must land in `settings` before navigating - onboarding/3 kicks off
     // roadmap generation on mount, and /api/roadmap/generate reads bio
     // server-side at that point (see MAX_BIO_CHARS comment there).
@@ -69,6 +91,19 @@ export default function Onboarding2() {
                 if (e.key === 'Enter') handleNext();
               }}
             />
+          </div>
+          <div>
+            <label className="text-xs text-ink-dim mb-2 block">
+              {isLanguageDomain ? t('targetLanguageLabel') : t('targetLanguageOptionalLabel')}
+            </label>
+            <select className={inputCls} value={targetLanguage} onChange={(e) => setTargetLanguage(e.target.value)}>
+              {!isLanguageDomain && <option value="">{t('targetLanguageNone')}</option>}
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <option key={lang} value={lang}>
+                  {lang}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="text-xs text-ink-dim mb-1 block">{t('bioLabel')}</label>
