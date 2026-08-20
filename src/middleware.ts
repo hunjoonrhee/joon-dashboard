@@ -42,8 +42,17 @@ export async function middleware(request: NextRequest) {
   const isTryPage = /^\/(ko|de|en)\/try/.test(pathname);
   const isLandingPage = /^\/(ko|de|en)$/.test(pathname);
   const isOnboardingPage = /^\/(ko|de|en)\/onboarding/.test(pathname);
+  const isLegalPage = /^\/(ko|de|en)\/(terms|privacy)$/.test(pathname);
+  const isVerifyPage = /^\/(ko|de|en)\/verify$/.test(pathname);
   const isPublicPage =
-    isLoginPage || isSignupPage || isTryPage || isLandingPage || isOnboardingPage || pathname === '/';
+    isLoginPage ||
+    isSignupPage ||
+    isTryPage ||
+    isLandingPage ||
+    isOnboardingPage ||
+    isLegalPage ||
+    isVerifyPage ||
+    pathname === '/';
 
   // 비로그인 → 보호된 페이지 → 랜딩으로
   if (!user && !isPublicPage) {

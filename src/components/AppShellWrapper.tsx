@@ -4,7 +4,16 @@ import { usePathname } from 'next/navigation';
 import AppShell from './AppShell';
 import UserProvider from './UserProvider';
 
-const PUBLIC_PATTERNS = [/\/login$/, /\/signup/, /\/try/, /\/verify/, /\/onboarding/, /^\/(ko|de|en)$/];
+const PUBLIC_PATTERNS = [
+  /\/login$/,
+  /\/signup/,
+  /\/try/,
+  /\/verify/,
+  /\/onboarding/,
+  /\/terms$/,
+  /\/privacy$/,
+  /^\/(ko|de|en)$/,
+];
 
 export default function AppShellWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
