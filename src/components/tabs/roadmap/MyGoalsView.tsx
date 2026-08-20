@@ -203,10 +203,16 @@ export default function MyGoalsView({
                 >
                   {stage.level}
                 </div>
-                <div className="flex-1 min-w-0">
+                <div
+                  className={`flex-1 min-w-0 ${headerGoal ? 'cursor-pointer' : ''}`}
+                  onClick={() => headerGoal && router.push(`goals/${headerGoal.id}`)}
+                >
                   <p className="text-xs font-semibold text-ink-dim truncate">{stage.title}</p>
                   <p className="text-xs text-ink-faint truncate">{stage.description}</p>
                 </div>
+                {headerGoal && getTopics(headerGoal.id).length > 0 && (
+                  <span className="text-xs font-semibold text-pri flex-shrink-0">{getPct(headerGoal.id)}%</span>
+                )}
                 {headerGoal && (
                   <button
                     onClick={() => onEdit(headerGoal)}

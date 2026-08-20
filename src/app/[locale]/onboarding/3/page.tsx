@@ -2,19 +2,14 @@
 
 import AddSessionModal from '@/components/AddSessionModal';
 import { CompassDial } from '@/components/compass-dial';
+import { applyRoadmapAdoption } from '@/lib/roadmap-adoption';
 import { supabase as supabaseClient, upsertWithUser } from '@/lib/supabase';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
+import type { RoadmapStage } from '@/types';
 import { PenLine, Rocket, Sparkles, Trophy } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-
-interface RoadmapStage {
-  level: number;
-  title: string;
-  description: string;
-  skills: { name: string; tags: string[] }[];
-}
 
 type Step = 'roadmap' | 'cta';
 
@@ -112,10 +107,12 @@ export default function Onboarding3() {
           .single();
 
         if (roadmap) {
-          // Onboarding only ever creates one roadmap, but un-adopt any others
-          // defensively (same as RoadmapTab's real adopt flow) in case this
-          // ever runs for a user who already has one from elsewhere.
-          await supabaseClient.from('ai_roadmaps').update({ adopted: false }).neq('id', roadmap.id);
+          // Same "make this the adopted roadmap" sequence RoadmapTab's real
+          // adopt flow uses - un-adopts any other roadmap, creates a Goal per
+          // stage and a Topic per skill, so a brand-new user has an actual
+          // checklist (and a non-empty "내 목표") from the moment onboarding
+          // finishes, not just a bare roadmap row.
+          await applyRoadmapAdoption(roadmap);
           await upsertWithUser(
             'settings',
             { key: 'adopted_roadmap_id', value: roadmap.id },

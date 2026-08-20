@@ -1,7 +1,8 @@
 'use client';
 
 import { useToast } from '@/components/Toast';
-import { insertWithUser, supabase, upsertWithUser } from '@/lib/supabase';
+import { applyRoadmapAdoption } from '@/lib/roadmap-adoption';
+import { supabase, upsertWithUser } from '@/lib/supabase';
 import type { AiRoadmap, Goal, Session, Topic } from '@/types';
 import { BarChart2, Route, Star } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -93,29 +94,7 @@ export default function RoadmapTab({ goals, topics, sessions = [], onRefresh, se
 
   const handleAdopt = async (roadmap: AiRoadmap) => {
     try {
-      // 기존 모든 로드맵 adopted 해제
-      await supabase.from('ai_roadmaps').update({ adopted: false }).neq('id', roadmap.id);
-
-      // 새 로드맵 adopted 설정
-      await supabase.from('ai_roadmaps').update({ adopted: true }).eq('id', roadmap.id);
-
-      // 기존 이 로드맵에서 온 goals 삭제 (재채택 시 중복 방지)
-      await supabase.from('goals').delete().eq('roadmap_id', roadmap.id).eq('is_auto_generated', true);
-
-      // 각 stage → Goal 자동 생성
-      const goalPayloads = roadmap.stages.map((stage) => ({
-        name: stage.title,
-        description: stage.description,
-        status: 'planned' as const,
-        priority: 'medium' as const,
-        is_focus: stage.level === 1,
-        tags: stage.skills.flatMap((sk: { tags: string[] }) => sk.tags),
-        roadmap_id: roadmap.id,
-        stage_level: stage.level,
-        is_auto_generated: true, // 추가
-      }));
-
-      await insertWithUser('goals', goalPayloads);
+      await applyRoadmapAdoption(roadmap);
 
       // settings 업데이트
       await Promise.all([
