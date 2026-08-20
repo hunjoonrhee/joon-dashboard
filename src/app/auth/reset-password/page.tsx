@@ -1,7 +1,7 @@
 'use client';
 
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
-import { AuthChangeEvent } from '@supabase/supabase-js';
+import { AuthChangeEvent, AuthError } from '@supabase/supabase-js';
 import { KeyRound, Lock } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
@@ -14,7 +14,9 @@ import { Suspense, useEffect, useState } from 'react';
 const STRINGS = {
   ko: {
     checking: '링크를 확인하는 중...',
-    checkingSub: '이메일의 링크를 통해 접속해줘.',
+    checkingSub: '이메일의 링크를 통해 접속해주세요.',
+    invalidLink: '링크가 만료되었거나 이미 사용됐어요. 비밀번호 찾기를 다시 시도해주세요.',
+    backToLogin: '로그인으로 돌아가기',
     title: '새 비밀번호 설정',
     newPassword: '새 비밀번호',
     confirmPassword: '비밀번호 확인',
@@ -25,6 +27,8 @@ const STRINGS = {
   en: {
     checking: 'Checking your link...',
     checkingSub: 'Please open this page from the link in your email.',
+    invalidLink: 'This link has expired or was already used. Please request a new password reset.',
+    backToLogin: 'Back to login',
     title: 'Set a new password',
     newPassword: 'New password',
     confirmPassword: 'Confirm password',
@@ -35,6 +39,8 @@ const STRINGS = {
   de: {
     checking: 'Link wird überprüft...',
     checkingSub: 'Bitte öffne diese Seite über den Link in deiner E-Mail.',
+    invalidLink: 'Dieser Link ist abgelaufen oder wurde bereits verwendet. Bitte fordere einen neuen Link an.',
+    backToLogin: 'Zurück zum Login',
     title: 'Neues Passwort festlegen',
     newPassword: 'Neues Passwort',
     confirmPassword: 'Passwort bestätigen',
@@ -56,14 +62,36 @@ function ResetPasswordForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [linkInvalid, setLinkInvalid] = useState(false);
 
   useEffect(() => {
-    // Supabase가 URL hash에서 세션을 자동으로 처리함
-    supabase.auth.onAuthStateChange((event: AuthChangeEvent) => {
+    // This client uses the PKCE flow (@supabase/ssr's default), so the
+    // recovery email links here with `?code=...` in the query string, not
+    // the old implicit flow's `#access_token=...` hash - onAuthStateChange
+    // alone never fires for a bare query-param code, which left this page
+    // stuck on "checking your link" forever. Exchange it explicitly first;
+    // fall back to onAuthStateChange only for the legacy hash-based link
+    // shape, in case an already-sent email still points at the old flow.
+    const code = searchParams.get('code');
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }: { error: AuthError | null }) => {
+        if (error) {
+          setLinkInvalid(true);
+        } else {
+          setReady(true);
+        }
+      });
+      return;
+    }
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event: AuthChangeEvent) => {
       if (event === 'PASSWORD_RECOVERY') {
         setReady(true);
       }
     });
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleReset = async () => {
@@ -93,8 +121,22 @@ function ResetPasswordForm() {
           <div className="w-14 h-14 rounded-full bg-pri/10 flex items-center justify-center mx-auto mb-5">
             <KeyRound size={26} strokeWidth={1.8} className="text-pri" />
           </div>
-          <h1 className="text-xl font-bold text-ink mb-2">{t.checking}</h1>
-          <p className="text-sm text-ink-faint">{t.checkingSub}</p>
+          {linkInvalid ? (
+            <>
+              <p className="text-sm text-ink mb-5">{t.invalidLink}</p>
+              <button
+                onClick={() => router.push(`/${locale}/login`)}
+                className="text-sm font-semibold text-pri hover:opacity-90 transition-colors"
+              >
+                {t.backToLogin}
+              </button>
+            </>
+          ) : (
+            <>
+              <h1 className="text-xl font-bold text-ink mb-2">{t.checking}</h1>
+              <p className="text-sm text-ink-faint">{t.checkingSub}</p>
+            </>
+          )}
         </div>
       </div>
     );
