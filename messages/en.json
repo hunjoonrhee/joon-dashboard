@@ -285,6 +285,7 @@
   "settings": {
     "back": "Back",
     "proSectionTitle": "Growpath Pro",
+    "proAdminStatus": "You're an admin account. Every feature is unlocked.",
     "proActiveStatus": "You're subscribed to Pro. Unlimited AI tutor access.",
     "proTrialStatus": "Free trial · {days} day(s) left",
     "proFreeStatus": "You're on the free plan. Upgrade to Pro for unlimited AI tutor access.",

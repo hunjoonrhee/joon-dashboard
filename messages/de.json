@@ -285,6 +285,7 @@
   "settings": {
     "back": "Zurück",
     "proSectionTitle": "Growpath Pro",
+    "proAdminStatus": "Du bist ein Admin-Konto. Alle Funktionen sind freigeschaltet.",
     "proActiveStatus": "Du hast Pro abonniert. Unbegrenzter Zugang zum KI-Tutor.",
     "proTrialStatus": "Kostenlose Testphase · noch {days} Tag(e)",
     "proFreeStatus": "Du nutzt den kostenlosen Plan. Upgrade auf Pro für unbegrenzten KI-Tutor-Zugang.",

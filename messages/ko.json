@@ -285,6 +285,7 @@
   "settings": {
     "back": "뒤로",
     "proSectionTitle": "Growpath Pro",
+    "proAdminStatus": "관리자 계정이에요. 모든 기능을 제한 없이 이용할 수 있어요.",
     "proActiveStatus": "Pro 구독 중이에요. AI 튜터를 무제한으로 이용할 수 있어요.",
     "proTrialStatus": "무료 체험 중이에요 · {days}일 남음",
     "proFreeStatus": "무료 플랜을 이용 중이에요. Pro로 업그레이드하면 AI 튜터를 무제한으로 쓸 수 있어요.",

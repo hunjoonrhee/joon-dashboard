@@ -113,6 +113,7 @@ export default function SettingsPage() {
     show(t('certDeleted'), { type: 'info' });
   };
 
+  const isAdmin = subscription?.is_admin ?? false;
   const hasPaidSubscription =
     subscription?.status === 'active' || subscription?.status === 'trialing' || subscription?.status === 'past_due';
   const trialDaysLeft =
@@ -160,19 +161,23 @@ export default function SettingsPage() {
             <p className="text-sm font-medium text-ink">{t('proSectionTitle')}</p>
           </div>
           <p className="text-sm text-ink-dim mb-4">
-            {hasPaidSubscription
-              ? t('proActiveStatus')
-              : trialDaysLeft > 0
-                ? t('proTrialStatus', { days: trialDaysLeft })
-                : t('proFreeStatus')}
+            {isAdmin
+              ? t('proAdminStatus')
+              : hasPaidSubscription
+                ? t('proActiveStatus')
+                : trialDaysLeft > 0
+                  ? t('proTrialStatus', { days: trialDaysLeft })
+                  : t('proFreeStatus')}
           </p>
-          <button
-            onClick={handleBilling}
-            disabled={billingLoading}
-            className="w-full py-2.5 rounded-xl bg-pri text-on-pri text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-colors"
-          >
-            {billingLoading ? t('proRedirecting') : hasPaidSubscription ? t('manageBilling') : t('upgradeToProBtn')}
-          </button>
+          {!isAdmin && (
+            <button
+              onClick={handleBilling}
+              disabled={billingLoading}
+              className="w-full py-2.5 rounded-xl bg-pri text-on-pri text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-colors"
+            >
+              {billingLoading ? t('proRedirecting') : hasPaidSubscription ? t('manageBilling') : t('upgradeToProBtn')}
+            </button>
+          )}
         </div>
 
         <div className={cardCls}>
