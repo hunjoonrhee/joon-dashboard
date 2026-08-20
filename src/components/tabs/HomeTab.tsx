@@ -49,7 +49,10 @@ export default function HomeTab({
 
   useAchievementDetectors(user?.id, allSessions, goals, adoptedRoadmap);
 
-  const focusGoals = goals.filter((g) => g.is_focus);
+  // Same scoping as useHomeStats - switching the adopted roadmap doesn't
+  // clear is_focus on a previously-adopted roadmap's leftover goal, so a
+  // stale one can't be filtered out by is_focus alone.
+  const focusGoals = goals.filter((g) => g.is_focus && (g.roadmap_id === null || g.roadmap_id === adoptedRoadmapId));
   const totalTopics = topics.filter((t) => focusGoals.some((g) => g.id === t.goal_id));
 
   const suggestedTopics = totalTopics
