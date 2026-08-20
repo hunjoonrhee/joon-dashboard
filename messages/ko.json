@@ -57,6 +57,7 @@
     "weeklyTil": "TIL",
     "weeklyTopics": "완료 토픽",
     "gapLabel": "공부 방향 일치도",
+    "gapTooltip": "로드맵이 요구하는 스킬 태그 대비, 자격증·프로젝트 스킬·공부기록에서 겹치는 태그의 비율이에요. 자격증·프로젝트 스킬 태그는 완전 인정(가중치 1.0), 공부기록 태그는 부분 인정(가중치 0.6)돼요.",
     "noRoadmap": "AI 로드맵 미채택 — 로드맵 탭에서 생성해보세요",
     "recentNotes": "최근 노트",
     "recentTil": "최근 TIL",
@@ -196,7 +197,10 @@
     "skillModalNote": "선택한 태그는 갭 분석에 실전 사용으로 반영돼요",
     "skipForNow": "나중에 할게요",
     "skillsSaved": "스킬이 저장됐어요",
-    "skillsSaveFailed": "저장에 실패했어요"
+    "skillsSaveFailed": "저장에 실패했어요",
+    "skillsLinked": "스킬 {count}개 연결됨",
+    "skillsNotLinked": "스킬 태그 없음",
+    "editSkills": "스킬 태그 편집"
   },
   "roadmap": {
     "myGoals": "내 목표",

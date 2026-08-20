@@ -57,6 +57,7 @@
     "weeklyTil": "TIL",
     "weeklyTopics": "Topics done",
     "gapLabel": "Learning match",
+    "gapTooltip": "Share of your roadmap's required skill tags backed by evidence - certifications and project skills count fully (1.0x), study-log tags count partially (0.6x).",
     "noRoadmap": "No AI roadmap adopted — generate one in the Roadmap tab",
     "recentNotes": "Recent Notes",
     "recentTil": "Recent TIL",
@@ -196,7 +197,10 @@
     "skillModalNote": "Selected tags count as practical use in gap analysis",
     "skipForNow": "Skip for now",
     "skillsSaved": "Skills saved",
-    "skillsSaveFailed": "Save failed"
+    "skillsSaveFailed": "Save failed",
+    "skillsLinked": "{count} skills linked",
+    "skillsNotLinked": "No skill tags yet",
+    "editSkills": "Edit skill tags"
   },
   "roadmap": {
     "myGoals": "My Goals",

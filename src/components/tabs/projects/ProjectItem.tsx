@@ -2,29 +2,33 @@
 
 import { projectStatusStyle, taskStatusStyle } from '@/lib/statusConfig';
 import type { Project, ProjectTask } from '@/types';
-import { ChevronDown, ChevronRight, Pencil, Plus } from 'lucide-react';
+import { ChevronDown, ChevronRight, Pencil, Plus, Target } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface Props {
   project: Project;
   tasks: ProjectTask[];
+  skillTags: string[];
   isOpen: boolean;
   pct: number;
   onToggle: () => void;
   onEditProject: () => void;
   onAddTask: () => void;
   onEditTask: (task: ProjectTask) => void;
+  onEditSkills: () => void;
 }
 
 export default function ProjectItem({
   project,
   tasks,
+  skillTags,
   isOpen,
   pct,
   onToggle,
   onEditProject,
   onAddTask,
   onEditTask,
+  onEditSkills,
 }: Props) {
   const t = useTranslations('projects');
   const tStatus = useTranslations('status');
@@ -60,6 +64,24 @@ export default function ProjectItem({
             {tasks.filter((t) => t.status === 'completed').length}/{tasks.length}
           </span>
         </div>
+
+        <button
+          onClick={onEditSkills}
+          className="flex items-center gap-1 ml-5 mt-2 text-xs transition-colors group/skills"
+          title={t('editSkills')}
+        >
+          <Target
+            size={12}
+            className={skillTags.length > 0 ? 'text-pri' : 'text-ink-faint group-hover/skills:text-pri'}
+          />
+          <span
+            className={
+              skillTags.length > 0 ? 'text-pri font-medium' : 'text-ink-faint group-hover/skills:text-pri'
+            }
+          >
+            {skillTags.length > 0 ? t('skillsLinked', { count: skillTags.length }) : t('skillsNotLinked')}
+          </span>
+        </button>
       </div>
 
       {isOpen && (

@@ -57,6 +57,7 @@
     "weeklyTil": "TIL",
     "weeklyTopics": "Themen fertig",
     "gapLabel": "Lernrichtung",
+    "gapTooltip": "Anteil der von deiner Roadmap geforderten Skill-Tags, die durch Nachweise gedeckt sind - Zertifikate und Projekt-Skills zählen voll (1,0x), Lerntagebuch-Tags teilweise (0,6x).",
     "noRoadmap": "Kein KI-Roadmap — erstelle einen im Roadmap-Tab",
     "recentNotes": "Neueste Notizen",
     "recentTil": "Neueste TIL",
@@ -196,7 +197,10 @@
     "skillModalNote": "Als Praxiserfahrung in der Lueckenanalyse gezaehlt",
     "skipForNow": "Spaeter",
     "skillsSaved": "Skills gespeichert",
-    "skillsSaveFailed": "Speichern fehlgeschlagen"
+    "skillsSaveFailed": "Speichern fehlgeschlagen",
+    "skillsLinked": "{count} Skills verknüpft",
+    "skillsNotLinked": "Noch keine Skill-Tags",
+    "editSkills": "Skill-Tags bearbeiten"
   },
   "roadmap": {
     "myGoals": "Meine Ziele",

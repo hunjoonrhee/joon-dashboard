@@ -2,6 +2,7 @@
 
 import { CompassDial } from '@/components/compass-dial';
 import type { AiRoadmap } from '@/types';
+import { Info } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface Props {
@@ -93,8 +94,11 @@ export default function HeroCard({
                   trackColor="rgba(255,255,255,0.15)"
                   markerFill="var(--color-pri)"
                 />
-                <span className="text-xs font-bold shrink-0 opacity-90">
+                <span className="text-xs font-bold shrink-0 opacity-90 flex items-center gap-1">
                   {t('gapLabel')} {gapPct}%
+                  <span title={t('gapTooltip')} className="cursor-help">
+                    <Info size={12} className="opacity-60" />
+                  </span>
                 </span>
               </div>
             )}

@@ -47,6 +47,19 @@ export default function ProjectsTab({ projects, projectTasks, onRefresh, trigger
     projectId: string;
     projectName: string;
   } | null>(null);
+  const [skillTagsByProject, setSkillTagsByProject] = useState<Record<string, string[]>>({});
+
+  const fetchProjectSkills = async () => {
+    const { data } = await supabase.from('project_skills').select('project_id, tags');
+    if (!data) return;
+    setSkillTagsByProject(
+      Object.fromEntries((data as { project_id: string; tags: string[] }[]).map((ps) => [ps.project_id, ps.tags]))
+    );
+  };
+
+  useEffect(() => {
+    fetchProjectSkills();
+  }, []);
 
   useEffect(() => {
     if (triggerAdd) {
@@ -199,12 +212,14 @@ export default function ProjectsTab({ projects, projectTasks, onRefresh, trigger
             key={p.id}
             project={p}
             tasks={getTasks(p.id)}
+            skillTags={skillTagsByProject[p.id] ?? []}
             isOpen={openProjects[p.id] ?? false}
             pct={getPct(p.id)}
             onToggle={() => setOpenProjects((prev) => ({ ...prev, [p.id]: !prev[p.id] }))}
             onEditProject={() => openProjectModal('edit', p)}
             onAddTask={() => openTaskModal('add', p.id)}
             onEditTask={(task) => openTaskModal('edit', p.id, task)}
+            onEditSkills={() => setSkillModal({ projectId: p.id, projectName: p.name })}
           />
         ))}
       </div>
@@ -238,6 +253,7 @@ export default function ProjectsTab({ projects, projectTasks, onRefresh, trigger
           onClose={() => setSkillModal(null)}
           onSaved={() => {
             setSkillModal(null);
+            fetchProjectSkills();
             onRefresh();
           }}
         />
