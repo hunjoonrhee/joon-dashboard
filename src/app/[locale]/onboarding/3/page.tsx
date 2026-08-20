@@ -25,6 +25,8 @@ export default function Onboarding3() {
   const supabase = createSupabaseBrowserClient();
 
   const [stages, setStages] = useState<RoadmapStage[]>([]);
+  const [domain, setDomain] = useState<string | null>(null);
+  const [targetLanguage, setTargetLanguage] = useState<string | null>(null);
   const [goal, setGoal] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +77,8 @@ export default function Onboarding3() {
       if (!res.ok) throw new Error();
       const data = await res.json();
       setStages(data.stages ?? []);
+      setDomain(data.domain ?? null);
+      setTargetLanguage(data.targetLanguage ?? null);
     } catch {
       setError(t('step3Error'));
     } finally {
@@ -99,13 +103,19 @@ export default function Onboarding3() {
             goal,
             career_level: ob_level,
             stages,
-            adopted: false,
+            domain,
+            target_language: targetLanguage,
+            adopted: true,
             user_id: user.id,
           })
           .select()
           .single();
 
         if (roadmap) {
+          // Onboarding only ever creates one roadmap, but un-adopt any others
+          // defensively (same as RoadmapTab's real adopt flow) in case this
+          // ever runs for a user who already has one from elsewhere.
+          await supabaseClient.from('ai_roadmaps').update({ adopted: false }).neq('id', roadmap.id);
           await upsertWithUser(
             'settings',
             { key: 'adopted_roadmap_id', value: roadmap.id },
