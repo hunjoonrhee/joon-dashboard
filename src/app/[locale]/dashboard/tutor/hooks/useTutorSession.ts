@@ -222,6 +222,7 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
         tags,
         til: tilNote,
         memo: `${t('aiTutorLabel')} (${durationMin}분)`,
+        roadmap_id: userContext?.adoptedRoadmapId ?? null,
       });
       if (userContext?.targetLanguage && finalSummary?.vocabWords?.length) {
         await saveVocabWords(userContext.targetLanguage, finalSummary.vocabWords);

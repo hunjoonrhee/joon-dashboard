@@ -297,11 +297,27 @@ export async function POST(req: NextRequest) {
       .map((p: { text: string }) => p.text)
       .join('');
 
+    // The model occasionally emits JSON that doesn't quite parse (an unescaped
+    // quote inside a natural-language example sentence, a stray newline) -
+    // letting that throw here used to take down the whole response (including
+    // `text`, the actual reply the user is waiting for) over a broken quiz or
+    // summary block. Falls back to null instead so a malformed summary just
+    // means no vocab words / TIL note get saved this turn, not a lost reply.
     const quizMatch = raw.match(/\[QUIZ\]([\s\S]*?)\[\/QUIZ\]/);
-    const quiz = quizMatch ? JSON.parse(quizMatch[1]) : null;
+    let quiz = null;
+    try {
+      quiz = quizMatch ? JSON.parse(quizMatch[1]) : null;
+    } catch (e) {
+      console.error('Failed to parse [QUIZ] block:', e);
+    }
 
     const summaryMatch = raw.match(/\[SUMMARY\]([\s\S]*?)\[\/SUMMARY\]/);
-    const summary = summaryMatch ? JSON.parse(summaryMatch[1]) : null;
+    let summary = null;
+    try {
+      summary = summaryMatch ? JSON.parse(summaryMatch[1]) : null;
+    } catch (e) {
+      console.error('Failed to parse [SUMMARY] block:', e);
+    }
 
     // The prompt asks the model not to leak [DIALOGUE] tags into the summary
     // JSON, but - same unreliable-instruction problem the dialogueText logic

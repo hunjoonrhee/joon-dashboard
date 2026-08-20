@@ -65,7 +65,13 @@
     "tilKnowledgeTitle": "TIL Sammlung — Wissensschatz",
     "tilOptional": "💡 TIL (optional)",
     "sessionNoTil": "Noch keine TIL. Klicke auf das Stift-Symbol zum Hinzufügen.",
-    "untitled": "Kein Titel"
+    "untitled": "Kein Titel",
+    "vocabSavedCount": "Gespeicherte Wörter",
+    "vocabDueCount": "{count} zur Wiederholung fällig",
+    "roleplayTitle": "Rollenspiel",
+    "roleplaySubtitle": "Beschreibe eine Situation, die du üben möchtest",
+    "roleplayScenarioPlaceholder": "z.B. einen Arzttermin vereinbaren",
+    "roleplayStart": "Starten"
   },
   "goals": {
     "title": "Ziele",

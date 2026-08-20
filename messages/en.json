@@ -65,7 +65,13 @@
     "tilKnowledgeTitle": "TIL Collection — Knowledge Base",
     "tilOptional": "💡 TIL (optional)",
     "sessionNoTil": "No TIL yet. Click the pencil icon to add one.",
-    "untitled": "Untitled"
+    "untitled": "Untitled",
+    "vocabSavedCount": "Words saved",
+    "vocabDueCount": "{count} due for review",
+    "roleplayTitle": "Roleplay",
+    "roleplaySubtitle": "Describe a situation you'd like to practice",
+    "roleplayScenarioPlaceholder": "e.g. Making an appointment at the doctor's",
+    "roleplayStart": "Start"
   },
   "goals": {
     "title": "Goals",

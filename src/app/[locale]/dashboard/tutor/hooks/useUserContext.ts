@@ -12,6 +12,8 @@ export interface UserContext {
   tilHistory: string[];
   /** Set only when the adopted roadmap is a language-learning goal - drives whether /api/tutor/chat generates vocabWords. */
   targetLanguage: string | null;
+  /** So tutor-created sessions can be tagged with roadmap_id like every other session-creating flow (AddSessionModal) - without it, Home's roadmap-scoped queries (TIL, streak) never see these sessions. */
+  adoptedRoadmapId: string | null;
 }
 
 export async function loadUserContext(topic: string): Promise<UserContext> {
@@ -19,7 +21,7 @@ export async function loadUserContext(topic: string): Promise<UserContext> {
     const [settingsRes, sessionsRes, roadmapRes, projectsRes] = await Promise.all([
       supabase.from('settings').select('key, value').in('key', ['career_level', 'adopted_roadmap_id']),
       supabase.from('sessions').select('tags, date, til').order('date', { ascending: false }).limit(30),
-      supabase.from('ai_roadmaps').select('goal, stages, target_language').eq('adopted', true).single(),
+      supabase.from('ai_roadmaps').select('id, goal, stages, target_language').eq('adopted', true).single(),
       supabase.from('projects').select('name').eq('status', 'in_progress').limit(5),
     ]);
 
@@ -52,6 +54,7 @@ export async function loadUserContext(topic: string): Promise<UserContext> {
       goal: adoptedRoadmap?.goal ?? topic,
       tilHistory,
       targetLanguage: adoptedRoadmap?.target_language ?? null,
+      adoptedRoadmapId: adoptedRoadmap?.id ?? null,
     };
   } catch {
     return {
@@ -62,6 +65,7 @@ export async function loadUserContext(topic: string): Promise<UserContext> {
       goal: topic,
       tilHistory: [],
       targetLanguage: null,
+      adoptedRoadmapId: null,
     };
   }
 }

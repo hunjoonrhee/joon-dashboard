@@ -10,6 +10,8 @@ import HeroCard from './home/HeroCard';
 import { useAdoptedRoadmap } from './home/hooks/useAdoptedRoadmap';
 import { useHomeStats } from './home/hooks/useHomeStats';
 import { useAchievementDetectors } from './home/useAchievementDetectors';
+import HomeRoleplayCard from './home/HomeRoleplayCard';
+import HomeVocabCard from './home/HomeVocabCard';
 import NotesPreviewCard from './home/NotesPreviewCard';
 import TilPreviewCard from './home/TilPreviewCard';
 import TodayCard from './home/TodayCard';
@@ -96,7 +98,15 @@ export default function HomeTab({
         />
       </div>
 
-      <CoachCard sessions={sessions} goals={goals} adoptedRoadmap={adoptedRoadmap} isPro={true} />
+      {adoptedRoadmap?.target_language ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <CoachCard sessions={sessions} goals={goals} adoptedRoadmap={adoptedRoadmap} isPro={true} />
+          <HomeVocabCard />
+          <HomeRoleplayCard isPro={true} />
+        </div>
+      ) : (
+        <CoachCard sessions={sessions} goals={goals} adoptedRoadmap={adoptedRoadmap} isPro={true} />
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <TodayCard

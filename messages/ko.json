@@ -65,7 +65,13 @@
     "tilKnowledgeTitle": "TIL 모음 — 지식 자산",
     "tilOptional": "💡 TIL (선택)",
     "sessionNoTil": "아직 TIL이 없어요. 연필 아이콘을 눌러 추가해보세요.",
-    "untitled": "제목 없음"
+    "untitled": "제목 없음",
+    "vocabSavedCount": "저장한 단어",
+    "vocabDueCount": "복습할 단어 {count}개",
+    "roleplayTitle": "롤플레잉",
+    "roleplaySubtitle": "연습하고 싶은 상황을 자유롭게 적어보세요",
+    "roleplayScenarioPlaceholder": "예: 병원에서 예약 잡기",
+    "roleplayStart": "시작하기"
   },
   "goals": {
     "title": "목표",
