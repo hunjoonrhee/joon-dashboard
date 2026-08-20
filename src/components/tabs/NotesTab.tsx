@@ -1,8 +1,7 @@
 'use client';
 
 import { useToast } from '@/components/Toast';
-import { supabase } from '@/lib/supabase';
-import { insertWithUser } from '@/lib/supabase';
+import { getCurrentUserId, supabase } from '@/lib/supabase';
 import type { Note } from '@/types';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -56,9 +55,10 @@ export default function NotesTab({ notes, onRefresh }: Props) {
     };
     try {
       if (isNew || !selected) {
+        const userId = await getCurrentUserId();
         const { data } = await supabase
           .from('notes')
-
+          .insert({ ...payload, user_id: userId })
           .select()
           .single();
         if (data) {
@@ -135,7 +135,7 @@ export default function NotesTab({ notes, onRefresh }: Props) {
       <div className="lg:hidden flex flex-col gap-4">
         {isEditing ? (
           <>
-            <button onClick={cancelEdit} className="text-xs text-gray-400 text-left">
+            <button onClick={cancelEdit} className="text-xs text-ink-faint text-left">
               {tNotes('backToList')}
             </button>
             <NoteEditorPanel
@@ -155,7 +155,7 @@ export default function NotesTab({ notes, onRefresh }: Props) {
           </>
         ) : selected ? (
           <>
-            <button onClick={() => setSelected(null)} className="text-xs text-gray-400 text-left">
+            <button onClick={() => setSelected(null)} className="text-xs text-ink-faint text-left">
               {tNotes('backToList')}
             </button>
             <NoteViewPanel note={selected} onEdit={() => setIsEditing(true)} onDelete={remove} />
