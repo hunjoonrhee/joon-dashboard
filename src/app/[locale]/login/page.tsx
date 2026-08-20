@@ -73,7 +73,7 @@ export default function LoginPage() {
     }
     setLoading('reset');
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin}/auth/reset-password`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin}/auth/reset-password?locale=${locale}`,
     });
     setLoading(null);
     setError(t('resetSent'));
