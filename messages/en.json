@@ -613,6 +613,7 @@
   },
   "tutor": {
     "pageTitle": "AI Tutor",
+    "vocabLink": "Vocab",
     "sessionWith": "{topic} session",
     "elapsed": "{min}m",
     "endSession": "End session",
@@ -651,5 +652,27 @@
     "quizCorrect": "Correct: {answer}",
     "quizWrong": "Wrong: {answer}. Correct answer: {correct}.",
     "backBtn": "← Back"
+  },
+  "vocab": {
+    "title": "Vocab",
+    "back": "Back",
+    "tabList": "List",
+    "tabReview": "Review",
+    "addWord": "Add word",
+    "cancel": "Cancel",
+    "language": "Language",
+    "languagePlaceholder": "e.g. German",
+    "word": "Word",
+    "meaning": "Meaning",
+    "exampleSentence": "Example sentence (optional)",
+    "save": "Save",
+    "wordAdded": "Word saved",
+    "wordDeleted": "Word deleted",
+    "noWords": "No saved words yet. Words get added automatically after a roleplay session, or add one yourself.",
+    "tapToFlip": "Tap to see meaning",
+    "noDueWords": "Nothing due for review right now",
+    "reviewComplete": "You've finished today's review!",
+    "reviewAgain": "Review again",
+    "reviewKnew": "I knew it"
   }
 }

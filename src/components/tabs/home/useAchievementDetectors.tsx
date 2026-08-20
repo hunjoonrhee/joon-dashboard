@@ -6,6 +6,7 @@ import { useNewRecordDetector } from '@/hooks/achievements/useNewRecordDetector'
 import { useOneTimeUnlockDetector } from '@/hooks/achievements/useOneTimeUnlockDetector';
 import { computeAchievementStats, type AchievementStats } from '@/lib/achievements';
 import { useCelebration, type CelebrationColorTheme } from '@/lib/celebration-context';
+import { useVocabWordCount } from '@/lib/queries';
 import { calcStreak } from '@/lib/streak';
 import type { AiRoadmap, Goal, Session } from '@/types';
 import { useLocale, useTranslations } from 'next-intl';
@@ -32,7 +33,8 @@ export function useAchievementDetectors(
   const router = useRouter();
   const showCelebration = useCelebration();
 
-  const stats: AchievementStats = computeAchievementStats(sessions, goals, adoptedRoadmap);
+  const { data: vocabWordCount = 0 } = useVocabWordCount();
+  const stats: AchievementStats = computeAchievementStats(sessions, goals, adoptedRoadmap, vocabWordCount);
   const currentStreak = calcStreak(sessions);
 
   const goTo = useCallback((path: string) => router.push(`/${locale}${path}`), [router, locale]);
@@ -125,6 +127,19 @@ export function useAchievementDetectors(
     });
   }, [showCelebration, t, goTo]);
 
+  const handleFirstWordSaved = useCallback(() => {
+    const Icon = getBadge('pr-saved-words').icon;
+    showCelebration({
+      eyebrow: t('celebration.savedWords.eyebrow'),
+      title: t('celebration.savedWords.title'),
+      subtitle: t('celebration.savedWords.subtitle', { count: 1 }),
+      centerIcon: <Icon size={56} strokeWidth={1.8} />,
+      colorTheme: 'gold',
+      primaryLabel: t('celebration.viewAchievementsCta'),
+      onPrimary: () => goTo('/dashboard/achievements'),
+    });
+  }, [showCelebration, t, goTo]);
+
   useMilestoneDetector(
     userId ? `growpath.lastSeenStreak.${userId}` : null,
     STREAK_MILESTONES,
@@ -158,5 +173,10 @@ export function useAchievementDetectors(
     adoptedRoadmap ? `growpath.roadmapComplete.${adoptedRoadmap.id}` : null,
     stats.currentStageLevel !== null && stats.totalStages !== null && stats.currentStageLevel >= stats.totalStages,
     handleRoadmapCompleted
+  );
+  useOneTimeUnlockDetector(
+    userId ? `growpath.savedWordsUnlocked.${userId}` : null,
+    stats.savedVocabWordCount > 0,
+    handleFirstWordSaved
   );
 }

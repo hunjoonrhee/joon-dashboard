@@ -10,6 +10,8 @@ export interface UserContext {
   projects: string[];
   goal: string;
   tilHistory: string[];
+  /** Set only when the adopted roadmap is a language-learning goal - drives whether /api/tutor/chat generates vocabWords. */
+  targetLanguage: string | null;
 }
 
 export async function loadUserContext(topic: string): Promise<UserContext> {
@@ -17,7 +19,7 @@ export async function loadUserContext(topic: string): Promise<UserContext> {
     const [settingsRes, sessionsRes, roadmapRes, projectsRes] = await Promise.all([
       supabase.from('settings').select('key, value').in('key', ['career_level', 'adopted_roadmap_id']),
       supabase.from('sessions').select('tags, date, til').order('date', { ascending: false }).limit(30),
-      supabase.from('ai_roadmaps').select('goal, stages').eq('adopted', true).single(),
+      supabase.from('ai_roadmaps').select('goal, stages, target_language').eq('adopted', true).single(),
       supabase.from('projects').select('name').eq('status', 'in_progress').limit(5),
     ]);
 
@@ -36,9 +38,7 @@ export async function loadUserContext(topic: string): Promise<UserContext> {
     const studiedTagSet = new Set(recentTags);
     const gapSkills = adoptedRoadmap
       ? adoptedRoadmap.stages.flatMap((stage) =>
-          stage.skills
-            .filter((sk) => !sk.tags.some((tag: string) => studiedTagSet.has(tag)))
-            .map((sk) => sk.name)
+          stage.skills.filter((sk) => !sk.tags.some((tag: string) => studiedTagSet.has(tag))).map((sk) => sk.name)
         )
       : [];
 
@@ -51,6 +51,7 @@ export async function loadUserContext(topic: string): Promise<UserContext> {
       projects,
       goal: adoptedRoadmap?.goal ?? topic,
       tilHistory,
+      targetLanguage: adoptedRoadmap?.target_language ?? null,
     };
   } catch {
     return {
@@ -60,6 +61,7 @@ export async function loadUserContext(topic: string): Promise<UserContext> {
       projects: [],
       goal: topic,
       tilHistory: [],
+      targetLanguage: null,
     };
   }
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { AlertTriangle, WifiOff, XCircle } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import type { Message, TutorError } from '../hooks/useTutorSession';
 import TutorMessageItem from './TutorMessageItem';
@@ -27,10 +28,10 @@ export default function TutorChat({ messages, loading, isEndingSession, lastErro
       ))}
 
       {(loading || isEndingSession) && (
-        <div className="flex gap-1 px-4 py-3 bg-gray-50 rounded-2xl rounded-tl-sm w-fit">
-          <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-          <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-          <span className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+        <div className="flex gap-1 px-4 py-3 bg-surf-2 rounded-2xl rounded-tl-sm w-fit">
+          <span className="w-1.5 h-1.5 bg-ink-faint rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+          <span className="w-1.5 h-1.5 bg-ink-faint rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+          <span className="w-1.5 h-1.5 bg-ink-faint rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
         </div>
       )}
 
@@ -38,7 +39,7 @@ export default function TutorChat({ messages, loading, isEndingSession, lastErro
         <div className="max-w-[88%]">
           {lastError.type === 'unavailable' && (
             <div className="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3">
-              <span className="text-base flex-shrink-0">⚠️</span>
+              <AlertTriangle size={16} className="text-amber flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-xs font-semibold text-amber-700 mb-1">AI 서버가 잠시 바빠요</p>
                 <p className="text-xs text-amber-600 mb-2">
@@ -46,7 +47,7 @@ export default function TutorChat({ messages, loading, isEndingSession, lastErro
                 </p>
                 <button
                   onClick={onRetry}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500 text-white hover:bg-amber-600 transition-colors"
+                  className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber text-on-pri hover:opacity-90 transition-colors"
                 >
                   ↻ 다시 시도
                 </button>
@@ -56,7 +57,7 @@ export default function TutorChat({ messages, loading, isEndingSession, lastErro
 
           {lastError.type === 'invalid' && (
             <div className="flex items-start gap-3 bg-red-50 border border-red-100 rounded-2xl px-4 py-3">
-              <span className="text-base flex-shrink-0">❌</span>
+              <XCircle size={16} className="text-red-400 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-xs font-semibold text-red-700 mb-1">요청 오류가 발생했어요</p>
                 <p className="text-xs text-red-500">
@@ -67,14 +68,14 @@ export default function TutorChat({ messages, loading, isEndingSession, lastErro
           )}
 
           {lastError.type === 'unknown' && (
-            <div className="flex items-start gap-3 bg-gray-100 border border-gray-200 rounded-2xl px-4 py-3">
-              <span className="text-base flex-shrink-0">🔌</span>
+            <div className="flex items-start gap-3 bg-surf-2 border border-border rounded-2xl px-4 py-3">
+              <WifiOff size={16} className="text-ink-faint flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="text-xs font-semibold text-gray-700 mb-1">연결에 문제가 생겼어요</p>
-                <p className="text-xs text-gray-500 mb-2">네트워크 상태를 확인하고 다시 시도해보세요.</p>
+                <p className="text-xs font-semibold text-ink-dim mb-1">연결에 문제가 생겼어요</p>
+                <p className="text-xs text-ink-faint mb-2">네트워크 상태를 확인하고 다시 시도해보세요.</p>
                 <button
                   onClick={onRetry}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-600 text-white hover:bg-gray-700 transition-colors"
+                  className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-ink text-bg hover:opacity-90 transition-colors"
                 >
                   ↻ 다시 시도
                 </button>

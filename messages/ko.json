@@ -613,6 +613,7 @@
   },
   "tutor": {
     "pageTitle": "AI 튜터",
+    "vocabLink": "단어장",
     "sessionWith": "{topic} 세션",
     "elapsed": "{min}분",
     "endSession": "세션 종료",
@@ -651,5 +652,27 @@
     "quizCorrect": "정답: {answer}",
     "quizWrong": "오답 선택: {answer}. 정답은 {correct}입니다.",
     "backBtn": "← 뒤로"
+  },
+  "vocab": {
+    "title": "단어장",
+    "back": "뒤로",
+    "tabList": "목록",
+    "tabReview": "복습",
+    "addWord": "단어 추가",
+    "cancel": "취소",
+    "language": "언어",
+    "languagePlaceholder": "예: 독일어",
+    "word": "단어",
+    "meaning": "뜻",
+    "exampleSentence": "예문 (선택)",
+    "save": "저장",
+    "wordAdded": "단어가 저장됐어요",
+    "wordDeleted": "단어가 삭제됐어요",
+    "noWords": "저장된 단어가 없어요. 롤플레잉 세션이 끝나면 자동으로 추가되거나, 직접 추가해보세요.",
+    "tapToFlip": "탭해서 뜻 보기",
+    "noDueWords": "지금 복습할 단어가 없어요",
+    "reviewComplete": "오늘 복습을 다 끝냈어요!",
+    "reviewAgain": "다시 볼래요",
+    "reviewKnew": "알고 있어요"
   }
 }

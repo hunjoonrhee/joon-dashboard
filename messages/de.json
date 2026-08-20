@@ -613,6 +613,7 @@
   },
   "tutor": {
     "pageTitle": "KI-Tutor",
+    "vocabLink": "Vokabeln",
     "sessionWith": "Sitzung: {topic}",
     "elapsed": "{min} Min.",
     "endSession": "Sitzung beenden",
@@ -651,5 +652,27 @@
     "quizCorrect": "Richtig: {answer}",
     "quizWrong": "Falsch: {answer}. Richtige Antwort: {correct}.",
     "backBtn": "← Zurück"
+  },
+  "vocab": {
+    "title": "Vokabeln",
+    "back": "Zurück",
+    "tabList": "Liste",
+    "tabReview": "Wiederholen",
+    "addWord": "Wort hinzufügen",
+    "cancel": "Abbrechen",
+    "language": "Sprache",
+    "languagePlaceholder": "z.B. Deutsch",
+    "word": "Wort",
+    "meaning": "Bedeutung",
+    "exampleSentence": "Beispielsatz (optional)",
+    "save": "Speichern",
+    "wordAdded": "Wort gespeichert",
+    "wordDeleted": "Wort gelöscht",
+    "noWords": "Noch keine gespeicherten Wörter. Wörter werden nach einer Rollenspiel-Sitzung automatisch hinzugefügt, oder füge selbst eins hinzu.",
+    "tapToFlip": "Tippen für Bedeutung",
+    "noDueWords": "Gerade nichts zu wiederholen",
+    "reviewComplete": "Du hast die heutige Wiederholung abgeschlossen!",
+    "reviewAgain": "Nochmal ansehen",
+    "reviewKnew": "Wusste ich"
   }
 }

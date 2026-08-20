@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { fetchAllVocabWords, fetchDueVocabWords, fetchVocabWordCount } from '@/lib/vocab';
 import type { Goal, Note, Project, ProjectTask, Session, Setting, TodayItem, Topic } from '@/types';
 import { useQuery } from '@tanstack/react-query';
 
@@ -91,3 +92,11 @@ export const useNotes = (limit?: number) =>
       return (data ?? []) as Note[];
     },
   });
+
+// ─── Vocab ──────────────────────────────────────────────
+export const useVocabWords = () => useQuery({ queryKey: ['vocab_words', 'all'], queryFn: fetchAllVocabWords });
+
+export const useDueVocabWords = (limit?: number) =>
+  useQuery({ queryKey: ['vocab_words', 'due', limit], queryFn: () => fetchDueVocabWords(limit) });
+
+export const useVocabWordCount = () => useQuery({ queryKey: ['vocab_words', 'count'], queryFn: fetchVocabWordCount });

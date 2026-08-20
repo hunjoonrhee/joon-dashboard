@@ -1,6 +1,7 @@
 'use client';
 
 import { insertWithUser } from '@/lib/supabase';
+import { saveVocabWords } from '@/lib/vocab';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import type { UserContext } from './useUserContext';
@@ -11,10 +12,18 @@ export interface QuizData {
   correct: number;
 }
 
+export interface VocabWordSuggestion {
+  word: string;
+  meaning: string;
+  example: string;
+}
+
 export interface SummaryData {
   concepts: string[];
   tags: string[];
   tilNote?: string;
+  /** Only present when the session had a targetLanguage - see sendToAI. */
+  vocabWords?: VocabWordSuggestion[];
 }
 
 export interface Message {
@@ -90,7 +99,16 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
       const res = await fetch('/api/tutor/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic, messages: contents, locale, userContext, requestSummary, codeReview, code }),
+        body: JSON.stringify({
+          topic,
+          messages: contents,
+          locale,
+          userContext,
+          requestSummary,
+          codeReview,
+          code,
+          targetLanguage: userContext?.targetLanguage ?? undefined,
+        }),
       });
 
       if (!res.ok) {
@@ -197,6 +215,9 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
         til: tilNote,
         memo: `${t('aiTutorLabel')} (${durationMin}분)`,
       });
+      if (userContext?.targetLanguage && finalSummary?.vocabWords?.length) {
+        await saveVocabWords(userContext.targetLanguage, finalSummary.vocabWords);
+      }
       localStorage.removeItem('coach_suggestion');
       localStorage.removeItem('coach_suggestion_date');
     } catch (e) {

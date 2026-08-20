@@ -114,6 +114,8 @@ export interface AiRoadmap {
   stages: RoadmapStage[];
   adopted: boolean;
   created_at: string;
+  domain: 'dev' | 'language' | 'art' | 'other' | null;
+  target_language: string | null;
 }
 
 // 프로젝트 실전 스킬
@@ -121,6 +123,20 @@ export interface ProjectSkill {
   id: string;
   project_id: string;
   tags: string[];
+  created_at: string;
+}
+
+// 단어장
+export interface VocabWord {
+  id: string;
+  language: string;
+  word: string;
+  meaning: string;
+  example_sentence: string | null;
+  interval_days: number;
+  ease_factor: number;
+  review_count: number;
+  next_review_at: string;
   created_at: string;
 }
 

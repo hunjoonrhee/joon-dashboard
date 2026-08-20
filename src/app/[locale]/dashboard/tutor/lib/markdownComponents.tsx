@@ -24,13 +24,13 @@ export const markdownComponents: Components = {
     return (
       <code
         style={{
-          background: '#ede9fe',
-          color: '#4f46e5',
+          background: 'var(--color-surf-2)',
+          color: 'var(--color-pri)',
           padding: '1px 5px',
           borderRadius: '4px',
           fontSize: '0.85em',
           fontFamily: 'ui-monospace, monospace',
-          border: '1px solid #c4b5fd',
+          border: '1px solid var(--color-border)',
         }}
         {...props}
       >

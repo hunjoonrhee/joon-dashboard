@@ -25,10 +25,9 @@ export type AchievementStats = {
   totalStudyMinutes: number;
   longestSessionMinutes: number | null;
   longestSessionDate: string | null;
-  /** Not persisted anywhere on web yet (pronunciation scoring is request-only, never saved) - always null until a future vocab/pronunciation phase adds storage. */
+  /** Not persisted anywhere on web yet (pronunciation scoring is request-only, never saved) - always null until a future phase adds storage + a recording UI (no browser audio capture exists yet). */
   bestPronunciationScore: number | null;
   bestPronunciationDate: string | null;
-  /** No vocab feature on web yet - always 0 for the same reason as bestPronunciationScore. */
   savedVocabWordCount: number;
   /** From the currently adopted roadmap only. */
   currentStageLevel: number | null;
@@ -69,12 +68,15 @@ export function computeUnlockedBadges(stats: AchievementStats): Record<BadgeId, 
  * (sessions, goals, adopted roadmap) instead of separate queries -
  * mobile computes this via 3 extra Supabase round-trips, but web's
  * sessions/goals are already in the query cache by the time any screen
- * needs this.
+ * needs this. vocabWordCount is the one exception - it comes from its
+ * own useVocabWordCount() query since nothing else on the dashboard
+ * already fetches it.
  */
 export function computeAchievementStats(
   sessions: Session[],
   goals: Goal[],
-  adoptedRoadmap: AiRoadmap | null
+  adoptedRoadmap: AiRoadmap | null,
+  vocabWordCount = 0
 ): AchievementStats {
   const longestSession = sessions.reduce<{ minutes: number; date: string } | null>((best, s) => {
     if (s.duration_minutes === null) return best;
@@ -94,7 +96,7 @@ export function computeAchievementStats(
     longestSessionDate: longestSession?.date ?? null,
     bestPronunciationScore: null,
     bestPronunciationDate: null,
-    savedVocabWordCount: 0,
+    savedVocabWordCount: vocabWordCount,
     currentStageLevel: adoptedRoadmap ? 1 + completedStages : null,
     totalStages: adoptedRoadmap ? adoptedRoadmap.stages.length : null,
   };
