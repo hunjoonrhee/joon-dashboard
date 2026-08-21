@@ -43,6 +43,16 @@ export default function LandingPreview() {
   const [step, setStep] = useState(0);
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState(0);
+  // GIFs keep looping in the background even while hidden (opacity-0), so
+  // without this a step revisited later shows wherever its loop happened to
+  // land instead of restarting from frame 1. Bumping this per-step counter
+  // each time a step becomes active changes its <img> key, forcing React to
+  // remount the element so the GIF restarts from the beginning.
+  const [restartCounts, setRestartCounts] = useState<number[]>(() => STEP_FILES.map(() => 0));
+
+  useEffect(() => {
+    setRestartCounts((counts) => counts.map((c, i) => (i === step ? c + 1 : c)));
+  }, [step]);
 
   useEffect(() => {
     if (paused) return;
@@ -88,7 +98,7 @@ export default function LandingPreview() {
           {stepImages.map((src, i) => (
             // eslint-disable-next-line @next/next/no-img-element -- next/image drops GIF animation without extra config; plain img keeps steps 2/3's screen recordings moving.
             <img
-              key={src}
+              key={`${src}-${restartCounts[i]}`}
               src={src}
               alt={steps[i].title}
               className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${i === step ? 'opacity-100' : 'opacity-0'}`}
