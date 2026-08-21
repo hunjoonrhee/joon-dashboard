@@ -1,5 +1,5 @@
 import { getAuthenticatedUserId } from '@/lib/api-auth';
-import { getStripeClient, STRIPE_PRO_PRICE_ID } from '@/lib/stripe';
+import { getProPriceId, getStripeClient } from '@/lib/stripe';
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
     customer: customerId,
-    line_items: [{ price: STRIPE_PRO_PRICE_ID, quantity: 1 }],
+    line_items: [{ price: getProPriceId(locale), quantity: 1 }],
     success_url: `${siteUrl}/${locale}/dashboard/settings?upgraded=true`,
     cancel_url: `${siteUrl}/${locale}/dashboard/settings`,
     metadata: { supabase_user_id: userId },

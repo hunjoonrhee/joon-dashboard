@@ -10,4 +10,13 @@ export function getStripeClient(): Stripe {
   return client;
 }
 
-export const STRIPE_PRO_PRICE_ID = process.env.STRIPE_PRO_PRICE_ID!;
+/** Pro plan is priced per-currency; each locale bills in its market's currency. */
+const PRICE_ID_BY_LOCALE: Record<string, string> = {
+  ko: process.env.STRIPE_PRO_PRICE_ID_KRW!,
+  en: process.env.STRIPE_PRO_PRICE_ID_USD!,
+  de: process.env.STRIPE_PRO_PRICE_ID_EUR!,
+};
+
+export function getProPriceId(locale: string): string {
+  return PRICE_ID_BY_LOCALE[locale] ?? PRICE_ID_BY_LOCALE.en;
+}
