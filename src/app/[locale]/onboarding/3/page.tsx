@@ -30,6 +30,7 @@ export default function Onboarding3() {
   const [goal, setGoal] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [rateLimited, setRateLimited] = useState(false);
   const [saving, setSaving] = useState(false);
   const [step, setStep] = useState<Step>('roadmap');
   const [showSessionModal, setShowSessionModal] = useState(false);
@@ -75,6 +76,7 @@ export default function Onboarding3() {
   const generateRoadmap = async (goal: string, level: string) => {
     setLoading(true);
     setError(null);
+    setRateLimited(false);
     try {
       const obDomain = sessionStorage.getItem('ob_domain');
       const obTargetLanguage = sessionStorage.getItem('ob_target_language');
@@ -89,6 +91,11 @@ export default function Onboarding3() {
           presetTargetLanguage: obTargetLanguage || undefined,
         }),
       });
+      if (res.status === 429) {
+        setRateLimited(true);
+        setError(t('step3RateLimited'));
+        return;
+      }
       if (!res.ok) throw new Error();
       const data = await res.json();
       setStages(data.stages ?? []);
@@ -198,16 +205,18 @@ export default function Onboarding3() {
             ) : error ? (
               <div className="text-center py-8">
                 <p className="text-sm text-red-400 mb-4">{error}</p>
-                <button
-                  onClick={() => {
-                    const g = sessionStorage.getItem('ob_goal') ?? '';
-                    const l = sessionStorage.getItem('ob_level') ?? '';
-                    generateRoadmap(g, l);
-                  }}
-                  className="px-4 py-2 bg-pri rounded-lg text-sm font-medium text-on-pri"
-                >
-                  {t('step3Error')}
-                </button>
+                {!rateLimited && (
+                  <button
+                    onClick={() => {
+                      const g = sessionStorage.getItem('ob_goal') ?? '';
+                      const l = sessionStorage.getItem('ob_level') ?? '';
+                      generateRoadmap(g, l);
+                    }}
+                    className="px-4 py-2 bg-pri rounded-lg text-sm font-medium text-on-pri"
+                  >
+                    {t('step3RetryBtn')}
+                  </button>
+                )}
               </div>
             ) : (
               <>

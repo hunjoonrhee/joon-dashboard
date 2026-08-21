@@ -45,6 +45,10 @@ export default function AiRoadmapView({ adoptedRoadmap, settings, onAdopt, onRef
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ goal, careerLevel, locale }),
       });
+      if (res.status === 429) {
+        setError(t('rateLimited'));
+        return;
+      }
       if (!res.ok) throw new Error();
       const data: AiRoadmap = await res.json();
       setRoadmaps((prev) => [data, ...prev]);

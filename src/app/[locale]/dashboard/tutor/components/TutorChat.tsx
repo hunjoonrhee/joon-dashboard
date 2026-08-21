@@ -64,6 +64,16 @@ export default function TutorChat({
             </div>
           )}
 
+          {lastError.type === 'rateLimited' && (
+            <div className="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3">
+              <AlertTriangle size={16} className="text-amber flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-amber-700 mb-1">오늘 사용량을 다 썼어요</p>
+                <p className="text-xs text-amber-600">내일 다시 이용할 수 있어요. 재시도해도 지금은 안 돼요.</p>
+              </div>
+            </div>
+          )}
+
           {lastError.type === 'invalid' && (
             <div className="flex items-start gap-3 bg-red-50 border border-red-100 rounded-2xl px-4 py-3">
               <XCircle size={16} className="text-red-400 flex-shrink-0 mt-0.5" />

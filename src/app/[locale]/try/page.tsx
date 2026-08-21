@@ -37,6 +37,10 @@ export default function TryPage() {
           locale,
         }),
       });
+      if (res.status === 429) {
+        setError(t('rateLimited'));
+        return;
+      }
       if (!res.ok) throw new Error();
       const data = await res.json();
       setStages(data.stages ?? []);

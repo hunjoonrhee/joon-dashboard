@@ -37,7 +37,7 @@ interface Props {
   isPro?: boolean;
 }
 
-type Status = 'idle' | 'loading' | 'done' | 'error';
+type Status = 'idle' | 'loading' | 'done' | 'error' | 'rateLimited';
 
 const MIN_SESSIONS = 3;
 
@@ -82,6 +82,10 @@ export default function CoachCard({ sessions, goals, adoptedRoadmap, onRefresh, 
           careerLevel: adoptedRoadmap?.career_level ?? '',
         }),
       });
+      if (res.status === 429) {
+        setStatus('rateLimited');
+        return;
+      }
       if (!res.ok) throw new Error();
       const json: CoachSuggestion = await res.json();
       setData(json);
@@ -198,6 +202,12 @@ export default function CoachCard({ sessions, goals, adoptedRoadmap, onRefresh, 
           >
             {t('getAdvice')}
           </button>
+        </div>
+      )}
+
+      {status === 'rateLimited' && (
+        <div className="text-center py-2">
+          <p className="text-xs text-amber-600">{t('rateLimited')}</p>
         </div>
       )}
 

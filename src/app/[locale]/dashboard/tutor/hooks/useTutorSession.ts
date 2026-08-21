@@ -51,6 +51,7 @@ export interface SavedRecord {
 export type TutorError =
   | { type: 'unavailable' } // 503 — 서버 과부하, 재시도 가능
   | { type: 'invalid' } // 400 — 요청 오류
+  | { type: 'rateLimited' } // 429 — 오늘 사용량 한도 도달, 재시도해도 소용없음
   | { type: 'unknown' }; // 기타
 
 interface UseTutorSessionParams {
@@ -118,6 +119,16 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
       });
 
       if (!res.ok) {
+        // res.status is the actual HTTP status Next.js sent (429 for the
+        // rate limiter, 503/400 from further down) - errData.error.code was
+        // never populated for those paths, so it silently fell through to
+        // 'unknown' ("check your network") for a 429, which isn't a network
+        // problem and retrying does nothing until tomorrow's reset.
+        if (res.status === 429) {
+          setLastError({ type: 'rateLimited' });
+          return null;
+        }
+
         const errData = await res.json().catch(() => ({}));
         const status = errData?.error?.code ?? res.status;
 
