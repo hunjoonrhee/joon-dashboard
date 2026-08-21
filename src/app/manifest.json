@@ -1,6 +1,6 @@
 {
-  "name": "Joon Dashboard",
-  "short_name": "Joon",
+  "name": "Growpath",
+  "short_name": "Growpath",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -13,8 +13,8 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#6366f1",
-  "background_color": "#f9fafb",
+  "theme_color": "#2F5D50",
+  "background_color": "#121815",
   "display": "standalone",
   "start_url": "/"
 }
