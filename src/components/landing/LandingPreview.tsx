@@ -19,8 +19,19 @@ const STEP_FILES = [
 const SUPPORTED_LOCALES = ['ko', 'en', 'de'];
 
 const STEP_COUNT = STEP_FILES.length;
-const AUTO_ADVANCE_MS = 5000;
+const DEFAULT_ADVANCE_MS = 5000;
 const TICK_MS = 50;
+
+// Steps 2 & 3's GIFs run 12-26s depending on locale (each was recorded live,
+// not scripted to a fixed length) - matching the auto-advance timer to each
+// clip's actual total frame duration keeps the progress bar in sync with the
+// recording instead of racing ahead on a flat 5s timer. Static jpg steps
+// (1, 4, 5) fall back to DEFAULT_ADVANCE_MS.
+const GIF_DURATIONS_MS: Record<string, Partial<Record<number, number>>> = {
+  ko: { 1: 12600, 2: 26000 },
+  en: { 1: 21050, 2: 24750 },
+  de: { 1: 20600, 2: 25200 },
+};
 
 function PreviewBar() {
   return (
@@ -58,11 +69,12 @@ export default function LandingPreview() {
     if (paused) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+    const advanceMs = GIF_DURATIONS_MS[imageLocale]?.[step] ?? DEFAULT_ADVANCE_MS;
     setProgress(0);
     let elapsed = 0;
     const id = setInterval(() => {
       elapsed += TICK_MS;
-      const pct = (elapsed / AUTO_ADVANCE_MS) * 100;
+      const pct = (elapsed / advanceMs) * 100;
       if (pct >= 100) {
         clearInterval(id);
         setStep((s) => (s + 1) % STEP_COUNT);
@@ -71,7 +83,7 @@ export default function LandingPreview() {
       }
     }, TICK_MS);
     return () => clearInterval(id);
-  }, [step, paused]);
+  }, [step, paused, imageLocale]);
 
   const steps = Array.from({ length: STEP_COUNT }, (_, i) => ({
     title: t(`previewStep${i + 1}Title`),
