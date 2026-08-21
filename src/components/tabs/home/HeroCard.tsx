@@ -57,7 +57,7 @@ export default function HeroCard({
 
       <div className="flex gap-6 mt-4">
         <div>
-          <div className="text-base font-bold">{streak > 0 ? `${streak}일` : '-'}</div>
+          <div className="text-base font-bold">{streak > 0 ? `${streak}${t('dayUnit')}` : '-'}</div>
           <div className="text-xs opacity-65">{t('currentStreak')}</div>
         </div>
         <div>
@@ -68,7 +68,10 @@ export default function HeroCard({
           <div className="text-xs opacity-65">{t('monthlySession')}</div>
         </div>
         <div>
-          <div className="text-base font-bold">{completedTopicsCount}개</div>
+          <div className="text-base font-bold">
+            {completedTopicsCount}
+            {t('topicUnit')}
+          </div>
           <div className="text-xs opacity-65">{t('completedTopics')}</div>
         </div>
       </div>

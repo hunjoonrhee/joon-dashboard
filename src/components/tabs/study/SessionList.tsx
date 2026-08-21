@@ -73,7 +73,12 @@ export default function SessionList({ sessions, grouped, onAdd, onEdit }: Props)
                 <p className="text-sm font-medium text-ink truncate">{s.title}</p>
                 <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                   <span className="text-xs text-ink-faint">{s.date}</span>
-                  {s.duration_minutes && <span className="text-xs text-ink-faint">· {s.duration_minutes}분</span>}
+                  {s.duration_minutes && (
+                    <span className="text-xs text-ink-faint">
+                      · {s.duration_minutes}
+                      {t('durationUnit')}
+                    </span>
+                  )}
                   {s.tags.map((tag) => (
                     <span key={tag} className={`text-xs px-1.5 py-0.5 rounded-full ${getTagColor(tag)}`}>
                       {tag}

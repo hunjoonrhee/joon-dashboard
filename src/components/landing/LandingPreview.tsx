@@ -1,19 +1,14 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
-const STEP_IMAGES = [
-  '/landing-steps/step-1-goal.jpg',
-  '/landing-steps/step-2-roadmap.jpg',
-  '/landing-steps/step-3-record.jpg',
-  '/landing-steps/step-4-recommend.jpg',
-  '/landing-steps/step-5-achievements.jpg',
-];
+const STEP_SLUGS = ['step-1-goal', 'step-2-roadmap', 'step-3-record', 'step-4-recommend', 'step-5-achievements'];
+const SUPPORTED_LOCALES = ['ko', 'en', 'de'];
 
-const STEP_COUNT = STEP_IMAGES.length;
+const STEP_COUNT = STEP_SLUGS.length;
 const AUTO_ADVANCE_MS = 5000;
 const TICK_MS = 50;
 
@@ -32,6 +27,9 @@ function PreviewBar() {
 
 export default function LandingPreview() {
   const t = useTranslations('landing');
+  const locale = useLocale();
+  const imageLocale = SUPPORTED_LOCALES.includes(locale) ? locale : 'en';
+  const stepImages = STEP_SLUGS.map((slug) => `/landing-steps/${slug}-${imageLocale}.jpg`);
   const [step, setStep] = useState(0);
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -77,7 +75,7 @@ export default function LandingPreview() {
       >
         <PreviewBar />
         <div className="relative aspect-[1470/656] bg-surf-2">
-          {STEP_IMAGES.map((src, i) => (
+          {stepImages.map((src, i) => (
             <Image
               key={src}
               src={src}

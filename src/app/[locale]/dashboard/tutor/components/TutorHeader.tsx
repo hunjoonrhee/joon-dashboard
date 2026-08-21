@@ -42,7 +42,7 @@ export default function TutorHeader({ topic, elapsedMin, isEndingSession, loadin
           disabled={isEndingSession || loading}
           className="text-xs text-ink-dim border border-border px-3 py-1.5 rounded-lg hover:bg-surf-2 disabled:opacity-40 transition-colors"
         >
-          {isEndingSession ? '요약 중...' : t('endSession')}
+          {isEndingSession ? t('summarizing') : t('endSession')}
         </button>
       </div>
     </div>
