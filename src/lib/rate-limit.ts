@@ -13,6 +13,7 @@ export const RATE_LIMITS = {
   'roadmap-generate-trial': 3,
   'tutor-chat': 200,
   'coach-suggest': 20,
+  'roleplay-suggest': 20,
   'speech-transcribe': 150,
   'speech-synthesize': 150,
   'speech-pronunciation': 150,

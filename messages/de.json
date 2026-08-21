@@ -74,7 +74,11 @@
     "roleplayTitle": "Rollenspiel",
     "roleplaySubtitle": "Beschreibe eine Situation, die du üben möchtest",
     "roleplayScenarioPlaceholder": "z.B. einen Arzttermin vereinbaren",
-    "roleplayStart": "Starten"
+    "roleplayStart": "Starten",
+    "roleplaySuggestCta": "KI-Vorschlag holen",
+    "roleplaySuggestLoading": "Vorschlag wird erstellt...",
+    "roleplaySuggestError": "Vorschlag konnte nicht geladen werden. Bitte erneut versuchen.",
+    "rateLimited": "Du hast dein heutiges Nutzungslimit erreicht. Versuch es morgen wieder."
   },
   "goals": {
     "title": "Ziele",

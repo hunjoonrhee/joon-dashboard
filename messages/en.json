@@ -74,7 +74,11 @@
     "roleplayTitle": "Roleplay",
     "roleplaySubtitle": "Describe a situation you'd like to practice",
     "roleplayScenarioPlaceholder": "e.g. Making an appointment at the doctor's",
-    "roleplayStart": "Start"
+    "roleplayStart": "Start",
+    "roleplaySuggestCta": "Get AI suggestion",
+    "roleplaySuggestLoading": "Generating suggestion...",
+    "roleplaySuggestError": "Couldn't get a suggestion. Please try again.",
+    "rateLimited": "You've hit today's usage limit. Try again tomorrow."
   },
   "goals": {
     "title": "Goals",

@@ -74,7 +74,11 @@
     "roleplayTitle": "롤플레잉",
     "roleplaySubtitle": "연습하고 싶은 상황을 자유롭게 적어보세요",
     "roleplayScenarioPlaceholder": "예: 병원에서 예약 잡기",
-    "roleplayStart": "시작하기"
+    "roleplayStart": "시작하기",
+    "roleplaySuggestCta": "AI 추천받기",
+    "roleplaySuggestLoading": "추천 생성 중...",
+    "roleplaySuggestError": "추천을 가져오지 못했어요. 다시 시도해줘.",
+    "rateLimited": "오늘 사용량을 다 썼어요. 내일 다시 이용할 수 있어요."
   },
   "goals": {
     "title": "목표",
