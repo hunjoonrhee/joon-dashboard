@@ -10,7 +10,7 @@ import type { VocabWord } from '@/types';
 import { ArrowLeft, BookMarked, ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 type Tab = 'list' | 'review';
@@ -196,12 +196,25 @@ function VocabList({
 
 function VocabReview({ onChange }: { onChange: () => void }) {
   const t = useTranslations('vocab');
-  const { data: dueWords = [], isLoading } = useDueVocabWords(20);
-  const [index, setIndex] = useState(0);
+  const { data: fetchedDueWords, isLoading } = useDueVocabWords(20);
+  // Snapshotted once the due list first loads, then shrunk locally as each
+  // word is reviewed - reading a plain index off useDueVocabWords directly
+  // breaks mid-session, since onChange()'s cache invalidation refetches that
+  // query in the background and the just-reviewed word drops out of it,
+  // shifting every later index by one and silently skipping the next word.
+  const [queue, setQueue] = useState<VocabWord[] | null>(null);
+  const [initialTotal, setInitialTotal] = useState<number | null>(null);
   const [flipped, setFlipped] = useState(false);
   const [reviewing, setReviewing] = useState(false);
 
-  const current: VocabWord | undefined = dueWords[index];
+  useEffect(() => {
+    if (queue === null && fetchedDueWords) {
+      setQueue(fetchedDueWords);
+      setInitialTotal(fetchedDueWords.length);
+    }
+  }, [fetchedDueWords, queue]);
+
+  const current: VocabWord | undefined = queue?.[0];
 
   const handleReview = async (knew: boolean) => {
     if (!current || reviewing) return;
@@ -209,13 +222,13 @@ function VocabReview({ onChange }: { onChange: () => void }) {
     await reviewVocabWord(current, knew);
     setReviewing(false);
     setFlipped(false);
-    setIndex((i) => i + 1);
+    setQueue((q) => (q ? q.slice(1) : q));
     onChange();
   };
 
-  if (isLoading) return null;
+  if (isLoading || queue === null || initialTotal === null) return null;
 
-  if (dueWords.length === 0) {
+  if (initialTotal === 0) {
     return <p className="text-sm text-ink-faint text-center py-8">{t('noDueWords')}</p>;
   }
 
@@ -226,7 +239,7 @@ function VocabReview({ onChange }: { onChange: () => void }) {
   return (
     <div className="flex flex-col items-center gap-5 py-4">
       <p className="text-xs text-ink-faint">
-        {index + 1} / {dueWords.length}
+        {initialTotal - queue.length + 1} / {initialTotal}
       </p>
       <VocabCard word={current} flipped={flipped} onFlip={() => setFlipped((v) => !v)} />
       {flipped && <VocabReviewActions onReview={handleReview} disabled={reviewing} />}
