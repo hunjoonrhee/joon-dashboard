@@ -69,7 +69,7 @@ export default function TodayCard({
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs font-bold text-ink-faint uppercase tracking-wider">{t('today')}</p>
         <button onClick={() => setAddingItem(true)} className="text-xs text-pri hover:opacity-80 font-medium">
-          + 추가
+          {t('addItem')}
         </button>
       </div>
 

@@ -13,6 +13,7 @@ export default function Sidebar() {
   const router = useRouter();
   const locale = pathname.split('/')[1] ?? 'ko';
   const t = useTranslations('nav');
+  const tCommon = useTranslations('common');
   const [name, setName] = useState('Joon');
   const [role, setRole] = useState('');
 
@@ -109,7 +110,7 @@ export default function Sidebar() {
           className="flex items-center gap-2 px-3 py-2 rounded-xl text-ink-faint hover:text-red-500 hover:bg-red-50 w-full transition-colors mt-0.5"
         >
           <LogOut size={15} />
-          <span className="text-sm">로그아웃</span>
+          <span className="text-sm">{tCommon('logout')}</span>
         </button>
       </div>
     </aside>
