@@ -1,6 +1,6 @@
 'use client';
 
-import { Compass, Sparkles, Trophy } from 'lucide-react';
+import { Sparkles, Trophy } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -76,9 +76,7 @@ export default function TryPage() {
     <div className="min-h-screen bg-bg">
       <nav className="bg-surf border-b border-border h-14 flex items-center justify-between px-8">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push(`/${locale}`)}>
-          <div className="w-7 h-7 bg-pri rounded-lg flex items-center justify-center text-on-pri">
-            <Compass size={16} strokeWidth={1.8} />
-          </div>
+          <img src="/icon.svg" alt="Growpath" className="w-7 h-7 rounded-lg" />
           <span className="text-sm font-bold text-ink">Growpath</span>
         </div>
         <div className="flex gap-2">

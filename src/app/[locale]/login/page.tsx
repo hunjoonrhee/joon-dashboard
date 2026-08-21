@@ -2,7 +2,7 @@
 
 import { GitHubIcon, GoogleIcon } from '@/components/icons/OAuthIcons';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
-import { Compass, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -87,9 +87,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 cursor-pointer" onClick={() => router.push(`/${locale}`)}>
-            <div className="w-8 h-8 bg-pri rounded-lg flex items-center justify-center text-on-pri">
-              <Compass size={16} strokeWidth={1.8} />
-            </div>
+            <img src="/icon.svg" alt="Growpath" className="w-8 h-8 rounded-lg" />
             <span className="text-lg font-bold text-ink">Growpath</span>
           </div>
         </div>

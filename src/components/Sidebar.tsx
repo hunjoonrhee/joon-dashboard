@@ -3,7 +3,7 @@
 import { navItems } from '@/lib/nav-items';
 import { supabase } from '@/lib/supabase';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
-import { Compass, LogOut, Settings, Trophy } from 'lucide-react';
+import { LogOut, Settings, Trophy } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -53,9 +53,7 @@ export default function Sidebar() {
         className="flex items-center gap-2.5 px-5 h-[57px] border-b border-border cursor-pointer hover:bg-surf-2 transition-colors"
         onClick={() => navigate('/dashboard')}
       >
-        <div className="w-7 h-7 bg-pri rounded-lg flex items-center justify-center text-on-pri">
-          <Compass size={16} strokeWidth={1.8} />
-        </div>
+        <img src="/icon.svg" alt="Growpath" className="w-7 h-7 rounded-lg" />
         <span className="text-sm font-bold text-ink">Growpath</span>
       </div>
 

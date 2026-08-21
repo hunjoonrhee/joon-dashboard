@@ -1,6 +1,5 @@
 'use client';
 
-import { Compass } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 
 export default function LandingFooter() {
@@ -16,9 +15,7 @@ export default function LandingFooter() {
   return (
     <footer className="border-t border-border py-8 px-6 max-w-3xl mx-auto flex items-center justify-between flex-wrap gap-4">
       <div className="flex items-center gap-2">
-        <div className="w-5 h-5 bg-pri rounded-md flex items-center justify-center text-on-pri">
-          <Compass size={12} strokeWidth={1.8} />
-        </div>
+        <img src="/icon.svg" alt="Growpath" className="w-5 h-5 rounded-md" />
         <span className="text-sm font-bold text-ink">Growpath</span>
       </div>
       <div className="flex gap-5">

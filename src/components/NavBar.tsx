@@ -3,7 +3,7 @@
 import { navItems } from '@/lib/nav-items';
 import { supabase } from '@/lib/supabase';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
-import { Compass, LogOut, Settings, Trophy } from 'lucide-react';
+import { LogOut, Settings, Trophy } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -79,9 +79,7 @@ export default function NavBar() {
       {/* 모바일 상단 헤더 */}
       <div className="lg:hidden bg-surf border-b border-border h-12 flex items-center justify-between px-4 sticky top-0 z-10">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-pri rounded-lg flex items-center justify-center text-on-pri">
-            <Compass size={13} strokeWidth={1.8} />
-          </div>
+          <img src="/icon.svg" alt="Growpath" className="w-6 h-6 rounded-lg" />
           <span className="text-sm font-bold text-ink">Growpath</span>
         </div>
 
