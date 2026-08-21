@@ -1,6 +1,7 @@
 'use client';
 
 import { Code2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import ReactMarkdown from 'react-markdown';
 import type { Message } from '../hooks/useTutorSession';
 import { markdownComponents } from '../lib/markdownComponents';
@@ -16,6 +17,8 @@ interface Props {
 }
 
 export default function TutorMessageItem({ message, msgIdx, languageCode, onQuizSelect }: Props) {
+  const t = useTranslations('tutor');
+
   if (message.role === 'model') {
     return (
       <div className="flex flex-col gap-2 max-w-[88%]">
@@ -45,9 +48,9 @@ export default function TutorMessageItem({ message, msgIdx, languageCode, onQuiz
       <div className="flex justify-end">
         <div className="bg-[#1e1e1e] text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-[75%]">
           <p className="text-[10px] text-pri-2 font-semibold mb-1 flex items-center gap-1">
-            <Code2 size={11} /> 코드 리뷰 요청
+            <Code2 size={11} /> {t('codeReviewRequest')}
           </p>
-          <p className="text-[10px] opacity-70">코드가 제출됐어요 — AI 리뷰를 확인하세요</p>
+          <p className="text-[10px] opacity-70">{t('codeReviewSubmitted')}</p>
         </div>
       </div>
     );

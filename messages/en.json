@@ -159,6 +159,7 @@
     "studyItems": "Study Items",
     "studyItemsEmpty": "Press + to add study items.",
     "keywordPlaceholder": "Enter keyword...",
+    "conversationSection": "Conversation",
     "tilSection": "TIL — Today I Learned",
     "backToList": "Back to list"
   },
@@ -690,6 +691,15 @@
     "sessionReadyTitle": "🎉 Ready to wrap up",
     "endAndSave": "{endSession} & save record",
     "errorMessage": "Something went wrong. Please try again.",
+    "aiBusyTitle": "The AI server is busy right now",
+    "aiBusyMessage": "Demand is high at the moment. Please try again in a bit.",
+    "rateLimitedTitle": "You've used today's quota",
+    "rateLimitedMessage": "You can use this again tomorrow. Retrying won't help right now.",
+    "connectionErrorTitle": "There was a connection problem",
+    "connectionErrorMessage": "Check your network and try again.",
+    "retryBtn": "Try again",
+    "codeReviewRequest": "Code review request",
+    "codeReviewSubmitted": "Code submitted — check the AI review",
     "quizCorrect": "Correct: {answer}",
     "quizWrong": "Wrong: {answer}. Correct answer: {correct}.",
     "backBtn": "← Back"

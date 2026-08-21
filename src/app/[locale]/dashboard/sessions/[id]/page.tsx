@@ -1,5 +1,6 @@
 'use client';
 
+import { getLanguageCode } from '@/lib/language-codes';
 import { supabase } from '@/lib/supabase';
 import { getTagColor } from '@/lib/tagColor';
 import type { Session, StudyItem } from '@/types';
@@ -8,6 +9,19 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import TutorMessageItem from '../../tutor/components/TutorMessageItem';
+import type { Message } from '../../tutor/hooks/useTutorSession';
+
+interface StoredTranscript {
+  messages: Message[];
+  targetLanguage: string | null;
+}
+
+function isStoredTranscript(value: unknown): value is StoredTranscript {
+  return !!value && typeof value === 'object' && Array.isArray((value as StoredTranscript).messages);
+}
+
+const noopQuizSelect = () => {};
 
 export default function SessionDetail() {
   const t = useTranslations('study');
@@ -30,6 +44,8 @@ export default function SessionDetail() {
   });
 
   const dateLocale = locale === 'ko' ? 'ko-KR' : locale === 'de' ? 'de-DE' : 'en-US';
+  const transcript = isStoredTranscript(session?.transcript) ? session.transcript : null;
+  const transcriptLanguageCode = transcript?.targetLanguage ? getLanguageCode(transcript.targetLanguage) : null;
 
   useEffect(() => {
     const fetch = async () => {
@@ -241,6 +257,26 @@ export default function SessionDetail() {
             <p className="text-sm text-ink-faint">{t('sessionNoTil')}</p>
           )}
         </div>
+
+        {/* 대화 기록 - AI 튜터 세션만 존재. 라이브 채팅과 동일한 컴포넌트를 읽기
+            전용으로 재사용 - 퀴즈는 이미 선택된 답이 잠겨 보이고, 발음듣기 버튼도
+            그대로 눌러서 다시 들을 수 있다. */}
+        {transcript && transcript.messages.length > 0 && (
+          <div className="bg-surf rounded-xl border border-border p-4">
+            <p className="text-sm font-medium text-ink-dim mb-3">{t('conversationSection')}</p>
+            <div className="flex flex-col gap-4">
+              {transcript.messages.map((message, i) => (
+                <TutorMessageItem
+                  key={i}
+                  message={message}
+                  msgIdx={i}
+                  languageCode={transcriptLanguageCode}
+                  onQuizSelect={noopQuizSelect}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

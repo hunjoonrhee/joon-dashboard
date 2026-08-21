@@ -159,6 +159,7 @@
     "studyItems": "Gelernte Inhalte",
     "studyItemsEmpty": "+ Schaltfläche drücken, um Inhalte hinzuzufügen.",
     "keywordPlaceholder": "Stichwort eingeben...",
+    "conversationSection": "Unterhaltung",
     "tilSection": "TIL — Today I Learned",
     "backToList": "Zur Liste"
   },
@@ -690,6 +691,15 @@
     "sessionReadyTitle": "🎉 Sitzung fast abgeschlossen",
     "endAndSave": "{endSession} & Protokoll speichern",
     "errorMessage": "Ein Fehler ist aufgetreten. Bitte erneut versuchen.",
+    "aiBusyTitle": "Der KI-Server ist gerade ausgelastet",
+    "aiBusyMessage": "Die Nachfrage ist derzeit hoch. Bitte versuch es gleich noch einmal.",
+    "rateLimitedTitle": "Du hast dein heutiges Kontingent aufgebraucht",
+    "rateLimitedMessage": "Morgen kannst du es wieder nutzen. Erneut versuchen hilft jetzt nicht.",
+    "connectionErrorTitle": "Es gab ein Verbindungsproblem",
+    "connectionErrorMessage": "Überprüfe deine Internetverbindung und versuch es erneut.",
+    "retryBtn": "Erneut versuchen",
+    "codeReviewRequest": "Code-Review angefordert",
+    "codeReviewSubmitted": "Code eingereicht — sieh dir das KI-Review an",
     "quizCorrect": "Richtig: {answer}",
     "quizWrong": "Falsch: {answer}. Richtige Antwort: {correct}.",
     "backBtn": "← Zurück"

@@ -49,8 +49,7 @@ export interface SavedRecord {
 }
 
 export type TutorError =
-  | { type: 'unavailable' } // 503 — 서버 과부하, 재시도 가능
-  | { type: 'invalid' } // 400 — 요청 오류
+  | { type: 'unavailable' } // 502 — Gemini 과부하/실패, 재시도 가능
   | { type: 'rateLimited' } // 429 — 오늘 사용량 한도 도달, 재시도해도 소용없음
   | { type: 'unknown' }; // 기타
 
@@ -119,24 +118,19 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
       });
 
       if (!res.ok) {
-        // res.status is the actual HTTP status Next.js sent (429 for the
-        // rate limiter, 503/400 from further down) - errData.error.code was
-        // never populated for those paths, so it silently fell through to
-        // 'unknown' ("check your network") for a 429, which isn't a network
-        // problem and retrying does nothing until tomorrow's reset.
+        // The route's error bodies are always flat { error: string } - there
+        // was never a nested error.code to read, so this used to check
+        // errData?.error?.code (always undefined) and fall through to
+        // res.status anyway, except the branch below compared that to 503
+        // when the route only ever sends 502 for an upstream AI failure.
+        // Net effect: "AI busy, retry" never matched anything real, so
+        // clicking retry silently did nothing - it fell into the 'unknown'
+        // branch instead, which doesn't wire up a retry function at all.
         if (res.status === 429) {
           setLastError({ type: 'rateLimited' });
-          return null;
-        }
-
-        const errData = await res.json().catch(() => ({}));
-        const status = errData?.error?.code ?? res.status;
-
-        if (status === 503) {
+        } else if (res.status === 502) {
           setLastError({ type: 'unavailable' });
           setRetryFn(() => () => sendToAI(history, requestSummary, codeReview, code));
-        } else if (status === 400) {
-          setLastError({ type: 'invalid' });
         } else {
           setLastError({ type: 'unknown' });
         }
@@ -234,6 +228,9 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
         til: tilNote,
         memo: `${t('aiTutorLabel')} (${durationMin}분)`,
         roadmap_id: userContext?.adoptedRoadmapId ?? null,
+        // 세션 상세 페이지에서 채팅 UI 그대로(퀴즈 응답, TTS용 dialogueText,
+        // 발음점수 포함) 재현할 수 있도록 대화 전체를 같이 저장.
+        transcript: { messages, targetLanguage: userContext?.targetLanguage ?? null },
       });
       if (userContext?.targetLanguage && finalSummary?.vocabWords?.length) {
         await saveVocabWords(userContext.targetLanguage, finalSummary.vocabWords);

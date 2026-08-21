@@ -9,6 +9,10 @@ export interface Session {
   tags: string[];
   created_at: string;
   roadmap_id: string | null; // 추가
+  /** AI 튜터 세션의 전체 대화 기록. useTutorSession.Message[]를 담지만, 순환
+   * import를 피하려고 여기서는 unknown으로 두고 소비하는 쪽(세션 상세 페이지)에서
+   * 캐스팅한다. 이 컬럼 도입 이전 세션이나 텍스트로 직접 남긴 세션은 null. */
+  transcript: unknown | null;
 }
 
 export interface Topic {

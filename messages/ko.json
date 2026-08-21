@@ -159,6 +159,7 @@
     "studyItems": "공부한 항목",
     "studyItemsEmpty": "+ 버튼으로 공부한 항목을 추가해봐요.",
     "keywordPlaceholder": "키워드 입력...",
+    "conversationSection": "대화 기록",
     "tilSection": "TIL — Today I Learned",
     "backToList": "목록으로"
   },
@@ -690,6 +691,15 @@
     "sessionReadyTitle": "🎉 세션 마무리 준비됐어요",
     "endAndSave": "{endSession} & 기록 저장",
     "errorMessage": "오류가 발생했어요. 다시 시도해주세요.",
+    "aiBusyTitle": "AI 서버가 잠시 바빠요",
+    "aiBusyMessage": "수요가 많아 일시적으로 응답이 어렵습니다. 잠깐 후 다시 시도해보세요.",
+    "rateLimitedTitle": "오늘 사용량을 다 썼어요",
+    "rateLimitedMessage": "내일 다시 이용할 수 있어요. 재시도해도 지금은 안 돼요.",
+    "connectionErrorTitle": "연결에 문제가 생겼어요",
+    "connectionErrorMessage": "네트워크 상태를 확인하고 다시 시도해보세요.",
+    "retryBtn": "다시 시도",
+    "codeReviewRequest": "코드 리뷰 요청",
+    "codeReviewSubmitted": "코드가 제출됐어요 — AI 리뷰를 확인하세요",
     "quizCorrect": "정답: {answer}",
     "quizWrong": "오답 선택: {answer}. 정답은 {correct}입니다.",
     "backBtn": "← 뒤로"
