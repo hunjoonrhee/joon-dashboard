@@ -6,6 +6,18 @@ import { type NextRequest, NextResponse } from 'next/server';
 const handleI18n = createMiddleware(routing);
 const LOCALES = ['ko', 'de', 'en'];
 
+/** Best-matching locale from Accept-Language, falling back to routing.defaultLocale. */
+function negotiateLocale(request: NextRequest): string {
+  const acceptLanguage = request.headers.get('accept-language');
+  if (!acceptLanguage) return routing.defaultLocale;
+
+  const preferred = acceptLanguage
+    .split(',')
+    .map((part) => part.split(';')[0].trim().toLowerCase().split('-')[0]);
+
+  return preferred.find((lang) => LOCALES.includes(lang)) ?? routing.defaultLocale;
+}
+
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
     request: { headers: request.headers },
@@ -35,7 +47,7 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const locale = LOCALES.includes(pathname.split('/')[1]) ? pathname.split('/')[1] : 'ko';
+  const locale = LOCALES.includes(pathname.split('/')[1]) ? pathname.split('/')[1] : negotiateLocale(request);
 
   const isLoginPage = /^\/(ko|de|en)\/login$/.test(pathname);
   const isSignupPage = /^\/(ko|de|en)\/signup$/.test(pathname);

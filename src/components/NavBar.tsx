@@ -4,7 +4,7 @@ import { navItems } from '@/lib/nav-items';
 import { supabase } from '@/lib/supabase';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
 import { LogOut, Settings, Trophy } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -12,7 +12,7 @@ export default function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations('nav');
-  const locale = pathname.split('/')[1] ?? 'ko';
+  const locale = useLocale();
   const [name, setName] = useState('J');
   const [dateStr, setDateStr] = useState('');
 

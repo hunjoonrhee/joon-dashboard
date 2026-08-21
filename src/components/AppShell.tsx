@@ -9,7 +9,7 @@ import { ToastProvider } from '@/components/Toast';
 import { CelebrationProvider } from '@/lib/celebration-context';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useModalStore } from '@/store/modalStore';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -22,7 +22,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   // /ko/dashboard → segment = ''
   const pathname = usePathname();
   const router = useRouter();
-  const locale = pathname.split('/')[1] ?? 'ko';
+  const locale = useLocale();
   const segment = pathname.split('/')[3] ?? '';
 
   const pageTitles: Record<string, string> = {
