@@ -6,7 +6,7 @@ import { useNewRecordDetector } from '@/hooks/achievements/useNewRecordDetector'
 import { useOneTimeUnlockDetector } from '@/hooks/achievements/useOneTimeUnlockDetector';
 import { computeAchievementStats, type AchievementStats } from '@/lib/achievements';
 import { useCelebration, type CelebrationColorTheme } from '@/lib/celebration-context';
-import { usePronunciationBestScore, useVocabWordCount } from '@/lib/queries';
+import { usePronunciationBestScore, useSettings, useVocabWordCount } from '@/lib/queries';
 import { calcStreak } from '@/lib/streak';
 import type { AiRoadmap, Goal, Session } from '@/types';
 import { useLocale, useTranslations } from 'next-intl';
@@ -35,6 +35,7 @@ export function useAchievementDetectors(
 
   const { data: vocabWordCount = 0 } = useVocabWordCount();
   const { data: bestPronunciation = null } = usePronunciationBestScore();
+  const { data: settings } = useSettings();
   const stats: AchievementStats = computeAchievementStats(
     sessions,
     goals,
@@ -164,46 +165,54 @@ export function useAchievementDetectors(
   }, [showCelebration, t, goTo]);
 
   useMilestoneDetector(
-    userId ? `growpath.lastSeenStreak.${userId}` : null,
+    userId ? 'achv_lastSeenStreak' : null,
+    settings,
     STREAK_MILESTONES,
     currentStreak,
     handleStreakMilestone
   );
   useMilestoneDetector(
-    userId ? `growpath.lastSeenRecordsCount.${userId}` : null,
+    userId ? 'achv_lastSeenRecordsCount' : null,
+    settings,
     RECORDS_MILESTONES,
     stats.totalSessionCount,
     handleRecordsMilestone
   );
   useMilestoneDetector(
-    userId ? `growpath.lastSeenStudyHours.${userId}` : null,
+    userId ? 'achv_lastSeenStudyHours' : null,
+    settings,
     HOURS_MILESTONES,
     Math.floor(stats.totalStudyMinutes / 60),
     handleHoursMilestone
   );
   useNewRecordDetector(
-    userId ? `growpath.bestLongestSession.${userId}` : null,
+    userId ? 'achv_bestLongestSession' : null,
+    settings,
     stats.longestSessionMinutes,
     handleNewLongestSession
   );
   useNewRecordDetector(
-    userId ? `growpath.bestPronunciation.${userId}` : null,
+    userId ? 'achv_bestPronunciation' : null,
+    settings,
     stats.bestPronunciationScore,
     handleNewPronunciationRecord
   );
   // Stage completion is "new record" semantics too - currentStageLevel only ever increases as stages complete.
   useNewRecordDetector(
-    adoptedRoadmap ? `growpath.currentStageLevel.${adoptedRoadmap.id}` : null,
+    adoptedRoadmap ? `achv_currentStageLevel_${adoptedRoadmap.id}` : null,
+    settings,
     stats.currentStageLevel,
     handleStageCompleted
   );
   useOneTimeUnlockDetector(
-    adoptedRoadmap ? `growpath.roadmapComplete.${adoptedRoadmap.id}` : null,
+    adoptedRoadmap ? `achv_roadmapComplete_${adoptedRoadmap.id}` : null,
+    settings,
     stats.currentStageLevel !== null && stats.totalStages !== null && stats.currentStageLevel >= stats.totalStages,
     handleRoadmapCompleted
   );
   useOneTimeUnlockDetector(
-    userId ? `growpath.savedWordsUnlocked.${userId}` : null,
+    userId ? 'achv_savedWordsUnlocked' : null,
+    settings,
     stats.savedVocabWordCount > 0,
     handleFirstWordSaved
   );

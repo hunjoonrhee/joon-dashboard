@@ -1,27 +1,39 @@
 'use client';
 
+import { upsertWithUser } from '@/lib/supabase';
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 
-/** Fires whenever `currentValue` exceeds the highest value previously seen for this storageKey. */
+/**
+ * Fires whenever `currentValue` exceeds the highest value previously seen
+ * for this settingsKey. Backed by the `settings` table (not localStorage)
+ * so the record is tied to the account, not one browser.
+ */
 export function useNewRecordDetector(
-  storageKey: string | null,
+  settingsKey: string | null,
+  settings: Record<string, string> | undefined,
   currentValue: number | null | undefined,
   onNewRecord: (value: number) => void
 ) {
   const checkedRef = useRef<string | null>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!storageKey || currentValue == null) return;
-    const dedupeKey = `${storageKey}:${currentValue}`;
+    if (!settingsKey || currentValue == null || settings === undefined) return;
+    const dedupeKey = `${settingsKey}:${currentValue}`;
     if (checkedRef.current === dedupeKey) return;
     checkedRef.current = dedupeKey;
 
-    const storedRaw = window.localStorage.getItem(storageKey);
-    const stored = storedRaw !== null ? Number(storedRaw) : null;
+    const storedRaw = settings[settingsKey];
+    const stored = storedRaw !== undefined ? Number(storedRaw) : null;
 
     if (stored !== null && currentValue > stored) onNewRecord(currentValue);
     if (stored !== currentValue) {
-      window.localStorage.setItem(storageKey, String(currentValue));
+      upsertWithUser(
+        'settings',
+        { key: settingsKey, value: String(currentValue) },
+        { onConflict: 'key,user_id' }
+      ).then(() => queryClient.invalidateQueries({ queryKey: ['settings'] }));
     }
-  }, [storageKey, currentValue, onNewRecord]);
+  }, [settingsKey, settings, currentValue, onNewRecord, queryClient]);
 }

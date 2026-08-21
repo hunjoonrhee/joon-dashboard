@@ -1,20 +1,34 @@
 'use client';
 
+import { upsertWithUser } from '@/lib/supabase';
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 
-/** Fires exactly once ever per storageKey, the first time `isUnlocked` is true. */
-export function useOneTimeUnlockDetector(storageKey: string | null, isUnlocked: boolean, onUnlocked: () => void) {
+/**
+ * Fires exactly once ever per settingsKey, the first time `isUnlocked` is
+ * true. Backed by the `settings` table (not localStorage) so the flag is
+ * tied to the account, not one browser - a user switching devices or
+ * clearing site data doesn't see the celebration replay.
+ */
+export function useOneTimeUnlockDetector(
+  settingsKey: string | null,
+  settings: Record<string, string> | undefined,
+  isUnlocked: boolean,
+  onUnlocked: () => void
+) {
   const checkedRef = useRef<string | null>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!storageKey || !isUnlocked) return;
-    if (checkedRef.current === storageKey) return;
-    checkedRef.current = storageKey;
+    if (!settingsKey || !isUnlocked || settings === undefined) return;
+    if (checkedRef.current === settingsKey) return;
+    checkedRef.current = settingsKey;
 
-    const already = window.localStorage.getItem(storageKey);
-    if (already === null) {
+    if (settings[settingsKey] === undefined) {
       onUnlocked();
-      window.localStorage.setItem(storageKey, '1');
+      upsertWithUser('settings', { key: settingsKey, value: '1' }, { onConflict: 'key,user_id' }).then(() =>
+        queryClient.invalidateQueries({ queryKey: ['settings'] })
+      );
     }
-  }, [storageKey, isUnlocked, onUnlocked]);
+  }, [settingsKey, settings, isUnlocked, onUnlocked, queryClient]);
 }
