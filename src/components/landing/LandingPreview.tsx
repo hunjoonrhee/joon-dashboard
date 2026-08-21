@@ -1,6 +1,21 @@
 'use client';
 
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
+
+const STEP_IMAGES = [
+  '/landing-steps/step-1-goal.jpg',
+  '/landing-steps/step-2-roadmap.jpg',
+  '/landing-steps/step-3-record.jpg',
+  '/landing-steps/step-4-recommend.jpg',
+  '/landing-steps/step-5-achievements.jpg',
+];
+
+const STEP_COUNT = STEP_IMAGES.length;
+const AUTO_ADVANCE_MS = 5000;
+const TICK_MS = 50;
 
 function PreviewBar() {
   return (
@@ -17,16 +32,107 @@ function PreviewBar() {
 
 export default function LandingPreview() {
   const t = useTranslations('landing');
+  const [step, setStep] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    if (paused) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    setProgress(0);
+    let elapsed = 0;
+    const id = setInterval(() => {
+      elapsed += TICK_MS;
+      const pct = (elapsed / AUTO_ADVANCE_MS) * 100;
+      if (pct >= 100) {
+        clearInterval(id);
+        setStep((s) => (s + 1) % STEP_COUNT);
+      } else {
+        setProgress(pct);
+      }
+    }, TICK_MS);
+    return () => clearInterval(id);
+  }, [step, paused]);
+
+  const steps = Array.from({ length: STEP_COUNT }, (_, i) => ({
+    title: t(`previewStep${i + 1}Title`),
+    desc: t(`previewStep${i + 1}Desc`),
+  }));
+
+  const goTo = (i: number) => {
+    setStep((i + STEP_COUNT) % STEP_COUNT);
+    setProgress(0);
+  };
 
   return (
     <div className="max-w-3xl mx-auto px-6 mb-20">
       <p className="text-center text-xs font-semibold text-ink-faint uppercase tracking-widest mb-4">
         {t('previewLabel')}
       </p>
-      <div className="bg-surf border border-border rounded-2xl overflow-hidden shadow-2xl shadow-pri/5">
+      <div
+        className="bg-surf border border-border rounded-2xl overflow-hidden shadow-2xl shadow-pri/5"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
         <PreviewBar />
-        {/* eslint-disable-next-line @next/next/no-img-element -- next/image doesn't preserve GIF animation without `unoptimized`, and this is a static public asset, not a remote/optimizable one */}
-        <img src="/growpath-demo.gif" alt={t('previewLabel')} className="w-full block" />
+        <div className="relative aspect-[1470/656] bg-surf-2">
+          {STEP_IMAGES.map((src, i) => (
+            <Image
+              key={src}
+              src={src}
+              alt={steps[i].title}
+              fill
+              priority={i === 0}
+              sizes="(max-width: 768px) 100vw, 768px"
+              className={`object-cover transition-opacity duration-500 ${i === step ? 'opacity-100' : 'opacity-0'}`}
+            />
+          ))}
+        </div>
+
+        <div className="p-5">
+          <div className="flex items-center gap-1.5 mb-4">
+            {steps.map((s, i) => (
+              <button
+                key={s.title}
+                onClick={() => goTo(i)}
+                aria-label={s.title}
+                className="relative flex-1 h-1 rounded-full bg-border overflow-hidden cursor-pointer"
+              >
+                <span
+                  className="absolute inset-y-0 left-0 bg-pri rounded-full"
+                  style={{ width: i < step ? '100%' : i === step ? `${progress}%` : '0%' }}
+                />
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold text-pri mb-1">
+                {t('previewStepPrefix')} {step + 1}
+              </p>
+              <h3 className="text-base font-bold text-ink mb-1">{steps[step].title}</h3>
+              <p className="text-sm text-ink-dim">{steps[step].desc}</p>
+            </div>
+            <div className="flex gap-1.5 flex-shrink-0">
+              <button
+                onClick={() => goTo(step - 1)}
+                aria-label={t('previewPrev')}
+                className="w-8 h-8 rounded-full border border-border flex items-center justify-center text-ink-dim hover:bg-surf-2 transition-colors"
+              >
+                <ChevronLeft size={16} strokeWidth={2} />
+              </button>
+              <button
+                onClick={() => goTo(step + 1)}
+                aria-label={t('previewNext')}
+                className="w-8 h-8 rounded-full border border-border flex items-center justify-center text-ink-dim hover:bg-surf-2 transition-colors"
+              >
+                <ChevronRight size={16} strokeWidth={2} />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

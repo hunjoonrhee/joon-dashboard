@@ -185,7 +185,7 @@ export default function SessionDetail() {
               <h1 className="text-lg font-semibold text-ink mb-2">{session.title}</h1>
               <div className="flex items-center gap-3 text-sm text-ink-faint">
                 <span>{new Date(session.date).toLocaleDateString(dateLocale)}</span>
-                {session.duration_minutes && <span>· {session.duration_minutes}{t('duration')}</span>}
+                {session.duration_minutes && <span>· {session.duration_minutes}{t('durationUnit')}</span>}
               </div>
               {session.tags.length > 0 && (
                 <div className="flex gap-1.5 flex-wrap mt-3">
