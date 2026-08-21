@@ -205,7 +205,7 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
     await sendToAI(next);
   };
 
-  const handleEndSession = async () => {
+  const handleEndSession = async (saveTranscript: boolean) => {
     if (isEndingSession || loading) return;
     setIsEndingSession(true);
 
@@ -223,14 +223,21 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
       await insertWithUser('sessions', {
         title,
         date: today,
-        duration: durationMin,
+        // sessions has both duration/duration_minutes and memo/notes from an
+        // earlier schema drift (this insert used to write the former, the
+        // manual "공부 기록 추가" flow and the session detail page both use
+        // the latter, so AI tutor sessions silently never showed a duration).
+        // Standardizing on duration_minutes here; memo was never read
+        // anywhere so it's dropped rather than renamed.
+        duration_minutes: durationMin,
         tags,
         til: tilNote,
-        memo: `${t('aiTutorLabel')} (${durationMin}분)`,
         roadmap_id: userContext?.adoptedRoadmapId ?? null,
         // 세션 상세 페이지에서 채팅 UI 그대로(퀴즈 응답, TTS용 dialogueText,
-        // 발음점수 포함) 재현할 수 있도록 대화 전체를 같이 저장.
-        transcript: { messages, targetLanguage: userContext?.targetLanguage ?? null },
+        // 발음점수 포함) 재현할 수 있도록 대화 전체를 같이 저장 - 단, 사용자가
+        // 저장을 선택했을 때만. 매 세션마다 자동으로 남기면 부담스러워하는
+        // 피드백이 있어서 종료 시점에 확인을 받는다.
+        transcript: saveTranscript ? { messages, targetLanguage: userContext?.targetLanguage ?? null } : null,
       });
       if (userContext?.targetLanguage && finalSummary?.vocabWords?.length) {
         await saveVocabWords(userContext.targetLanguage, finalSummary.vocabWords);

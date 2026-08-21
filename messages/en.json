@@ -700,6 +700,10 @@
     "retryBtn": "Try again",
     "codeReviewRequest": "Code review request",
     "codeReviewSubmitted": "Code submitted — check the AI review",
+    "saveTranscriptTitle": "Save this conversation?",
+    "saveTranscriptSub": "Saving it lets you revisit the full conversation (quizzes and pronunciation playback included) on the session detail page later. Your study record (summary, TIL, time) is kept either way.",
+    "saveTranscriptDecline": "Don't save",
+    "saveTranscriptAccept": "Save conversation",
     "quizCorrect": "Correct: {answer}",
     "quizWrong": "Wrong: {answer}. Correct answer: {correct}.",
     "backBtn": "← Back"

@@ -700,6 +700,10 @@
     "retryBtn": "다시 시도",
     "codeReviewRequest": "코드 리뷰 요청",
     "codeReviewSubmitted": "코드가 제출됐어요 — AI 리뷰를 확인하세요",
+    "saveTranscriptTitle": "이 대화를 저장하시겠어요?",
+    "saveTranscriptSub": "저장하면 세션 상세 페이지에서 전체 대화(퀴즈, 발음듣기 포함)를 나중에 다시 볼 수 있어요. 저장하지 않아도 학습 기록(요약, TIL, 시간)은 그대로 남아요.",
+    "saveTranscriptDecline": "저장 안 함",
+    "saveTranscriptAccept": "대화 저장하기",
     "quizCorrect": "정답: {answer}",
     "quizWrong": "오답 선택: {answer}. 정답은 {correct}입니다.",
     "backBtn": "← 뒤로"

@@ -700,6 +700,10 @@
     "retryBtn": "Erneut versuchen",
     "codeReviewRequest": "Code-Review angefordert",
     "codeReviewSubmitted": "Code eingereicht — sieh dir das KI-Review an",
+    "saveTranscriptTitle": "Diese Unterhaltung speichern?",
+    "saveTranscriptSub": "Wenn du speicherst, kannst du die ganze Unterhaltung (inkl. Quiz und Aussprache-Wiedergabe) später auf der Sitzungsdetailseite nachlesen. Dein Lernrekord (Zusammenfassung, TIL, Zeit) bleibt so oder so erhalten.",
+    "saveTranscriptDecline": "Nicht speichern",
+    "saveTranscriptAccept": "Unterhaltung speichern",
     "quizCorrect": "Richtig: {answer}",
     "quizWrong": "Falsch: {answer}. Richtige Antwort: {correct}.",
     "backBtn": "← Zurück"

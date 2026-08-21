@@ -3,6 +3,7 @@
 import { getLanguageCode } from '@/lib/language-codes';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import SaveTranscriptModal from './components/SaveTranscriptModal';
 import TutorChat from './components/TutorChat';
 import TutorCodeReview from './components/TutorCodeReview';
 import TutorComplete from './components/TutorComplete';
@@ -25,6 +26,7 @@ export default function TutorPage() {
   const [userContext, setUserContext] = useState<UserContext | null>(null);
   const [savedRecord, setSavedRecord] = useState<SavedRecord | null>(null);
   const [codeReviewMode, setCodeReviewMode] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
   useEffect(() => {
     if (isGate || !topic) return;
@@ -60,6 +62,11 @@ export default function TutorPage() {
     setCodeReviewMode(false);
   };
 
+  const onChooseSaveTranscript = (saveTranscript: boolean) => {
+    setShowSaveConfirm(false);
+    handleEndSession(saveTranscript);
+  };
+
   const languageCode = getLanguageCode(userContext?.targetLanguage ?? null);
 
   if (pageState === 'loading') {
@@ -83,7 +90,7 @@ export default function TutorPage() {
         elapsedMin={elapsedMin}
         isEndingSession={isEndingSession}
         loading={loading}
-        onEndSession={handleEndSession}
+        onEndSession={() => setShowSaveConfirm(true)}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -118,9 +125,11 @@ export default function TutorPage() {
           sessionSummary={sessionSummary}
           isEndingSession={isEndingSession}
           loading={loading}
-          onEndSession={handleEndSession}
+          onEndSession={() => setShowSaveConfirm(true)}
         />
       </div>
+
+      {showSaveConfirm && <SaveTranscriptModal onChoose={onChooseSaveTranscript} />}
     </main>
   );
 }
