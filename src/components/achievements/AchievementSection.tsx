@@ -24,9 +24,6 @@ export default function AchievementSection({ section, title, unlocked, stats, on
     if (id === 'pr-pronunciation' && stats.bestPronunciationScore !== null) {
       return t('detail.pronunciation', { score: Math.round(stats.bestPronunciationScore) });
     }
-    if (id === 'pr-saved-words' && stats.savedVocabWordCount > 0) {
-      return t('detail.savedWords', { count: stats.savedVocabWordCount });
-    }
     return undefined;
   };
 

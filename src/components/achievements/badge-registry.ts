@@ -1,5 +1,16 @@
 import type { BadgeId } from '@/lib/achievements';
-import { BookMarked, Clock, Flag, Flame, ListChecks, Mic, Timer, Trophy, type LucideIcon } from 'lucide-react';
+import {
+  BookMarked,
+  Clock,
+  Flag,
+  Flame,
+  GraduationCap,
+  ListChecks,
+  Mic,
+  Timer,
+  Trophy,
+  type LucideIcon,
+} from 'lucide-react';
 
 export type BadgeSection = 'milestone' | 'personalRecord' | 'goal';
 export type BadgeTier = 'green' | 'gold' | 'purple';
@@ -25,9 +36,32 @@ export const BADGES: BadgeMeta[] = [
   { id: 'hours-10-green', section: 'milestone', icon: Clock, tier: 'green', labelKey: 'hours10' },
   { id: 'hours-50-gold', section: 'milestone', icon: Clock, tier: 'gold', labelKey: 'hours50' },
   { id: 'hours-100-purple', section: 'milestone', icon: Clock, tier: 'purple', labelKey: 'hours100' },
+  { id: 'vocab-10-green', section: 'milestone', icon: BookMarked, tier: 'green', labelKey: 'vocab10' },
+  { id: 'vocab-50-gold', section: 'milestone', icon: BookMarked, tier: 'gold', labelKey: 'vocab50' },
+  { id: 'vocab-100-purple', section: 'milestone', icon: BookMarked, tier: 'purple', labelKey: 'vocab100' },
+  {
+    id: 'vocab-mastered-5-green',
+    section: 'milestone',
+    icon: GraduationCap,
+    tier: 'green',
+    labelKey: 'vocabMastered5',
+  },
+  {
+    id: 'vocab-mastered-20-gold',
+    section: 'milestone',
+    icon: GraduationCap,
+    tier: 'gold',
+    labelKey: 'vocabMastered20',
+  },
+  {
+    id: 'vocab-mastered-50-purple',
+    section: 'milestone',
+    icon: GraduationCap,
+    tier: 'purple',
+    labelKey: 'vocabMastered50',
+  },
   { id: 'pr-longest-session', section: 'personalRecord', icon: Timer, tier: 'gold', labelKey: 'prLongestSession' },
   { id: 'pr-pronunciation', section: 'personalRecord', icon: Mic, tier: 'gold', labelKey: 'prPronunciation' },
-  { id: 'pr-saved-words', section: 'personalRecord', icon: BookMarked, tier: 'gold', labelKey: 'prSavedWords' },
   { id: 'goal-stage-complete', section: 'goal', icon: Flag, tier: 'purple', labelKey: 'goalStageComplete' },
   { id: 'goal-roadmap-100', section: 'goal', icon: Trophy, tier: 'purple', labelKey: 'goalRoadmap100' },
 ];

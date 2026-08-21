@@ -353,16 +353,20 @@
       "hours10": "10 Stunden gelernt",
       "hours50": "50 Stunden gelernt",
       "hours100": "100 Stunden gelernt",
+      "vocab10": "10 Wörter gespeichert",
+      "vocab50": "50 Wörter gespeichert",
+      "vocab100": "100 Wörter gespeichert",
+      "vocabMastered5": "5 Wörter gemeistert",
+      "vocabMastered20": "20 Wörter gemeistert",
+      "vocabMastered50": "50 Wörter gemeistert",
       "prLongestSession": "Längste Sitzung",
       "prPronunciation": "Beste Aussprache",
-      "prSavedWords": "Gespeicherte Wörter",
       "goalStageComplete": "Stufe abgeschlossen",
       "goalRoadmap100": "Roadmap abgeschlossen"
     },
     "detail": {
       "longestSession": "{minutes} Min.",
-      "pronunciation": "{score} Punkte",
-      "savedWords": "{count}"
+      "pronunciation": "{score} Punkte"
     },
     "celebration": {
       "streakMilestone": {
@@ -383,6 +387,18 @@
         "subtitle": "Die Zeit zeigt, wie viel Mühe du investierst.",
         "dialCaption": "Stunden"
       },
+      "vocabMilestone": {
+        "eyebrow": "MEILENSTEIN",
+        "title": "{count} Wörter gespeichert!",
+        "subtitle": "Dein Wortschatz wächst stetig.",
+        "dialCaption": "Wörter"
+      },
+      "vocabMasteredMilestone": {
+        "eyebrow": "MEILENSTEIN",
+        "title": "{count} Wörter gemeistert!",
+        "subtitle": "Wörter, die du durch Wiederholung wirklich kannst.",
+        "dialCaption": "gemeistert"
+      },
       "longestSession": {
         "eyebrow": "PERSÖNLICHER REKORD",
         "title": "Neuer Rekord für die längste Sitzung!",
@@ -392,11 +408,6 @@
         "eyebrow": "PERSÖNLICHER REKORD",
         "title": "Neue Bestwertung bei der Aussprache!",
         "subtitle": "Dein bester Wert diesmal: {score} Punkte."
-      },
-      "savedWords": {
-        "eyebrow": "PERSÖNLICHER REKORD",
-        "title": "Du hast ein Wort gespeichert",
-        "subtitle": "Bisher hast du {count} gespeichert."
       },
       "stageComplete": {
         "eyebrow": "ZIEL",

@@ -6,7 +6,7 @@ import { useNewRecordDetector } from '@/hooks/achievements/useNewRecordDetector'
 import { useOneTimeUnlockDetector } from '@/hooks/achievements/useOneTimeUnlockDetector';
 import { computeAchievementStats, type AchievementStats } from '@/lib/achievements';
 import { useCelebration, type CelebrationColorTheme } from '@/lib/celebration-context';
-import { usePronunciationBestScore, useSettings, useVocabWordCount } from '@/lib/queries';
+import { useMasteredVocabWordCount, usePronunciationBestScore, useSettings, useVocabWordCount } from '@/lib/queries';
 import { calcStreak } from '@/lib/streak';
 import type { AiRoadmap, Goal, Session } from '@/types';
 import { useLocale, useTranslations } from 'next-intl';
@@ -16,6 +16,8 @@ import { useCallback } from 'react';
 const STREAK_MILESTONES = [3, 7, 30, 100] as const;
 const RECORDS_MILESTONES = [10, 50, 100] as const;
 const HOURS_MILESTONES = [10, 50, 100] as const;
+const VOCAB_MILESTONES = [10, 50, 100] as const;
+const VOCAB_MASTERED_MILESTONES = [5, 20, 50] as const;
 
 function tierFor(value: number, purpleAt: number, goldAt: number): CelebrationColorTheme {
   return value >= purpleAt ? 'purple' : value >= goldAt ? 'gold' : 'green';
@@ -34,6 +36,7 @@ export function useAchievementDetectors(
   const showCelebration = useCelebration();
 
   const { data: vocabWordCount = 0 } = useVocabWordCount();
+  const { data: masteredVocabWordCount = 0 } = useMasteredVocabWordCount();
   const { data: bestPronunciation = null } = usePronunciationBestScore();
   const { data: settings } = useSettings();
   const stats: AchievementStats = computeAchievementStats(
@@ -41,7 +44,8 @@ export function useAchievementDetectors(
     goals,
     adoptedRoadmap,
     vocabWordCount,
-    bestPronunciation
+    bestPronunciation,
+    masteredVocabWordCount
   );
   const currentStreak = calcStreak(sessions);
 
@@ -151,18 +155,35 @@ export function useAchievementDetectors(
     });
   }, [showCelebration, t, goTo]);
 
-  const handleFirstWordSaved = useCallback(() => {
-    const Icon = getBadge('pr-saved-words').icon;
-    showCelebration({
-      eyebrow: t('celebration.savedWords.eyebrow'),
-      title: t('celebration.savedWords.title'),
-      subtitle: t('celebration.savedWords.subtitle', { count: 1 }),
-      centerIcon: <Icon size={56} strokeWidth={1.8} />,
-      colorTheme: 'gold',
-      primaryLabel: t('celebration.viewAchievementsCta'),
-      onPrimary: () => goTo('/dashboard/achievements'),
-    });
-  }, [showCelebration, t, goTo]);
+  const handleVocabMilestone = useCallback(
+    (milestone: number) => {
+      showCelebration({
+        eyebrow: t('celebration.vocabMilestone.eyebrow'),
+        title: t('celebration.vocabMilestone.title', { count: milestone }),
+        subtitle: t('celebration.vocabMilestone.subtitle'),
+        centerLabel: { value: String(milestone), caption: t('celebration.vocabMilestone.dialCaption') },
+        colorTheme: tierFor(milestone, 100, 50),
+        primaryLabel: t('celebration.viewAchievementsCta'),
+        onPrimary: () => goTo('/dashboard/achievements'),
+      });
+    },
+    [showCelebration, t, goTo]
+  );
+
+  const handleVocabMasteredMilestone = useCallback(
+    (milestone: number) => {
+      showCelebration({
+        eyebrow: t('celebration.vocabMasteredMilestone.eyebrow'),
+        title: t('celebration.vocabMasteredMilestone.title', { count: milestone }),
+        subtitle: t('celebration.vocabMasteredMilestone.subtitle'),
+        centerLabel: { value: String(milestone), caption: t('celebration.vocabMasteredMilestone.dialCaption') },
+        colorTheme: tierFor(milestone, 50, 20),
+        primaryLabel: t('celebration.viewAchievementsCta'),
+        onPrimary: () => goTo('/dashboard/achievements'),
+      });
+    },
+    [showCelebration, t, goTo]
+  );
 
   useMilestoneDetector(
     userId ? 'achv_lastSeenStreak' : null,
@@ -210,10 +231,18 @@ export function useAchievementDetectors(
     stats.currentStageLevel !== null && stats.totalStages !== null && stats.currentStageLevel >= stats.totalStages,
     handleRoadmapCompleted
   );
-  useOneTimeUnlockDetector(
-    userId ? 'achv_savedWordsUnlocked' : null,
+  useMilestoneDetector(
+    userId ? 'achv_lastSeenVocabCount' : null,
     settings,
-    stats.savedVocabWordCount > 0,
-    handleFirstWordSaved
+    VOCAB_MILESTONES,
+    stats.savedVocabWordCount,
+    handleVocabMilestone
+  );
+  useMilestoneDetector(
+    userId ? 'achv_lastSeenVocabMasteredCount' : null,
+    settings,
+    VOCAB_MASTERED_MILESTONES,
+    stats.masteredVocabWordCount,
+    handleVocabMasteredMilestone
   );
 }

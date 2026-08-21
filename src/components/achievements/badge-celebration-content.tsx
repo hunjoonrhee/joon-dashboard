@@ -21,6 +21,16 @@ const HOURS_THRESHOLDS: Partial<Record<BadgeId, number>> = {
   'hours-50-gold': 50,
   'hours-100-purple': 100,
 };
+const VOCAB_THRESHOLDS: Partial<Record<BadgeId, number>> = {
+  'vocab-10-green': 10,
+  'vocab-50-gold': 50,
+  'vocab-100-purple': 100,
+};
+const VOCAB_MASTERED_THRESHOLDS: Partial<Record<BadgeId, number>> = {
+  'vocab-mastered-5-green': 5,
+  'vocab-mastered-20-gold': 20,
+  'vocab-mastered-50-purple': 50,
+};
 
 function tierFor(value: number, purpleAt: number, goldAt: number): CelebrationColorTheme {
   return value >= purpleAt ? 'purple' : value >= goldAt ? 'gold' : 'green';
@@ -91,13 +101,25 @@ export function getBadgeCelebrationContent(
     };
   }
 
-  if (badgeId === 'pr-saved-words') {
+  if (badgeId in VOCAB_THRESHOLDS) {
+    const count = VOCAB_THRESHOLDS[badgeId]!;
     return {
-      eyebrow: t('celebration.savedWords.eyebrow'),
-      title: t('celebration.savedWords.title'),
-      subtitle: t('celebration.savedWords.subtitle', { count: stats.savedVocabWordCount }),
-      centerIcon,
-      colorTheme: 'gold',
+      eyebrow: t('celebration.vocabMilestone.eyebrow'),
+      title: t('celebration.vocabMilestone.title', { count }),
+      subtitle: t('celebration.vocabMilestone.subtitle'),
+      centerLabel: { value: String(count), caption: t('celebration.vocabMilestone.dialCaption') },
+      colorTheme: tierFor(count, 100, 50),
+    };
+  }
+
+  if (badgeId in VOCAB_MASTERED_THRESHOLDS) {
+    const count = VOCAB_MASTERED_THRESHOLDS[badgeId]!;
+    return {
+      eyebrow: t('celebration.vocabMasteredMilestone.eyebrow'),
+      title: t('celebration.vocabMasteredMilestone.title', { count }),
+      subtitle: t('celebration.vocabMasteredMilestone.subtitle'),
+      centerLabel: { value: String(count), caption: t('celebration.vocabMasteredMilestone.dialCaption') },
+      colorTheme: tierFor(count, 50, 20),
     };
   }
 

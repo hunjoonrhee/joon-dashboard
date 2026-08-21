@@ -1,6 +1,6 @@
 import { fetchBestPronunciationScore } from '@/lib/pronunciation';
 import { supabase } from '@/lib/supabase';
-import { fetchAllVocabWords, fetchDueVocabWords, fetchVocabWordCount } from '@/lib/vocab';
+import { fetchAllVocabWords, fetchDueVocabWords, fetchMasteredVocabWordCount, fetchVocabWordCount } from '@/lib/vocab';
 import type { Goal, Note, Project, ProjectTask, Session, Setting, TodayItem, Topic } from '@/types';
 import { useQuery } from '@tanstack/react-query';
 
@@ -101,6 +101,8 @@ export const useDueVocabWords = (limit?: number) =>
   useQuery({ queryKey: ['vocab_words', 'due', limit], queryFn: () => fetchDueVocabWords(limit) });
 
 export const useVocabWordCount = () => useQuery({ queryKey: ['vocab_words', 'count'], queryFn: fetchVocabWordCount });
+export const useMasteredVocabWordCount = () =>
+  useQuery({ queryKey: ['vocab_words', 'masteredCount'], queryFn: fetchMasteredVocabWordCount });
 
 // ─── Pronunciation ──────────────────────────────────────
 export const usePronunciationBestScore = () =>

@@ -353,16 +353,20 @@
       "hours10": "10시간 공부",
       "hours50": "50시간 공부",
       "hours100": "100시간 공부",
+      "vocab10": "단어 10개 저장",
+      "vocab50": "단어 50개 저장",
+      "vocab100": "단어 100개 저장",
+      "vocabMastered5": "단어 5개 마스터",
+      "vocabMastered20": "단어 20개 마스터",
+      "vocabMastered50": "단어 50개 마스터",
       "prLongestSession": "최장 세션",
       "prPronunciation": "발음 점수",
-      "prSavedWords": "저장한 단어",
       "goalStageComplete": "단계 완료",
       "goalRoadmap100": "로드맵 완주"
     },
     "detail": {
       "longestSession": "{minutes}분",
-      "pronunciation": "{score}점",
-      "savedWords": "{count}개"
+      "pronunciation": "{score}점"
     },
     "celebration": {
       "streakMilestone": {
@@ -383,6 +387,18 @@
         "subtitle": "시간이 증명하는 노력이에요.",
         "dialCaption": "시간"
       },
+      "vocabMilestone": {
+        "eyebrow": "MILESTONE",
+        "title": "단어 {count}개 저장했어요!",
+        "subtitle": "단어장이 점점 풍성해지고 있어요.",
+        "dialCaption": "단어"
+      },
+      "vocabMasteredMilestone": {
+        "eyebrow": "MILESTONE",
+        "title": "단어 {count}개 마스터했어요!",
+        "subtitle": "반복 복습으로 확실히 외운 단어들이에요.",
+        "dialCaption": "마스터"
+      },
       "longestSession": {
         "eyebrow": "PERSONAL RECORD",
         "title": "최장 세션 기록 경신!",
@@ -392,11 +408,6 @@
         "eyebrow": "PERSONAL RECORD",
         "title": "발음 점수 신기록!",
         "subtitle": "이번 최고 점수는 {score}점이에요."
-      },
-      "savedWords": {
-        "eyebrow": "PERSONAL RECORD",
-        "title": "단어장에 단어를 저장했어요",
-        "subtitle": "지금까지 {count}개 저장했어요."
       },
       "stageComplete": {
         "eyebrow": "GOAL",

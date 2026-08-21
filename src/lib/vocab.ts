@@ -29,6 +29,17 @@ export async function fetchVocabWordCount(): Promise<number> {
   return count ?? 0;
 }
 
+/** A word is "mastered" once it's survived this many consecutive correct reviews without a wrong answer resetting it. */
+export const VOCAB_MASTERY_REVIEW_COUNT = 5;
+
+export async function fetchMasteredVocabWordCount(): Promise<number> {
+  const { count } = await supabase
+    .from('vocab_words')
+    .select('id', { count: 'exact', head: true })
+    .gte('review_count', VOCAB_MASTERY_REVIEW_COUNT);
+  return count ?? 0;
+}
+
 export type CreateVocabWordInput = {
   language: string;
   word: string;

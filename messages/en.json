@@ -353,16 +353,20 @@
       "hours10": "10 hours studied",
       "hours50": "50 hours studied",
       "hours100": "100 hours studied",
+      "vocab10": "10 words saved",
+      "vocab50": "50 words saved",
+      "vocab100": "100 words saved",
+      "vocabMastered5": "5 words mastered",
+      "vocabMastered20": "20 words mastered",
+      "vocabMastered50": "50 words mastered",
       "prLongestSession": "Longest session",
       "prPronunciation": "Best pronunciation",
-      "prSavedWords": "Saved words",
       "goalStageComplete": "Stage complete",
       "goalRoadmap100": "Roadmap complete"
     },
     "detail": {
       "longestSession": "{minutes} min",
-      "pronunciation": "{score} pts",
-      "savedWords": "{count}"
+      "pronunciation": "{score} pts"
     },
     "celebration": {
       "streakMilestone": {
@@ -383,6 +387,18 @@
         "subtitle": "That's time proving the effort you're putting in.",
         "dialCaption": "hours"
       },
+      "vocabMilestone": {
+        "eyebrow": "MILESTONE",
+        "title": "{count} words saved!",
+        "subtitle": "Your vocabulary list keeps growing.",
+        "dialCaption": "words"
+      },
+      "vocabMasteredMilestone": {
+        "eyebrow": "MILESTONE",
+        "title": "{count} words mastered!",
+        "subtitle": "Words you've reviewed enough to really know.",
+        "dialCaption": "mastered"
+      },
       "longestSession": {
         "eyebrow": "PERSONAL RECORD",
         "title": "New longest-session record!",
@@ -392,11 +408,6 @@
         "eyebrow": "PERSONAL RECORD",
         "title": "New pronunciation high score!",
         "subtitle": "Your best score this time was {score}."
-      },
-      "savedWords": {
-        "eyebrow": "PERSONAL RECORD",
-        "title": "You saved a word to your vocab list",
-        "subtitle": "You've saved {count} so far."
       },
       "stageComplete": {
         "eyebrow": "GOAL",

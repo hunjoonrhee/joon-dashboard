@@ -15,7 +15,12 @@ export type BadgeId =
   | 'hours-100-purple'
   | 'pr-longest-session'
   | 'pr-pronunciation'
-  | 'pr-saved-words'
+  | 'vocab-10-green'
+  | 'vocab-50-gold'
+  | 'vocab-100-purple'
+  | 'vocab-mastered-5-green'
+  | 'vocab-mastered-20-gold'
+  | 'vocab-mastered-50-purple'
   | 'goal-stage-complete'
   | 'goal-roadmap-100';
 
@@ -29,6 +34,7 @@ export type AchievementStats = {
   bestPronunciationScore: number | null;
   bestPronunciationDate: string | null;
   savedVocabWordCount: number;
+  masteredVocabWordCount: number;
   /** From the currently adopted roadmap only. */
   currentStageLevel: number | null;
   totalStages: number | null;
@@ -56,7 +62,12 @@ export function computeUnlockedBadges(stats: AchievementStats): Record<BadgeId, 
     'hours-100-purple': stats.totalStudyMinutes >= 100 * HOURS_TO_MINUTES,
     'pr-longest-session': stats.longestSessionMinutes !== null,
     'pr-pronunciation': stats.bestPronunciationScore !== null,
-    'pr-saved-words': stats.savedVocabWordCount > 0,
+    'vocab-10-green': stats.savedVocabWordCount >= 10,
+    'vocab-50-gold': stats.savedVocabWordCount >= 50,
+    'vocab-100-purple': stats.savedVocabWordCount >= 100,
+    'vocab-mastered-5-green': stats.masteredVocabWordCount >= 5,
+    'vocab-mastered-20-gold': stats.masteredVocabWordCount >= 20,
+    'vocab-mastered-50-purple': stats.masteredVocabWordCount >= 50,
     'goal-stage-complete': (stats.currentStageLevel ?? 0) > 1,
     'goal-roadmap-100':
       stats.currentStageLevel !== null && stats.totalStages !== null && stats.currentStageLevel >= stats.totalStages,
@@ -68,16 +79,17 @@ export function computeUnlockedBadges(stats: AchievementStats): Record<BadgeId, 
  * (sessions, goals, adopted roadmap) instead of separate queries -
  * mobile computes this via 3 extra Supabase round-trips, but web's
  * sessions/goals are already in the query cache by the time any screen
- * needs this. vocabWordCount is the one exception - it comes from its
- * own useVocabWordCount() query since nothing else on the dashboard
- * already fetches it.
+ * needs this. vocabWordCount and masteredVocabWordCount are the
+ * exceptions - they come from their own vocab_words queries since
+ * nothing else on the dashboard already fetches them.
  */
 export function computeAchievementStats(
   sessions: Session[],
   goals: Goal[],
   adoptedRoadmap: AiRoadmap | null,
   vocabWordCount = 0,
-  bestPronunciation: BestPronunciationScore = null
+  bestPronunciation: BestPronunciationScore = null,
+  masteredVocabWordCount = 0
 ): AchievementStats {
   const longestSession = sessions.reduce<{ minutes: number; date: string } | null>((best, s) => {
     if (s.duration_minutes === null) return best;
@@ -98,6 +110,7 @@ export function computeAchievementStats(
     bestPronunciationScore: bestPronunciation?.score ?? null,
     bestPronunciationDate: bestPronunciation?.date ?? null,
     savedVocabWordCount: vocabWordCount,
+    masteredVocabWordCount,
     currentStageLevel: adoptedRoadmap ? 1 + completedStages : null,
     totalStages: adoptedRoadmap ? adoptedRoadmap.stages.length : null,
   };
