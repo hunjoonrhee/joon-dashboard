@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="12" cy="12" r="10"/>
-  <circle cx="12" cy="12" r="6"/>
-  <circle cx="12" cy="12" r="2" fill="#ef4444"/>
-  <line x1="4" y1="4" x2="12" y2="12" stroke="white" stroke-width="1.5"/>
-<polyline points="9 12 12 12 12 9" stroke="white" stroke-width="1.5" fill="none"/>
-
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect x="0" y="0" width="1024" height="1024" fill="#121815"></rect>
+  <circle cx="512" cy="512" r="418" fill="none" stroke="#6FBF95" stroke-opacity="0.3" stroke-width="26" stroke-dasharray="5 38.8"></circle>
+  <circle cx="512" cy="512" r="418" fill="none" stroke="#6FBF95" stroke-opacity="0.8" stroke-width="46" stroke-dasharray="10 208.8"></circle>
+  <path d="M512 552 L512 752" fill="none" stroke="#E0A75B" stroke-width="60" stroke-linecap="round"></path>
+  <path d="M344 490 L512 300 L680 490" fill="none" stroke="#6FBF95" stroke-width="78" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M512 300 L512 560" fill="none" stroke="#6FBF95" stroke-width="60" stroke-linecap="round"></path>
 </svg>
