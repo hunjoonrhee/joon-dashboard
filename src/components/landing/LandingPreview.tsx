@@ -2,13 +2,23 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
-const STEP_SLUGS = ['step-1-goal', 'step-2-roadmap', 'step-3-record', 'step-4-recommend', 'step-5-achievements'];
+// Steps 2 & 3 are real screen recordings (goal -> AI roadmap generating,
+// an actual tutor conversation happening) so the walkthrough shows the app
+// doing something instead of five frozen screens; the rest are clean static
+// shots. next/image can't preserve GIF animation without extra config, so
+// every step renders through a plain <img> for consistency.
+const STEP_FILES = [
+  { slug: 'step-1-goal', ext: 'jpg' },
+  { slug: 'step-2-roadmap', ext: 'gif' },
+  { slug: 'step-3-record', ext: 'gif' },
+  { slug: 'step-4-recommend', ext: 'jpg' },
+  { slug: 'step-5-achievements', ext: 'jpg' },
+];
 const SUPPORTED_LOCALES = ['ko', 'en', 'de'];
 
-const STEP_COUNT = STEP_SLUGS.length;
+const STEP_COUNT = STEP_FILES.length;
 const AUTO_ADVANCE_MS = 5000;
 const TICK_MS = 50;
 
@@ -29,7 +39,7 @@ export default function LandingPreview() {
   const t = useTranslations('landing');
   const locale = useLocale();
   const imageLocale = SUPPORTED_LOCALES.includes(locale) ? locale : 'en';
-  const stepImages = STEP_SLUGS.map((slug) => `/landing-steps/${slug}-${imageLocale}.jpg`);
+  const stepImages = STEP_FILES.map(({ slug, ext }) => `/landing-steps/${slug}-${imageLocale}.${ext}`);
   const [step, setStep] = useState(0);
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -76,14 +86,12 @@ export default function LandingPreview() {
         <PreviewBar />
         <div className="relative aspect-[1470/656] bg-surf-2">
           {stepImages.map((src, i) => (
-            <Image
+            // eslint-disable-next-line @next/next/no-img-element -- next/image drops GIF animation without extra config; plain img keeps steps 2/3's screen recordings moving.
+            <img
               key={src}
               src={src}
               alt={steps[i].title}
-              fill
-              priority={i === 0}
-              sizes="(max-width: 768px) 100vw, 768px"
-              className={`object-cover transition-opacity duration-500 ${i === step ? 'opacity-100' : 'opacity-0'}`}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${i === step ? 'opacity-100' : 'opacity-0'}`}
             />
           ))}
         </div>
