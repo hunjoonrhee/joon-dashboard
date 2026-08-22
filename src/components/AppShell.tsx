@@ -30,6 +30,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const locale = useLocale();
   const segment = pathname.split('/')[3] ?? '';
+  // The AI tutor page already tracks its own elapsed time per session (shown
+  // in its own header) - offering the standalone study timer's start button
+  // there too would let two unrelated timers run at once for no reason.
+  const isTutorPage = segment === 'tutor';
 
   const pageTitles: Record<string, string> = {
     '': tNav('home'),
@@ -96,7 +100,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <span className="text-sm text-ink-faint" suppressHydrationWarning>
                   {today}
                 </span>
-                {timerStatus === 'idle' && (
+                {timerStatus === 'idle' && !isTutorPage && (
                   <button
                     onClick={() => startTimer()}
                     aria-label={tTimer('start')}

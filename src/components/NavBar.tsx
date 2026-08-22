@@ -41,6 +41,11 @@ export default function NavBar() {
     return pathname === fullPath || pathname.startsWith(`/${locale}${path}/`);
   };
 
+  // Same reasoning as AppShell's header: the AI tutor page already tracks
+  // its own per-session elapsed time, so don't offer the standalone study
+  // timer's start button there too.
+  const isTutorPage = pathname.split('/')[3] === 'tutor';
+
   const guard = useGuardedAction();
   const navigate = (path: string) => guard(() => router.push(`/${locale}${path}`));
 
@@ -104,7 +109,7 @@ export default function NavBar() {
               </button>
             ))}
           </div>
-          {timerStatus === 'idle' && (
+          {timerStatus === 'idle' && !isTutorPage && (
             <button
               onClick={() => startTimer()}
               aria-label={tTimer('start')}
