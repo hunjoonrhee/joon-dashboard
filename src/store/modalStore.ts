@@ -3,13 +3,16 @@ import { create } from 'zustand';
 interface ModalStore {
   studyModalOpen: boolean;
   studyModalInitialTitle: string;
-  openStudyModal: (title?: string) => void;
+  studyModalInitialDurationMinutes: number | null;
+  openStudyModal: (title?: string, durationMinutes?: number) => void;
   closeStudyModal: () => void;
 }
 
 export const useModalStore = create<ModalStore>((set) => ({
   studyModalOpen: false,
   studyModalInitialTitle: '',
-  openStudyModal: (title = '') => set({ studyModalOpen: true, studyModalInitialTitle: title }),
-  closeStudyModal: () => set({ studyModalOpen: false, studyModalInitialTitle: '' }),
+  studyModalInitialDurationMinutes: null,
+  openStudyModal: (title = '', durationMinutes) =>
+    set({ studyModalOpen: true, studyModalInitialTitle: title, studyModalInitialDurationMinutes: durationMinutes ?? null }),
+  closeStudyModal: () => set({ studyModalOpen: false, studyModalInitialTitle: '', studyModalInitialDurationMinutes: null }),
 }));

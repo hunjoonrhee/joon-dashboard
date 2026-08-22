@@ -170,6 +170,16 @@
     "tilSection": "TIL — Today I Learned",
     "backToList": "목록으로"
   },
+  "timer": {
+    "start": "타이머",
+    "topicPlaceholder": "무엇을 공부하세요?",
+    "pause": "일시정지",
+    "resume": "재개",
+    "finish": "완료",
+    "discard": "취소",
+    "tabTitleRunning": "학습 중",
+    "tabTitlePaused": "일시정지"
+  },
   "notes": {
     "title": "노트",
     "empty": "아직 노트가 없어요",

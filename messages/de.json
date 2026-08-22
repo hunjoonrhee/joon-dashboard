@@ -170,6 +170,16 @@
     "tilSection": "TIL — Today I Learned",
     "backToList": "Zur Liste"
   },
+  "timer": {
+    "start": "Timer",
+    "topicPlaceholder": "Was lernst du gerade?",
+    "pause": "Pausieren",
+    "resume": "Fortsetzen",
+    "finish": "Fertig",
+    "discard": "Verwerfen",
+    "tabTitleRunning": "Lernen läuft",
+    "tabTitlePaused": "Pausiert"
+  },
   "notes": {
     "title": "Notizen",
     "empty": "Noch keine Notizen",

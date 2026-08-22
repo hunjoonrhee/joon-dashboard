@@ -15,9 +15,13 @@ interface Props {
   onClose: () => void;
   onSaved: () => void;
   initialTitle?: string;
+  /** Handoff from the study timer - pre-fills the duration picker with the actual elapsed minutes instead of making the user guess. */
+  initialDurationMinutes?: number | null;
 }
 
-export default function AddSessionModal({ onClose, onSaved, initialTitle }: Props) {
+const DURATION_PRESETS = ['30', '60', '90'] as const;
+
+export default function AddSessionModal({ onClose, onSaved, initialTitle, initialDurationMinutes }: Props) {
   const locale = useLocale();
   const { show } = useToast();
   const queryClient = useQueryClient();
@@ -29,8 +33,14 @@ export default function AddSessionModal({ onClose, onSaved, initialTitle }: Prop
   const [til, setTil] = useState('');
   const [selectedDate, setSelectedDate] = useState<'today' | 'yesterday' | 'custom'>('today');
   const [customDate, setCustomDate] = useState<Date>(new Date());
-  const [selectedDuration, setSelectedDuration] = useState<'30' | '60' | '90' | 'custom'>('60');
-  const [customDuration, setCustomDuration] = useState('');
+  const initialDurationStr = initialDurationMinutes != null ? String(initialDurationMinutes) : null;
+  const initialDurationIsPreset = initialDurationStr != null && (DURATION_PRESETS as readonly string[]).includes(initialDurationStr);
+  const [selectedDuration, setSelectedDuration] = useState<'30' | '60' | '90' | 'custom'>(
+    initialDurationStr == null ? '60' : initialDurationIsPreset ? (initialDurationStr as '30' | '60' | '90') : 'custom'
+  );
+  const [customDuration, setCustomDuration] = useState(
+    initialDurationStr != null && !initialDurationIsPreset ? initialDurationStr : ''
+  );
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [tagPool, setTagPool] = useState<string[]>([]);
   const [tagSearch, setTagSearch] = useState('');

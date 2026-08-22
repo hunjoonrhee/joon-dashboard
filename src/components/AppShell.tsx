@@ -5,10 +5,13 @@ import { CelebrationOverlay } from '@/components/celebration/CelebrationOverlay'
 import NavBar from '@/components/NavBar';
 import Sidebar from '@/components/Sidebar';
 import GoalModal from '@/components/tabs/roadmap/GoalModal';
+import TimerBar from '@/components/timer/TimerBar';
 import { ToastProvider } from '@/components/Toast';
 import { CelebrationProvider } from '@/lib/celebration-context';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useModalStore } from '@/store/modalStore';
+import { useTimerStore } from '@/store/timerStore';
+import { Timer } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -17,6 +20,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const tNav = useTranslations('nav');
   const tCommon = useTranslations('common');
   const tAchievements = useTranslations('achievements');
+  const tTimer = useTranslations('timer');
 
   // /ko/dashboard/study → segment = 'study'
   // /ko/dashboard → segment = ''
@@ -56,7 +60,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     settings: { label: `+ ${tNav('study')}`, modal: 'study' },
   };
 
-  const { studyModalOpen, openStudyModal, closeStudyModal } = useModalStore();
+  const { studyModalOpen, studyModalInitialTitle, studyModalInitialDurationMinutes, openStudyModal, closeStudyModal } =
+    useModalStore();
+  const { status: timerStatus, start: startTimer } = useTimerStore();
   const [showGoalModal, setShowGoalModal] = useState(false);
 
   const btnConfig = headerButtonConfig[segment] ?? headerButtonConfig[''];
@@ -86,6 +92,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <span className="text-sm text-ink-faint" suppressHydrationWarning>
                   {today}
                 </span>
+                {timerStatus === 'idle' && (
+                  <button
+                    onClick={() => startTimer()}
+                    aria-label={tTimer('start')}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surf-2 text-ink-dim text-sm font-medium hover:bg-border transition-colors"
+                  >
+                    <Timer size={15} strokeWidth={1.8} /> {tTimer('start')}
+                  </button>
+                )}
                 <button
                   onClick={handleHeaderBtn}
                   className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-pri text-on-pri text-sm font-semibold hover:opacity-90 transition-colors"
@@ -100,10 +115,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
             </div>
+            <TimerBar />
             <main className="flex-1 bg-bg">{children}</main>
           </div>
 
-          {studyModalOpen && <AddSessionModal onClose={closeStudyModal} onSaved={closeStudyModal} />}
+          {studyModalOpen && (
+            <AddSessionModal
+              onClose={closeStudyModal}
+              onSaved={closeStudyModal}
+              initialTitle={studyModalInitialTitle}
+              initialDurationMinutes={studyModalInitialDurationMinutes}
+            />
+          )}
 
           {showGoalModal && (
             <GoalModal mode="add" onClose={() => setShowGoalModal(false)} onSaved={() => setShowGoalModal(false)} />

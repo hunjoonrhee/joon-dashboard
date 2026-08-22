@@ -3,7 +3,8 @@
 import { navItems } from '@/lib/nav-items';
 import { supabase } from '@/lib/supabase';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
-import { LogOut, Settings, Trophy } from 'lucide-react';
+import { useTimerStore } from '@/store/timerStore';
+import { LogOut, Settings, Timer, Trophy } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -12,9 +13,11 @@ export default function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations('nav');
+  const tTimer = useTranslations('timer');
   const locale = useLocale();
   const [name, setName] = useState('J');
   const [dateStr, setDateStr] = useState('');
+  const { status: timerStatus, start: startTimer } = useTimerStore();
 
   useEffect(() => {
     supabase
@@ -97,6 +100,15 @@ export default function NavBar() {
               </button>
             ))}
           </div>
+          {timerStatus === 'idle' && (
+            <button
+              onClick={() => startTimer()}
+              aria-label={tTimer('start')}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-ink-faint hover:text-ink hover:bg-surf-2 transition-colors"
+            >
+              <Timer size={16} />
+            </button>
+          )}
           <button
             onClick={() => navigate('/dashboard/achievements')}
             className="w-8 h-8 flex items-center justify-center rounded-lg text-ink-faint hover:text-ink hover:bg-surf-2 transition-colors"
