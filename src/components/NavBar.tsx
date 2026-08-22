@@ -1,5 +1,6 @@
 'use client';
 
+import { useGuardedAction } from '@/hooks/useGuardedNavigate';
 import { navItems } from '@/lib/nav-items';
 import { supabase } from '@/lib/supabase';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
@@ -40,19 +41,22 @@ export default function NavBar() {
     return pathname === fullPath || pathname.startsWith(`/${locale}${path}/`);
   };
 
-  const navigate = (path: string) => router.push(`/${locale}${path}`);
+  const guard = useGuardedAction();
+  const navigate = (path: string) => guard(() => router.push(`/${locale}${path}`));
 
-  const switchLocale = (newLocale: string) => {
-    const segments = pathname.split('/');
-    segments[1] = newLocale;
-    router.push(segments.join('/'));
-  };
+  const switchLocale = (newLocale: string) =>
+    guard(() => {
+      const segments = pathname.split('/');
+      segments[1] = newLocale;
+      router.push(segments.join('/'));
+    });
 
-  const handleSignOut = async () => {
-    const client = createSupabaseBrowserClient();
-    await client.auth.signOut();
-    router.push(`/${locale}/login`);
-  };
+  const handleSignOut = () =>
+    guard(async () => {
+      const client = createSupabaseBrowserClient();
+      await client.auth.signOut();
+      router.push(`/${locale}/login`);
+    });
 
   return (
     <>

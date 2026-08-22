@@ -7,6 +7,8 @@ import Sidebar from '@/components/Sidebar';
 import GoalModal from '@/components/tabs/roadmap/GoalModal';
 import TimerBar from '@/components/timer/TimerBar';
 import { ToastProvider } from '@/components/Toast';
+import LeaveSessionGuardModal from '@/components/tutor/LeaveSessionGuardModal';
+import { useGuardedAction } from '@/hooks/useGuardedNavigate';
 import { CelebrationProvider } from '@/lib/celebration-context';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useModalStore } from '@/store/modalStore';
@@ -66,18 +68,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [showGoalModal, setShowGoalModal] = useState(false);
 
   const btnConfig = headerButtonConfig[segment] ?? headerButtonConfig[''];
+  const guard = useGuardedAction();
 
   const handleHeaderBtn = () => {
     if (btnConfig.modal === 'study') openStudyModal();
     else if (btnConfig.modal === 'goal') setShowGoalModal(true);
-    else if (btnConfig.modal === 'project') router.push(pathname + '?add=true');
+    else if (btnConfig.modal === 'project') guard(() => router.push(pathname + '?add=true'));
   };
 
-  const handleSignOut = async () => {
-    const client = createSupabaseBrowserClient();
-    await client.auth.signOut();
-    router.push(`/${locale}/login`);
-  };
+  const handleSignOut = () =>
+    guard(async () => {
+      const client = createSupabaseBrowserClient();
+      await client.auth.signOut();
+      router.push(`/${locale}/login`);
+    });
 
   return (
     <ToastProvider>
@@ -133,6 +137,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           )}
 
           <CelebrationOverlay />
+          <LeaveSessionGuardModal />
         </div>
       </CelebrationProvider>
     </ToastProvider>

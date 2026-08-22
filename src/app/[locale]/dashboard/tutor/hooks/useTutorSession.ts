@@ -4,6 +4,7 @@ import type { PronunciationResult } from '@/lib/azure-pronunciation';
 import { savePronunciationAttempt } from '@/lib/pronunciation';
 import { insertWithUser } from '@/lib/supabase';
 import { saveVocabWords } from '@/lib/vocab';
+import { useTutorGuardStore } from '@/store/tutorGuardStore';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import type { UserContext } from './useUserContext';
@@ -73,6 +74,7 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startedRef = useRef(false);
+  const setGuardActive = useTutorGuardStore((s) => s.setActive);
 
   useEffect(() => {
     timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
@@ -80,6 +82,30 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
+
+  // Warns before leaving instead of silently losing the conversation - the
+  // transcript only reaches the DB once handleEndSession finishes, so
+  // navigating away (sidebar, logout, locale switch) before then would
+  // otherwise discard everything with no confirmation. Only activates once
+  // the user has actually said something; the AI's opening line alone isn't
+  // worth guarding. Cleared here on unmount as a safety net, and explicitly
+  // in handleEndSession once the transcript is actually saved.
+  useEffect(() => {
+    setGuardActive(messages.some((m) => m.role === 'user'));
+  }, [messages, setGuardActive]);
+
+  useEffect(() => {
+    return () => setGuardActive(false);
+  }, [setGuardActive]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!messages.some((m) => m.role === 'user')) return;
+      e.preventDefault();
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [messages]);
 
   useEffect(() => {
     if (!topic || !userContext || startedRef.current) return;
@@ -249,6 +275,7 @@ export function useTutorSession({ topic, userContext, onComplete }: UseTutorSess
     }
 
     setIsEndingSession(false);
+    setGuardActive(false);
     onComplete({ title, date: today, duration: durationMin, tags });
   };
 

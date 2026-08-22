@@ -738,7 +738,11 @@
     "saveTranscriptAccept": "Unterhaltung speichern",
     "quizCorrect": "Richtig: {answer}",
     "quizWrong": "Falsch: {answer}. Richtige Antwort: {correct}.",
-    "backBtn": "← Zurück"
+    "backBtn": "← Zurück",
+    "leaveConfirmTitle": "Beim Verlassen geht das Gespräch verloren",
+    "leaveConfirmSub": "Die Sitzung wurde noch nicht beendet. Wenn du jetzt gehst, wird dieses Gespräch nicht gespeichert.",
+    "leaveConfirmStay": "Bleiben",
+    "leaveConfirmLeave": "Trotzdem verlassen"
   },
   "vocab": {
     "title": "Vokabeln",

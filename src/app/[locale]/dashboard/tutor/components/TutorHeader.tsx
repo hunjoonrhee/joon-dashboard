@@ -1,5 +1,6 @@
 'use client';
 
+import { useGuardedAction } from '@/hooks/useGuardedNavigate';
 import { ArrowLeft, BookMarked, Clock } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
@@ -16,18 +17,19 @@ export default function TutorHeader({ topic, elapsedMin, isEndingSession, loadin
   const t = useTranslations('tutor');
   const locale = useLocale();
   const router = useRouter();
+  const guard = useGuardedAction();
 
   return (
     <div className="bg-surf border-b border-border px-4 py-3 flex items-center justify-between flex-shrink-0">
       <div className="flex items-center gap-2">
-        <button onClick={() => router.back()} className="text-ink-faint hover:text-ink mr-1">
+        <button onClick={() => guard(() => router.back())} className="text-ink-faint hover:text-ink mr-1">
           <ArrowLeft size={16} />
         </button>
         <span className="text-sm font-bold text-ink">{topic ? t('sessionWith', { topic }) : t('pageTitle')}</span>
       </div>
       <div className="flex items-center gap-2">
         <button
-          onClick={() => router.push(`/${locale}/dashboard/vocab`)}
+          onClick={() => guard(() => router.push(`/${locale}/dashboard/vocab`))}
           className="w-8 h-8 flex items-center justify-center rounded-lg text-ink-faint hover:text-pri hover:bg-surf-2 transition-colors"
           title={t('vocabLink')}
         >

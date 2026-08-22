@@ -738,7 +738,11 @@
     "saveTranscriptAccept": "Save conversation",
     "quizCorrect": "Correct: {answer}",
     "quizWrong": "Wrong: {answer}. Correct answer: {correct}.",
-    "backBtn": "← Back"
+    "backBtn": "← Back",
+    "leaveConfirmTitle": "Leaving will lose this conversation",
+    "leaveConfirmSub": "You haven't ended the session yet. Leaving now won't save this conversation.",
+    "leaveConfirmStay": "Stay",
+    "leaveConfirmLeave": "Leave anyway"
   },
   "vocab": {
     "title": "Vocab",

@@ -1,5 +1,6 @@
 'use client';
 
+import { useGuardedAction } from '@/hooks/useGuardedNavigate';
 import { BookMarked, Check } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
@@ -28,6 +29,7 @@ export default function TutorSidePanel({
   const t = useTranslations('tutor');
   const locale = useLocale();
   const router = useRouter();
+  const guard = useGuardedAction();
 
   return (
     <div className="w-36 flex-shrink-0 border-l border-border bg-surf-2 px-3 py-4 hidden md:flex flex-col gap-4">
@@ -67,7 +69,7 @@ export default function TutorSidePanel({
       )}
 
       <button
-        onClick={() => router.push(`/${locale}/dashboard/vocab`)}
+        onClick={() => guard(() => router.push(`/${locale}/dashboard/vocab`))}
         className="flex items-center gap-1.5 text-[10px] text-ink-faint hover:text-pri transition-colors"
       >
         <BookMarked size={11} />

@@ -1,5 +1,6 @@
 'use client';
 
+import { useGuardedAction } from '@/hooks/useGuardedNavigate';
 import { navItems } from '@/lib/nav-items';
 import { supabase } from '@/lib/supabase';
 import { createSupabaseBrowserClient } from '@/lib/supabase-client';
@@ -39,13 +40,15 @@ export default function Sidebar() {
     return pathname === fullPath || pathname.startsWith(`${fullPath}/`);
   };
 
-  const navigate = (path: string) => router.push(`/${locale}${path}`);
+  const guard = useGuardedAction();
+  const navigate = (path: string) => guard(() => router.push(`/${locale}${path}`));
 
-  const handleSignOut = async () => {
-    const client = createSupabaseBrowserClient();
-    await client.auth.signOut();
-    router.push(`/${locale}/login`);
-  };
+  const handleSignOut = () =>
+    guard(async () => {
+      const client = createSupabaseBrowserClient();
+      await client.auth.signOut();
+      router.push(`/${locale}/login`);
+    });
 
   return (
     <aside className="w-56 bg-surf border-r border-border fixed top-0 left-0 h-screen flex flex-col z-20 hidden lg:flex">
